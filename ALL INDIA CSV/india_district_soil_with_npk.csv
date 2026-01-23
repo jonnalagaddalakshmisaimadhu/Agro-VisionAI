@@ -1,0 +1,712 @@
+village,district,state,latitude,longitude,soil_type,ph,nitrogen,phosphorus,potassium
+,Anakapalli,Andhra Pradesh,17.691,82.9992,red,6.5,40,30,40
+,Anantapur,Andhra Pradesh,14.6819,77.6006,red,6.5,40,30,40
+,Annamayya,Andhra Pradesh,14.0153,79.195,red,6.5,40,30,40
+,Bapatla,Andhra Pradesh,15.9042,80.4676,black,7.8,60,45,75
+,Chittoor,Andhra Pradesh,13.6288,79.4192,red,6.5,40,30,40
+,Dr. B.R. Ambedkar Konaseema,Andhra Pradesh,16.565,81.8224,alluvial,6.8,70,45,55
+,East Godavari,Andhra Pradesh,16.9891,82.2475,alluvial,6.8,70,45,55
+,Eluru,Andhra Pradesh,16.7107,81.0955,alluvial,6.8,70,45,55
+,Guntur,Andhra Pradesh,16.3067,80.4365,black,7.8,60,45,75
+,Kakinada,Andhra Pradesh,16.9891,82.2475,alluvial,6.8,70,45,55
+,Krishna,Andhra Pradesh,16.1438,80.7242,alluvial,6.8,70,45,55
+,Kurnool,Andhra Pradesh,15.8281,78.0373,black,7.8,60,45,75
+,Nandyal,Andhra Pradesh,15.4771,78.4836,black,7.8,60,45,75
+,Nellore,Andhra Pradesh,14.4426,79.9865,alluvial,6.8,70,45,55
+,Palnadu,Andhra Pradesh,16.2333,80.05,black,7.8,60,45,75
+,Parvathipuram Manyam,Andhra Pradesh,18.7833,83.425,red,6.5,40,30,40
+,Prakasam,Andhra Pradesh,15.348,79.5603,red,6.5,40,30,40
+,Srikakulam,Andhra Pradesh,18.2969,83.8968,coastal_alluvial,7.0,50,40,50
+,Sri Sathya Sai,Andhra Pradesh,14.1667,77.8333,red,6.5,40,30,40
+,Tirupati,Andhra Pradesh,13.6288,79.4192,red,6.5,40,30,40
+,Visakhapatnam,Andhra Pradesh,17.6868,83.2185,loamy,7.0,60,50,60
+,Vizianagaram,Andhra Pradesh,18.1067,83.3956,red,6.5,40,30,40
+,West Godavari,Andhra Pradesh,16.7107,81.0955,alluvial,6.8,70,45,55
+,YSR Kadapa,Andhra Pradesh,14.4673,78.8242,red,6.5,40,30,40
+,Alluri Sitharama Raju,Andhra Pradesh,18.25,82.75,red,6.5,40,30,40
+,NTR District,Andhra Pradesh,16.5062,80.648,alluvial,6.8,70,45,55
+,Ariyalur,Tamil Nadu,11.137,79.075,red,6.5,40,30,40
+,Chengalpattu,Tamil Nadu,12.6844,79.9831,alluvial,6.8,70,45,55
+,Chennai,Tamil Nadu,13.0827,80.2707,coastal_alluvial,7.0,50,40,50
+,Coimbatore,Tamil Nadu,11.0168,76.9558,black,7.8,60,45,75
+,Cuddalore,Tamil Nadu,11.7496,79.768,alluvial,6.8,70,45,55
+,Dharmapuri,Tamil Nadu,12.1277,78.1579,red,6.5,40,30,40
+,Dindigul,Tamil Nadu,10.3673,77.9803,red,6.5,40,30,40
+,Erode,Tamil Nadu,11.341,77.7172,black,7.8,60,45,75
+,Kallakurichi,Tamil Nadu,11.7407,78.9642,red,6.5,40,30,40
+,Kanchipuram,Tamil Nadu,12.8342,79.7036,alluvial,6.8,70,45,55
+,Kanyakumari,Tamil Nadu,8.0883,77.5385,laterite,6.0,30,25,30
+,Karur,Tamil Nadu,10.9601,78.0766,red,6.5,40,30,40
+,Krishnagiri,Tamil Nadu,12.525,78.2139,red,6.5,40,30,40
+,Madurai,Tamil Nadu,9.9252,78.1198,black,7.8,60,45,75
+,Mayiladuthurai,Tamil Nadu,11.1035,79.6524,alluvial,6.8,70,45,55
+,Nagapattinam,Tamil Nadu,10.7656,79.8424,coastal_alluvial,7.0,50,40,50
+,Namakkal,Tamil Nadu,11.2194,78.1674,red,6.5,40,30,40
+,Nilgiris,Tamil Nadu,11.4916,76.7337,laterite,6.0,30,25,30
+,Perambalur,Tamil Nadu,11.2353,78.88,red,6.5,40,30,40
+,Pudukkottai,Tamil Nadu,10.3797,78.8208,red,6.5,40,30,40
+,Ramanathapuram,Tamil Nadu,9.3721,78.83,sandy,6.0,20,15,20
+,Ranipet,Tamil Nadu,12.9279,79.3355,red,6.5,40,30,40
+,Salem,Tamil Nadu,11.6643,78.146,black,7.8,60,45,75
+,Sivaganga,Tamil Nadu,9.847,78.48,red,6.5,40,30,40
+,Tenkasi,Tamil Nadu,8.9603,77.3152,red,6.5,40,30,40
+,Thanjavur,Tamil Nadu,10.7867,79.1378,alluvial,6.8,70,45,55
+,Theni,Tamil Nadu,10.0104,77.4768,black,7.8,60,45,75
+,Thiruvallur,Tamil Nadu,13.1439,79.9084,alluvial,6.8,70,45,55
+,Thiruvarur,Tamil Nadu,10.772,79.6361,alluvial,6.8,70,45,55
+,Thoothukudi,Tamil Nadu,8.7642,78.1348,sandy,6.0,20,15,20
+,Tiruchirappalli,Tamil Nadu,10.7905,78.7047,red,6.5,40,30,40
+,Tirunelveli,Tamil Nadu,8.7139,77.7567,red,6.5,40,30,40
+,Tirupathur,Tamil Nadu,12.495,78.5733,red,6.5,40,30,40
+,Tiruppur,Tamil Nadu,11.1085,77.3411,black,7.8,60,45,75
+,Tiruvannamalai,Tamil Nadu,12.2253,79.0747,red,6.5,40,30,40
+,Vellore,Tamil Nadu,12.9165,79.1325,red,6.5,40,30,40
+,Viluppuram,Tamil Nadu,11.9401,79.4873,alluvial,6.8,70,45,55
+,Virudhunagar,Tamil Nadu,9.568,77.923,red,6.5,40,30,40
+,Thiruvananthapuram,Kerala,8.5241,76.9366,laterite,6.0,30,25,30
+,Kollam,Kerala,8.8932,76.6141,laterite,6.0,30,25,30
+,Pathanamthitta,Kerala,9.2648,76.787,laterite,6.0,30,25,30
+,Alappuzha,Kerala,9.4981,76.3388,alluvial,6.8,70,45,55
+,Kottayam,Kerala,9.5916,76.5222,laterite,6.0,30,25,30
+,Idukki,Kerala,9.8495,76.972,laterite,6.0,30,25,30
+,Ernakulam,Kerala,9.9816,76.2999,laterite,6.0,30,25,30
+,Thrissur,Kerala,10.5276,76.2144,laterite,6.0,30,25,30
+,Palakkad,Kerala,10.7867,76.6548,black,7.8,60,45,75
+,Malappuram,Kerala,11.073,76.074,laterite,6.0,30,25,30
+,Kozhikode,Kerala,11.2588,75.7804,laterite,6.0,30,25,30
+,Wayanad,Kerala,11.6854,76.1319,laterite,6.0,30,25,30
+,Kannur,Kerala,11.8745,75.3704,laterite,6.0,30,25,30
+,Kasaragod,Kerala,12.4996,74.9869,laterite,6.0,30,25,30
+,Tawang,Arunachal Pradesh,27.5859,91.8594,mountain,7.0,50,40,50
+,West Kameng,Arunachal Pradesh,27.247,92.4247,laterite,6.0,30,25,30
+,East Kameng,Arunachal Pradesh,27.3741,93.045,laterite,6.0,30,25,30
+,Papum Pare,Arunachal Pradesh,27.0844,93.6053,alluvial,6.8,70,45,55
+,Kurung Kumey,Arunachal Pradesh,27.9991,93.2957,laterite,6.0,30,25,30
+,Kra Daadi,Arunachal Pradesh,27.8824,93.4685,laterite,6.0,30,25,30
+,Lower Subansiri,Arunachal Pradesh,27.1941,93.7022,alluvial,6.8,70,45,55
+,Upper Subansiri,Arunachal Pradesh,28.364,94.117,laterite,6.0,30,25,30
+,West Siang,Arunachal Pradesh,28.0684,94.4605,alluvial,6.8,70,45,55
+,East Siang,Arunachal Pradesh,28.1235,95.0569,alluvial,6.8,70,45,55
+,Siang,Arunachal Pradesh,28.707,94.702,laterite,6.0,30,25,30
+,Lower Siang,Arunachal Pradesh,27.925,94.8515,alluvial,6.8,70,45,55
+,Upper Siang,Arunachal Pradesh,28.612,95.175,laterite,6.0,30,25,30
+,Lohit,Arunachal Pradesh,27.855,95.775,alluvial,6.8,70,45,55
+,Anjaw,Arunachal Pradesh,28.065,96.155,laterite,6.0,30,25,30
+,Namsai,Arunachal Pradesh,27.6665,95.8687,alluvial,6.8,70,45,55
+,Changlang,Arunachal Pradesh,27.12,95.71,alluvial,6.8,70,45,55
+,Tirap,Arunachal Pradesh,27.1167,95.57,laterite,6.0,30,25,30
+,Longding,Arunachal Pradesh,26.85,95.33,laterite,6.0,30,25,30
+,Lower Dibang Valley,Arunachal Pradesh,28.319,95.798,alluvial,6.8,70,45,55
+,Upper Dibang Valley,Arunachal Pradesh,28.9,95.94,laterite,6.0,30,25,30
+,Lower Lohit,Arunachal Pradesh,27.94,96.18,alluvial,6.8,70,45,55
+,Upper Lohit,Arunachal Pradesh,28.065,96.4,laterite,6.0,30,25,30
+,Kamle,Arunachal Pradesh,27.584,93.783,laterite,6.0,30,25,30
+,Pakke Kessang,Arunachal Pradesh,27.01,93.35,laterite,6.0,30,25,30
+,Baksa,Assam,26.699,91.42,alluvial,6.8,70,45,55
+,Barpeta,Assam,26.3228,91.0059,alluvial,6.8,70,45,55
+,Biswanath,Assam,26.7271,93.147,alluvial,6.8,70,45,55
+,Bongaigaon,Assam,26.477,90.558,alluvial,6.8,70,45,55
+,Cachar,Assam,24.8333,92.7789,alluvial,6.8,70,45,55
+,Charaideo,Assam,26.9858,94.8222,alluvial,6.8,70,45,55
+,Chirang,Assam,26.54,90.77,alluvial,6.8,70,45,55
+,Darrang,Assam,26.452,92.03,alluvial,6.8,70,45,55
+,Dhemaji,Assam,27.4833,94.5833,alluvial,6.8,70,45,55
+,Dhubri,Assam,26.0186,89.9855,alluvial,6.8,70,45,55
+,Dibrugarh,Assam,27.4728,94.911,alluvial,6.8,70,45,55
+,Dima Hasao,Assam,25.5,93.0,laterite,6.0,30,25,30
+,Goalpara,Assam,26.1716,90.625,alluvial,6.8,70,45,55
+,Golaghat,Assam,26.5119,93.9595,alluvial,6.8,70,45,55
+,Hailakandi,Assam,24.6847,92.561,alluvial,6.8,70,45,55
+,Hojai,Assam,26.0023,92.856,alluvial,6.8,70,45,55
+,Jorhat,Assam,26.7509,94.2037,alluvial,6.8,70,45,55
+,Kamrup,Assam,26.1743,91.736,alluvial,6.8,70,45,55
+,Kamrup Metropolitan,Assam,26.1445,91.7362,alluvial,6.8,70,45,55
+,Karbi Anglong,Assam,26.0,93.5,laterite,6.0,30,25,30
+,Karimganj,Assam,24.8697,92.355,alluvial,6.8,70,45,55
+,Kokrajhar,Assam,26.401,90.272,alluvial,6.8,70,45,55
+,Lakhimpur,Assam,27.238,94.103,alluvial,6.8,70,45,55
+,Majuli,Assam,27.0011,94.2247,alluvial,6.8,70,45,55
+,Morigaon,Assam,26.2528,92.3358,alluvial,6.8,70,45,55
+,Nagaon,Assam,26.347,92.678,alluvial,6.8,70,45,55
+,Nalbari,Assam,26.4468,91.4315,alluvial,6.8,70,45,55
+,Sivasagar,Assam,26.98,94.6376,alluvial,6.8,70,45,55
+,Sonitpur,Assam,26.654,92.794,alluvial,6.8,70,45,55
+,South Salmara-Mankachar,Assam,25.5333,89.8833,alluvial,6.8,70,45,55
+,Tinsukia,Assam,27.4922,95.3468,alluvial,6.8,70,45,55
+,Udalguri,Assam,26.75,92.1,alluvial,6.8,70,45,55
+,West Karbi Anglong,Assam,26.05,92.6,laterite,6.0,30,25,30
+,Araria,Bihar,26.13,87.47,alluvial,6.8,70,45,55
+,Arwal,Bihar,25.16,84.69,alluvial,6.8,70,45,55
+,Aurangabad,Bihar,24.75,84.37,alluvial,6.8,70,45,55
+,Banka,Bihar,24.88,86.92,alluvial,6.8,70,45,55
+,Begusarai,Bihar,25.42,86.13,alluvial,6.8,70,45,55
+,Bhagalpur,Bihar,25.25,86.98,alluvial,6.8,70,45,55
+,Bhojpur,Bihar,25.46,84.53,alluvial,6.8,70,45,55
+,Buxar,Bihar,25.58,84.0,alluvial,6.8,70,45,55
+,Darbhanga,Bihar,26.15,85.9,alluvial,6.8,70,45,55
+,East Champaran,Bihar,26.65,84.9,alluvial,6.8,70,45,55
+,Gaya,Bihar,24.8,85.0,alluvial,6.8,70,45,55
+,Gopalganj,Bihar,26.47,84.43,alluvial,6.8,70,45,55
+,Jamui,Bihar,24.92,86.22,red,6.5,40,30,40
+,Jehanabad,Bihar,25.22,84.99,alluvial,6.8,70,45,55
+,Kaimur,Bihar,25.04,83.58,red,6.5,40,30,40
+,Katihar,Bihar,25.53,87.58,alluvial,6.8,70,45,55
+,Khagaria,Bihar,25.5,86.47,alluvial,6.8,70,45,55
+,Kishanganj,Bihar,26.1,87.95,alluvial,6.8,70,45,55
+,Lakhisarai,Bihar,25.17,86.09,alluvial,6.8,70,45,55
+,Madhepura,Bihar,25.9,86.78,alluvial,6.8,70,45,55
+,Madhubani,Bihar,26.35,86.07,alluvial,6.8,70,45,55
+,Munger,Bihar,25.38,86.47,alluvial,6.8,70,45,55
+,Muzaffarpur,Bihar,26.12,85.39,alluvial,6.8,70,45,55
+,Nalanda,Bihar,25.13,85.45,alluvial,6.8,70,45,55
+,Nawada,Bihar,24.88,85.54,alluvial,6.8,70,45,55
+,Patna,Bihar,25.61,85.14,alluvial,6.8,70,45,55
+,Purnia,Bihar,25.78,87.47,alluvial,6.8,70,45,55
+,Rohtas,Bihar,24.92,84.18,alluvial,6.8,70,45,55
+,Saharsa,Bihar,25.88,86.6,alluvial,6.8,70,45,55
+,Samastipur,Bihar,25.86,85.78,alluvial,6.8,70,45,55
+,Saran,Bihar,26.0,84.95,alluvial,6.8,70,45,55
+,Sheikhpura,Bihar,25.14,85.85,alluvial,6.8,70,45,55
+,Sheohar,Bihar,26.51,85.29,alluvial,6.8,70,45,55
+,Sitamarhi,Bihar,26.6,85.48,alluvial,6.8,70,45,55
+,Siwan,Bihar,26.22,84.36,alluvial,6.8,70,45,55
+,Supaul,Bihar,26.12,86.61,alluvial,6.8,70,45,55
+,Vaishali,Bihar,25.7,85.22,alluvial,6.8,70,45,55
+,West Champaran,Bihar,26.79,84.41,alluvial,6.8,70,45,55
+,Balod,Chhattisgarh,20.73,81.204,red,6.5,40,30,40
+,Baloda Bazar,Chhattisgarh,21.66,82.16,alluvial,6.8,70,45,55
+,Balrampur,Chhattisgarh,23.62,83.78,red,6.5,40,30,40
+,Bastar,Chhattisgarh,19.08,82.03,laterite,6.0,30,25,30
+,Bemetara,Chhattisgarh,21.71,81.53,alluvial,6.8,70,45,55
+,Bijapur,Chhattisgarh,18.83,80.83,laterite,6.0,30,25,30
+,Bilaspur,Chhattisgarh,22.08,82.16,alluvial,6.8,70,45,55
+,Dantewada,Chhattisgarh,18.9,81.35,laterite,6.0,30,25,30
+,Dhamtari,Chhattisgarh,20.71,81.55,alluvial,6.8,70,45,55
+,Durg,Chhattisgarh,21.19,81.28,alluvial,6.8,70,45,55
+,Gariaband,Chhattisgarh,20.63,82.06,red,6.5,40,30,40
+,Gaurela-Pendra-Marwahi,Chhattisgarh,22.76,81.91,red,6.5,40,30,40
+,Janjgir-Champa,Chhattisgarh,22.01,82.58,alluvial,6.8,70,45,55
+,Jashpur,Chhattisgarh,22.95,83.85,laterite,6.0,30,25,30
+,Kabirdham,Chhattisgarh,22.06,81.24,alluvial,6.8,70,45,55
+,Kanker,Chhattisgarh,20.27,81.49,laterite,6.0,30,25,30
+,Khairagarh-Chhuikhadan-Gandai,Chhattisgarh,21.16,80.98,red,6.5,40,30,40
+,Kondagaon,Chhattisgarh,19.6,81.67,laterite,6.0,30,25,30
+,Korba,Chhattisgarh,22.35,82.69,red,6.5,40,30,40
+,Koriya,Chhattisgarh,23.25,82.38,red,6.5,40,30,40
+,Mahasamund,Chhattisgarh,21.11,82.1,alluvial,6.8,70,45,55
+,Manendragarh-Chirmiri-Bharatpur,Chhattisgarh,23.11,82.2,red,6.5,40,30,40
+,Mohla-Manpur-Ambagarh Chowki,Chhattisgarh,20.71,80.83,red,6.5,40,30,40
+,Mungeli,Chhattisgarh,22.07,81.69,alluvial,6.8,70,45,55
+,Narayanpur,Chhattisgarh,19.72,81.25,laterite,6.0,30,25,30
+,Raigarh,Chhattisgarh,22.08,83.35,red,6.5,40,30,40
+,Raipur,Chhattisgarh,21.25,81.63,alluvial,6.8,70,45,55
+,Rajnandgaon,Chhattisgarh,21.1,81.03,red,6.5,40,30,40
+,Sakti,Chhattisgarh,21.96,83.18,alluvial,6.8,70,45,55
+,Sarangarh-Bilaigarh,Chhattisgarh,21.58,83.01,alluvial,6.8,70,45,55
+,Sukma,Chhattisgarh,18.39,81.67,laterite,6.0,30,25,30
+,Surajpur,Chhattisgarh,23.21,82.87,red,6.5,40,30,40
+,Surguja,Chhattisgarh,23.36,82.86,red,6.5,40,30,40
+,North Goa,Goa,15.516,73.915,laterite,6.0,30,25,30
+,South Goa,Goa,15.049,74.023,laterite,6.0,30,25,30
+,Ahmedabad,Gujarat,23.0225,72.5714,alluvial,6.8,70,45,55
+,Amreli,Gujarat,21.6032,71.2221,black,7.8,60,45,75
+,Anand,Gujarat,22.5645,72.9289,alluvial,6.8,70,45,55
+,Aravalli,Gujarat,23.3333,73.3333,red,6.5,40,30,40
+,Banaskantha,Gujarat,24.1726,72.4349,sandy,6.0,20,15,20
+,Bharuch,Gujarat,21.7051,72.9959,alluvial,6.8,70,45,55
+,Bhavnagar,Gujarat,21.7645,72.1519,black,7.8,60,45,75
+,Botad,Gujarat,22.169,71.6667,black,7.8,60,45,75
+,Chhota Udaipur,Gujarat,22.304,74.015,red,6.5,40,30,40
+,Dahod,Gujarat,22.8392,74.2532,red,6.5,40,30,40
+,Dang,Gujarat,20.7667,73.6667,laterite,6.0,30,25,30
+,Devbhoomi Dwarka,Gujarat,22.2442,68.9685,sandy,6.0,20,15,20
+,Gandhinagar,Gujarat,23.2156,72.6369,alluvial,6.8,70,45,55
+,Gir Somnath,Gujarat,20.912,70.3676,black,7.8,60,45,75
+,Jamnagar,Gujarat,22.4707,70.0577,black,7.8,60,45,75
+,Junagadh,Gujarat,21.5222,70.4579,black,7.8,60,45,75
+,Kheda,Gujarat,22.75,72.6833,alluvial,6.8,70,45,55
+,Kutch,Gujarat,23.7337,69.8597,sandy,6.0,20,15,20
+,Mahisagar,Gujarat,22.77,73.48,red,6.5,40,30,40
+,Mehsana,Gujarat,23.6,72.4,alluvial,6.8,70,45,55
+,Morbi,Gujarat,22.8173,70.8377,black,7.8,60,45,75
+,Narmada,Gujarat,21.87,73.56,red,6.5,40,30,40
+,Navsari,Gujarat,20.9467,72.952,alluvial,6.8,70,45,55
+,Panchmahal,Gujarat,22.747,73.579,red,6.5,40,30,40
+,Patan,Gujarat,23.85,72.12,sandy,6.0,20,15,20
+,Porbandar,Gujarat,21.6417,69.6293,sandy,6.0,20,15,20
+,Rajkot,Gujarat,22.3039,70.8022,black,7.8,60,45,75
+,Sabarkantha,Gujarat,23.6086,73.369,red,6.5,40,30,40
+,Surat,Gujarat,21.1702,72.8311,alluvial,6.8,70,45,55
+,Surendranagar,Gujarat,22.72,71.65,black,7.8,60,45,75
+,Tapi,Gujarat,21.104,73.349,red,6.5,40,30,40
+,Vadodara,Gujarat,22.3072,73.1812,alluvial,6.8,70,45,55
+,Valsad,Gujarat,20.61,72.93,alluvial,6.8,70,45,55
+,Ambala,Haryana,30.3752,76.7821,alluvial,6.8,70,45,55
+,Bhiwani,Haryana,28.793,76.1391,sandy,6.0,20,15,20
+,Charkhi Dadri,Haryana,28.5916,76.271,sandy,6.0,20,15,20
+,Faridabad,Haryana,28.4089,77.3178,alluvial,6.8,70,45,55
+,Fatehabad,Haryana,29.5131,75.458,sandy,6.0,20,15,20
+,Gurugram,Haryana,28.4595,77.0266,sandy,6.0,20,15,20
+,Hisar,Haryana,29.1492,75.7217,sandy,6.0,20,15,20
+,Jhajjar,Haryana,28.6063,76.6565,sandy,6.0,20,15,20
+,Jind,Haryana,29.3211,76.3058,sandy,6.0,20,15,20
+,Kaithal,Haryana,29.8015,76.3999,alluvial,6.8,70,45,55
+,Karnal,Haryana,29.6857,76.9905,alluvial,6.8,70,45,55
+,Kurukshetra,Haryana,29.9695,76.8783,alluvial,6.8,70,45,55
+,Mahendragarh,Haryana,28.2734,76.1495,sandy,6.0,20,15,20
+,Nuh,Haryana,28.1024,77.0015,sandy,6.0,20,15,20
+,Palwal,Haryana,28.144,77.3259,alluvial,6.8,70,45,55
+,Panchkula,Haryana,30.6942,76.8606,loamy,7.0,60,50,60
+,Panipat,Haryana,29.3913,76.9636,alluvial,6.8,70,45,55
+,Rewari,Haryana,28.192,76.619,sandy,6.0,20,15,20
+,Rohtak,Haryana,28.8955,76.6066,alluvial,6.8,70,45,55
+,Sirsa,Haryana,29.5349,75.028,sandy,6.0,20,15,20
+,Sonipat,Haryana,28.9931,77.0151,alluvial,6.8,70,45,55
+,Yamunanagar,Haryana,30.129,77.2674,alluvial,6.8,70,45,55
+,Bilaspur,Himachal Pradesh,31.331,76.756,loamy,7.0,60,50,60
+,Chamba,Himachal Pradesh,32.556,76.125,loamy,7.0,60,50,60
+,Hamirpur,Himachal Pradesh,31.686,76.521,loamy,7.0,60,50,60
+,Kangra,Himachal Pradesh,32.0998,76.2691,loamy,7.0,60,50,60
+,Kinnaur,Himachal Pradesh,31.538,78.267,sandy,6.0,20,15,20
+,Kullu,Himachal Pradesh,31.9579,77.1095,loamy,7.0,60,50,60
+,Lahaul and Spiti,Himachal Pradesh,32.574,77.025,sandy,6.0,20,15,20
+,Mandi,Himachal Pradesh,31.708,76.931,loamy,7.0,60,50,60
+,Shimla,Himachal Pradesh,31.1048,77.1734,loamy,7.0,60,50,60
+,Sirmaur,Himachal Pradesh,30.603,77.341,loamy,7.0,60,50,60
+,Solan,Himachal Pradesh,30.9045,77.096,loamy,7.0,60,50,60
+,Una,Himachal Pradesh,31.464,76.269,alluvial,6.8,70,45,55
+,Bokaro,Jharkhand,23.6693,86.1511,red,6.5,40,30,40
+,Chatra,Jharkhand,24.205,84.87,red,6.5,40,30,40
+,Deoghar,Jharkhand,24.482,86.7,red,6.5,40,30,40
+,Dhanbad,Jharkhand,23.7957,86.4304,red,6.5,40,30,40
+,Dumka,Jharkhand,24.2679,87.2486,laterite,6.0,30,25,30
+,East Singhbhum,Jharkhand,22.8046,86.2029,red,6.5,40,30,40
+,Garhwa,Jharkhand,24.158,83.808,red,6.5,40,30,40
+,Giridih,Jharkhand,24.186,86.3,red,6.5,40,30,40
+,Godda,Jharkhand,24.827,87.214,red,6.5,40,30,40
+,Gumla,Jharkhand,23.042,84.54,red,6.5,40,30,40
+,Hazaribagh,Jharkhand,23.995,85.361,red,6.5,40,30,40
+,Jamtara,Jharkhand,23.958,86.801,red,6.5,40,30,40
+,Khunti,Jharkhand,23.078,85.277,red,6.5,40,30,40
+,Koderma,Jharkhand,24.467,85.592,red,6.5,40,30,40
+,Latehar,Jharkhand,23.745,84.505,red,6.5,40,30,40
+,Lohardaga,Jharkhand,23.434,84.684,red,6.5,40,30,40
+,Pakur,Jharkhand,24.637,87.843,red,6.5,40,30,40
+,Palamu,Jharkhand,24.038,84.07,red,6.5,40,30,40
+,Ramgarh,Jharkhand,23.623,85.514,red,6.5,40,30,40
+,Ranchi,Jharkhand,23.3441,85.3096,red,6.5,40,30,40
+,Sahebganj,Jharkhand,25.232,87.65,red,6.5,40,30,40
+,Seraikela Kharsawan,Jharkhand,22.721,85.95,red,6.5,40,30,40
+,Simdega,Jharkhand,22.61,84.505,red,6.5,40,30,40
+,West Singhbhum,Jharkhand,22.54,85.82,red,6.5,40,30,40
+,Bagalkot,Karnataka,16.185,75.696,black,7.8,60,45,75
+,Ballari,Karnataka,15.14,76.905,red,6.5,40,30,40
+,Belagavi,Karnataka,15.8497,74.4977,black,7.8,60,45,75
+,Bengaluru Rural,Karnataka,12.97,77.6,red,6.5,40,30,40
+,Bengaluru Urban,Karnataka,12.9716,77.5946,red,6.5,40,30,40
+,Bidar,Karnataka,17.91,77.52,black,7.8,60,45,75
+,Chamarajanagar,Karnataka,11.926,76.943,red,6.5,40,30,40
+,Chikkaballapur,Karnataka,13.4355,77.7315,red,6.5,40,30,40
+,Chikkamagaluru,Karnataka,13.316,75.772,laterite,6.0,30,25,30
+,Chitradurga,Karnataka,14.229,76.398,red,6.5,40,30,40
+,Dakshina Kannada,Karnataka,12.9141,74.856,laterite,6.0,30,25,30
+,Davanagere,Karnataka,14.4644,75.9218,black,7.8,60,45,75
+,Dharwad,Karnataka,15.4589,75.0078,black,7.8,60,45,75
+,Gadag,Karnataka,15.431,75.628,black,7.8,60,45,75
+,Hassan,Karnataka,13.0068,76.0996,loamy,7.0,60,50,60
+,Haveri,Karnataka,14.7936,75.404,black,7.8,60,45,75
+,Kalaburagi,Karnataka,17.3297,76.8343,black,7.8,60,45,75
+,Kodagu,Karnataka,12.3375,75.8069,laterite,6.0,30,25,30
+,Kolar,Karnataka,13.1367,78.129,red,6.5,40,30,40
+,Koppal,Karnataka,15.345,76.154,black,7.8,60,45,75
+,Mandya,Karnataka,12.5235,76.895,red,6.5,40,30,40
+,Mysuru,Karnataka,12.2958,76.6394,red,6.5,40,30,40
+,Raichur,Karnataka,16.2076,77.3463,black,7.8,60,45,75
+,Ramanagara,Karnataka,12.72,77.28,red,6.5,40,30,40
+,Shivamogga,Karnataka,13.9299,75.5681,laterite,6.0,30,25,30
+,Tumakuru,Karnataka,13.3424,77.101,red,6.5,40,30,40
+,Udupi,Karnataka,13.3419,74.7421,laterite,6.0,30,25,30
+,Uttara Kannada,Karnataka,14.7947,74.6869,laterite,6.0,30,25,30
+,Vijayanagara,Karnataka,15.3,76.33,red,6.5,40,30,40
+,Yadgir,Karnataka,16.77,77.135,black,7.8,60,45,75
+,Agar Malwa,Madhya Pradesh,23.71,76.01,black,7.8,60,45,75
+,Alirajpur,Madhya Pradesh,22.3,74.35,red,6.5,40,30,40
+,Anuppur,Madhya Pradesh,23.12,81.69,red,6.5,40,30,40
+,Ashoknagar,Madhya Pradesh,24.58,77.73,red,6.5,40,30,40
+,Balaghat,Madhya Pradesh,21.8,80.19,laterite,6.0,30,25,30
+,Barwani,Madhya Pradesh,22.03,74.9,black,7.8,60,45,75
+,Betul,Madhya Pradesh,21.9,77.9,laterite,6.0,30,25,30
+,Bhind,Madhya Pradesh,26.56,78.79,alluvial,6.8,70,45,55
+,Bhopal,Madhya Pradesh,23.2599,77.4126,black,7.8,60,45,75
+,Burhanpur,Madhya Pradesh,21.31,76.23,black,7.8,60,45,75
+,Chhatarpur,Madhya Pradesh,24.91,79.58,red,6.5,40,30,40
+,Chhindwara,Madhya Pradesh,22.06,78.94,laterite,6.0,30,25,30
+,Damoh,Madhya Pradesh,23.83,79.44,red,6.5,40,30,40
+,Datia,Madhya Pradesh,25.67,78.46,alluvial,6.8,70,45,55
+,Dewas,Madhya Pradesh,22.97,76.05,black,7.8,60,45,75
+,Dhar,Madhya Pradesh,22.6,75.3,black,7.8,60,45,75
+,Dindori,Madhya Pradesh,22.92,81.08,laterite,6.0,30,25,30
+,Guna,Madhya Pradesh,24.65,77.31,red,6.5,40,30,40
+,Gwalior,Madhya Pradesh,26.2183,78.1828,alluvial,6.8,70,45,55
+,Harda,Madhya Pradesh,22.34,77.1,black,7.8,60,45,75
+,Hoshangabad,Madhya Pradesh,22.75,77.72,black,7.8,60,45,75
+,Indore,Madhya Pradesh,22.7196,75.8577,black,7.8,60,45,75
+,Jabalpur,Madhya Pradesh,23.1815,79.9864,red,6.5,40,30,40
+,Jhabua,Madhya Pradesh,23.02,74.6,red,6.5,40,30,40
+,Katni,Madhya Pradesh,23.83,80.39,red,6.5,40,30,40
+,Khandwa,Madhya Pradesh,21.82,76.36,black,7.8,60,45,75
+,Khargone,Madhya Pradesh,21.83,75.98,black,7.8,60,45,75
+,Mandla,Madhya Pradesh,22.6,80.37,laterite,6.0,30,25,30
+,Mandsaur,Madhya Pradesh,24.07,75.07,black,7.8,60,45,75
+,Morena,Madhya Pradesh,26.5,77.99,alluvial,6.8,70,45,55
+,Narsinghpur,Madhya Pradesh,22.94,79.2,black,7.8,60,45,75
+,Neemuch,Madhya Pradesh,24.47,74.86,black,7.8,60,45,75
+,Panna,Madhya Pradesh,24.72,80.19,red,6.5,40,30,40
+,Raisen,Madhya Pradesh,23.33,77.78,black,7.8,60,45,75
+,Rajgarh,Madhya Pradesh,24.0,76.72,black,7.8,60,45,75
+,Ratlam,Madhya Pradesh,23.32,75.04,black,7.8,60,45,75
+,Rewa,Madhya Pradesh,24.53,81.29,red,6.5,40,30,40
+,Sagar,Madhya Pradesh,23.85,78.75,black,7.8,60,45,75
+,Satna,Madhya Pradesh,24.58,80.83,red,6.5,40,30,40
+,Sehore,Madhya Pradesh,23.2,77.09,black,7.8,60,45,75
+,Seoni,Madhya Pradesh,22.09,79.53,laterite,6.0,30,25,30
+,Shahdol,Madhya Pradesh,23.3,81.35,red,6.5,40,30,40
+,Shajapur,Madhya Pradesh,23.43,76.27,black,7.8,60,45,75
+,Sheopur,Madhya Pradesh,25.66,76.7,alluvial,6.8,70,45,55
+,Shivpuri,Madhya Pradesh,25.42,77.66,red,6.5,40,30,40
+,Sidhi,Madhya Pradesh,24.41,81.88,red,6.5,40,30,40
+,Singrauli,Madhya Pradesh,24.2,82.67,red,6.5,40,30,40
+,Tikamgarh,Madhya Pradesh,24.75,78.83,red,6.5,40,30,40
+,Ujjain,Madhya Pradesh,23.1765,75.7885,black,7.8,60,45,75
+,Umaria,Madhya Pradesh,23.53,80.83,red,6.5,40,30,40
+,Vidisha,Madhya Pradesh,23.52,77.81,black,7.8,60,45,75
+,Ahmednagar,Maharashtra,19.0952,74.7496,black,7.8,60,45,75
+,Akola,Maharashtra,20.7059,77.0219,black,7.8,60,45,75
+,Amravati,Maharashtra,20.932,77.7523,black,7.8,60,45,75
+,Aurangabad,Maharashtra,19.8762,75.3433,black,7.8,60,45,75
+,Beed,Maharashtra,18.9891,75.7601,black,7.8,60,45,75
+,Bhandara,Maharashtra,21.1732,79.652,red,6.5,40,30,40
+,Buldhana,Maharashtra,20.5293,76.1829,black,7.8,60,45,75
+,Chandrapur,Maharashtra,19.9615,79.2961,red,6.5,40,30,40
+,Dhule,Maharashtra,20.9042,74.7749,black,7.8,60,45,75
+,Gadchiroli,Maharashtra,19.4969,80.2767,laterite,6.0,30,25,30
+,Gondia,Maharashtra,21.4624,80.2034,red,6.5,40,30,40
+,Hingoli,Maharashtra,19.578,77.103,black,7.8,60,45,75
+,Jalgaon,Maharashtra,21.0077,75.5626,black,7.8,60,45,75
+,Jalna,Maharashtra,19.8347,75.8816,black,7.8,60,45,75
+,Kolhapur,Maharashtra,16.705,74.2433,laterite,6.0,30,25,30
+,Latur,Maharashtra,18.4088,76.5604,black,7.8,60,45,75
+,Mumbai City,Maharashtra,18.9388,72.8354,coastal_alluvial,7.0,50,40,50
+,Mumbai Suburban,Maharashtra,19.0896,72.8656,coastal_alluvial,7.0,50,40,50
+,Nagpur,Maharashtra,21.1458,79.0882,black,7.8,60,45,75
+,Nanded,Maharashtra,19.1383,77.321,black,7.8,60,45,75
+,Nandurbar,Maharashtra,21.37,74.24,black,7.8,60,45,75
+,Nashik,Maharashtra,19.9975,73.7898,laterite,6.0,30,25,30
+,Osmanabad,Maharashtra,18.1861,76.0419,black,7.8,60,45,75
+,Palghar,Maharashtra,19.6894,72.765,coastal_alluvial,7.0,50,40,50
+,Parbhani,Maharashtra,19.2686,76.7708,black,7.8,60,45,75
+,Pune,Maharashtra,18.5204,73.8567,black,7.8,60,45,75
+,Raigad,Maharashtra,18.515,73.185,laterite,6.0,30,25,30
+,Ratnagiri,Maharashtra,16.9956,73.3002,laterite,6.0,30,25,30
+,Sangli,Maharashtra,16.8524,74.5815,black,7.8,60,45,75
+,Satara,Maharashtra,17.6805,74.0183,black,7.8,60,45,75
+,Sindhudurg,Maharashtra,16.3492,73.5594,laterite,6.0,30,25,30
+,Solapur,Maharashtra,17.6599,75.9064,black,7.8,60,45,75
+,Thane,Maharashtra,19.2183,72.9781,coastal_alluvial,7.0,50,40,50
+,Wardha,Maharashtra,20.7453,78.6022,black,7.8,60,45,75
+,Washim,Maharashtra,20.1113,77.133,black,7.8,60,45,75
+,Yavatmal,Maharashtra,20.388,78.13,black,7.8,60,45,75
+,Bishnupur,Manipur,24.633,93.766,alluvial,6.8,70,45,55
+,Chandel,Manipur,24.35,93.99,laterite,6.0,30,25,30
+,Churachandpur,Manipur,24.3333,93.6667,red,6.5,40,30,40
+,Imphal East,Manipur,24.817,93.936,alluvial,6.8,70,45,55
+,Imphal West,Manipur,24.807,93.938,alluvial,6.8,70,45,55
+,Jiribam,Manipur,24.8,93.183,alluvial,6.8,70,45,55
+,Kakching,Manipur,24.497,93.918,alluvial,6.8,70,45,55
+,Kamjong,Manipur,25.05,94.37,laterite,6.0,30,25,30
+,Kangpokpi,Manipur,25.03,93.97,laterite,6.0,30,25,30
+,Noney,Manipur,24.775,93.535,laterite,6.0,30,25,30
+,Pherzawl,Manipur,24.32,93.13,red,6.5,40,30,40
+,Senapati,Manipur,25.27,94.03,laterite,6.0,30,25,30
+,Tamenglong,Manipur,24.97,93.33,laterite,6.0,30,25,30
+,Tengnoupal,Manipur,24.383,94.16,laterite,6.0,30,25,30
+,Thoubal,Manipur,24.64,93.94,alluvial,6.8,70,45,55
+,Ukhrul,Manipur,25.12,94.36,laterite,6.0,30,25,30
+,East Garo Hills,Meghalaya,25.5733,90.624,laterite,6.0,30,25,30
+,East Jaintia Hills,Meghalaya,25.358,92.46,laterite,6.0,30,25,30
+,East Khasi Hills,Meghalaya,25.5735,91.8968,laterite,6.0,30,25,30
+,North Garo Hills,Meghalaya,25.93,90.55,laterite,6.0,30,25,30
+,Ri-Bhoi,Meghalaya,25.9,91.88,laterite,6.0,30,25,30
+,South Garo Hills,Meghalaya,25.328,90.63,laterite,6.0,30,25,30
+,South West Garo Hills,Meghalaya,25.45,89.87,laterite,6.0,30,25,30
+,South West Khasi Hills,Meghalaya,25.4,91.27,laterite,6.0,30,25,30
+,West Garo Hills,Meghalaya,25.567,90.215,laterite,6.0,30,25,30
+,West Jaintia Hills,Meghalaya,25.45,92.17,laterite,6.0,30,25,30
+,West Khasi Hills,Meghalaya,25.55,91.26,laterite,6.0,30,25,30
+,Aizawl,Mizoram,23.7271,92.7176,laterite,6.0,30,25,30
+,Champhai,Mizoram,23.464,93.325,laterite,6.0,30,25,30
+,Hnahthial,Mizoram,22.966,92.751,laterite,6.0,30,25,30
+,Khawzawl,Mizoram,23.195,93.123,laterite,6.0,30,25,30
+,Kolasib,Mizoram,24.226,92.678,alluvial,6.8,70,45,55
+,Lawngtlai,Mizoram,22.53,92.89,laterite,6.0,30,25,30
+,Lunglei,Mizoram,22.86,92.77,laterite,6.0,30,25,30
+,Mamit,Mizoram,23.93,92.49,alluvial,6.8,70,45,55
+,Saiha,Mizoram,22.49,92.98,laterite,6.0,30,25,30
+,Saitual,Mizoram,23.956,92.626,laterite,6.0,30,25,30
+,Serchhip,Mizoram,23.346,92.85,laterite,6.0,30,25,30
+,Chümoukedima,Nagaland,25.852,93.725,laterite,6.0,30,25,30
+,Dimapur,Nagaland,25.9095,93.7266,alluvial,6.8,70,45,55
+,Kiphire,Nagaland,25.888,94.778,laterite,6.0,30,25,30
+,Kohima,Nagaland,25.6751,94.1086,laterite,6.0,30,25,30
+,Longleng,Nagaland,26.5,94.75,laterite,6.0,30,25,30
+,Mokokchung,Nagaland,26.324,94.523,laterite,6.0,30,25,30
+,Mon,Nagaland,26.722,95.048,laterite,6.0,30,25,30
+,Niuland,Nagaland,25.793,93.646,alluvial,6.8,70,45,55
+,Noklak,Nagaland,26.061,94.524,laterite,6.0,30,25,30
+,Peren,Nagaland,25.512,93.738,laterite,6.0,30,25,30
+,Phek,Nagaland,25.661,94.47,laterite,6.0,30,25,30
+,Tuensang,Nagaland,26.261,94.824,laterite,6.0,30,25,30
+,Tseminyü,Nagaland,25.711,94.064,laterite,6.0,30,25,30
+,Wokha,Nagaland,26.098,94.266,laterite,6.0,30,25,30
+,Zünheboto,Nagaland,26.015,94.527,laterite,6.0,30,25,30
+,Angul,Odisha,20.84,85.11,red,6.5,40,30,40
+,Balangir,Odisha,20.72,83.49,red,6.5,40,30,40
+,Balasore,Odisha,21.493,86.934,alluvial,6.8,70,45,55
+,Bargarh,Odisha,21.333,83.616,black,7.8,60,45,75
+,Bhadrak,Odisha,21.0583,86.501,alluvial,6.8,70,45,55
+,Boudh,Odisha,20.839,84.329,red,6.5,40,30,40
+,Cuttack,Odisha,20.4625,85.883,alluvial,6.8,70,45,55
+,Deogarh,Odisha,21.537,84.73,red,6.5,40,30,40
+,Dhenkanal,Odisha,20.662,85.612,red,6.5,40,30,40
+,Gajapati,Odisha,18.975,84.186,laterite,6.0,30,25,30
+,Ganjam,Odisha,19.387,85.05,laterite,6.0,30,25,30
+,Jagatsinghpur,Odisha,20.255,86.15,alluvial,6.8,70,45,55
+,Jajpur,Odisha,20.85,86.337,alluvial,6.8,70,45,55
+,Jharsuguda,Odisha,21.855,84.006,red,6.5,40,30,40
+,Kalahandi,Odisha,19.913,83.166,red,6.5,40,30,40
+,Kandhamal,Odisha,20.123,84.031,laterite,6.0,30,25,30
+,Kendrapara,Odisha,20.502,86.422,alluvial,6.8,70,45,55
+,Kendujhar (Keonjhar),Odisha,21.634,85.583,laterite,6.0,30,25,30
+,Khordha,Odisha,20.182,85.617,laterite,6.0,30,25,30
+,Koraput,Odisha,18.811,82.71,laterite,6.0,30,25,30
+,Malkangiri,Odisha,18.364,81.892,laterite,6.0,30,25,30
+,Mayurbhanj,Odisha,21.543,86.816,laterite,6.0,30,25,30
+,Nabarangpur,Odisha,19.233,82.548,laterite,6.0,30,25,30
+,Nayagarh,Odisha,20.122,85.097,red,6.5,40,30,40
+,Nuapada,Odisha,20.83,82.543,red,6.5,40,30,40
+,Puri,Odisha,19.813,85.831,alluvial,6.8,70,45,55
+,Rayagada,Odisha,19.171,83.416,laterite,6.0,30,25,30
+,Sambalpur,Odisha,21.47,83.98,red,6.5,40,30,40
+,Subarnapur (Sonepur),Odisha,20.833,83.92,red,6.5,40,30,40
+,Sundargarh,Odisha,22.12,84.03,red,6.5,40,30,40
+,Amritsar,Punjab,31.634,74.8723,alluvial,6.8,70,45,55
+,Barnala,Punjab,30.3819,75.5468,alluvial,6.8,70,45,55
+,Bathinda,Punjab,30.21,74.945,alluvial,6.8,70,45,55
+,Faridkot,Punjab,30.678,74.7565,alluvial,6.8,70,45,55
+,Fatehgarh Sahib,Punjab,30.6433,76.3869,alluvial,6.8,70,45,55
+,Fazilka,Punjab,30.402,74.028,alluvial,6.8,70,45,55
+,Ferozepur,Punjab,30.933,74.622,alluvial,6.8,70,45,55
+,Gurdaspur,Punjab,32.0424,75.4057,alluvial,6.8,70,45,55
+,Hoshiarpur,Punjab,31.532,75.911,alluvial,6.8,70,45,55
+,Jalandhar,Punjab,31.326,75.5762,alluvial,6.8,70,45,55
+,Kapurthala,Punjab,31.372,75.38,alluvial,6.8,70,45,55
+,Ludhiana,Punjab,30.9,75.85,alluvial,6.8,70,45,55
+,Malerkotla,Punjab,30.54,75.875,alluvial,6.8,70,45,55
+,Mansa,Punjab,29.989,75.401,alluvial,6.8,70,45,55
+,Moga,Punjab,30.8165,75.173,alluvial,6.8,70,45,55
+,Pathankot,Punjab,32.273,75.652,alluvial,6.8,70,45,55
+,Patiala,Punjab,30.3398,76.3869,alluvial,6.8,70,45,55
+,Rupnagar,Punjab,30.97,76.53,alluvial,6.8,70,45,55
+,Sangrur,Punjab,30.245,75.842,alluvial,6.8,70,45,55
+,SAS Nagar (Mohali),Punjab,30.7046,76.7179,alluvial,6.8,70,45,55
+,Sri Muktsar Sahib,Punjab,30.476,74.515,alluvial,6.8,70,45,55
+,Shahid Bhagat Singh Nagar,Punjab,31.098,75.975,alluvial,6.8,70,45,55
+,Tarn Taran,Punjab,31.451,74.926,alluvial,6.8,70,45,55
+,Ajmer,Rajasthan,26.4499,74.6399,sandy,6.0,20,15,20
+,Alwar,Rajasthan,27.553,76.635,sandy,6.0,20,15,20
+,Banswara,Rajasthan,23.5461,74.435,black,7.8,60,45,75
+,Baran,Rajasthan,25.1,76.513,black,7.8,60,45,75
+,Barmer,Rajasthan,25.75,71.4167,sandy,6.0,20,15,20
+,Bharatpur,Rajasthan,27.2152,77.503,alluvial,6.8,70,45,55
+,Bhilwara,Rajasthan,25.3467,74.636,black,7.8,60,45,75
+,Bikaner,Rajasthan,28.0229,73.3119,sandy,6.0,20,15,20
+,Bundi,Rajasthan,25.4305,75.6499,black,7.8,60,45,75
+,Chittorgarh,Rajasthan,24.8829,74.623,black,7.8,60,45,75
+,Churu,Rajasthan,28.292,74.9673,sandy,6.0,20,15,20
+,Dausa,Rajasthan,26.893,76.337,alluvial,6.8,70,45,55
+,Dholpur,Rajasthan,26.7025,77.8934,alluvial,6.8,70,45,55
+,Dungarpur,Rajasthan,23.8419,73.7147,black,7.8,60,45,75
+,Hanumangarh,Rajasthan,29.5815,74.3294,alluvial,6.8,70,45,55
+,Jaipur,Rajasthan,26.9124,75.7873,sandy,6.0,20,15,20
+,Jaisalmer,Rajasthan,26.9157,70.9083,sandy,6.0,20,15,20
+,Jalore,Rajasthan,25.3466,72.615,sandy,6.0,20,15,20
+,Jhalawar,Rajasthan,24.5963,76.165,black,7.8,60,45,75
+,Jhunjhunu,Rajasthan,28.1289,75.399,sandy,6.0,20,15,20
+,Jodhpur,Rajasthan,26.2389,73.0243,sandy,6.0,20,15,20
+,Karauli,Rajasthan,26.4985,77.027,alluvial,6.8,70,45,55
+,Kota,Rajasthan,25.2138,75.8648,black,7.8,60,45,75
+,Nagaur,Rajasthan,27.201,73.7333,sandy,6.0,20,15,20
+,Pali,Rajasthan,25.7725,73.3234,sandy,6.0,20,15,20
+,Pratapgarh,Rajasthan,24.0319,74.7813,black,7.8,60,45,75
+,Rajsamand,Rajasthan,25.07,73.88,black,7.8,60,45,75
+,Sawai Madhopur,Rajasthan,26.023,76.344,alluvial,6.8,70,45,55
+,Sikar,Rajasthan,27.6094,75.1399,sandy,6.0,20,15,20
+,Sirohi,Rajasthan,24.8887,72.8479,sandy,6.0,20,15,20
+,Sri Ganganagar,Rajasthan,29.9038,73.8772,alluvial,6.8,70,45,55
+,Tonk,Rajasthan,26.1655,75.789,alluvial,6.8,70,45,55
+,Udaipur,Rajasthan,24.5854,73.7125,black,7.8,60,45,75
+,Gangtok,Sikkim,27.3314,88.6138,loamy,7.0,60,50,60
+,Gyalshing,Sikkim,27.2895,88.2575,loamy,7.0,60,50,60
+,Mangan,Sikkim,27.5095,88.531,sandy,6.0,20,15,20
+,Namchi,Sikkim,27.164,88.3639,loamy,7.0,60,50,60
+,Adilabad,Telangana,19.6728,78.5311,red,6.5,40,30,40
+,Bhadradri Kothagudem,Telangana,17.5546,80.6196,red,6.5,40,30,40
+,Hanumakonda,Telangana,18.005,79.555,black,7.8,60,45,75
+,Hyderabad,Telangana,17.385,78.4867,black,7.8,60,45,75
+,Jagtial,Telangana,18.794,78.912,black,7.8,60,45,75
+,Jangaon,Telangana,17.726,79.161,black,7.8,60,45,75
+,Jayashankar Bhupalpally,Telangana,18.359,79.882,red,6.5,40,30,40
+,Jogulamba Gadwal,Telangana,16.242,77.795,black,7.8,60,45,75
+,Kamareddy,Telangana,18.32,78.34,black,7.8,60,45,75
+,Karimnagar,Telangana,18.4386,79.1288,black,7.8,60,45,75
+,Khammam,Telangana,17.2473,80.1514,red,6.5,40,30,40
+,Komaram Bheem Asifabad,Telangana,19.685,79.499,red,6.5,40,30,40
+,Mahabubabad,Telangana,17.598,80.003,red,6.5,40,30,40
+,Mahabubnagar,Telangana,16.7439,77.985,black,7.8,60,45,75
+,Mancherial,Telangana,18.87,79.44,red,6.5,40,30,40
+,Medak,Telangana,18.0452,78.2608,black,7.8,60,45,75
+,Medchal-Malkajgiri,Telangana,17.493,78.533,black,7.8,60,45,75
+,Mulugu,Telangana,18.191,80.015,red,6.5,40,30,40
+,Nagarkurnool,Telangana,16.482,78.324,black,7.8,60,45,75
+,Nalgonda,Telangana,17.0575,79.2684,black,7.8,60,45,75
+,Narayanpet,Telangana,16.639,77.493,black,7.8,60,45,75
+,Nirmal,Telangana,19.101,78.344,red,6.5,40,30,40
+,Nizamabad,Telangana,18.6725,78.0941,black,7.8,60,45,75
+,Peddapalli,Telangana,18.613,79.332,black,7.8,60,45,75
+,Rajanna Sircilla,Telangana,18.388,78.792,black,7.8,60,45,75
+,Rangareddy,Telangana,17.366,78.55,black,7.8,60,45,75
+,Sangareddy,Telangana,17.6248,78.086,black,7.8,60,45,75
+,Siddipet,Telangana,18.103,78.849,black,7.8,60,45,75
+,Suryapet,Telangana,17.141,79.62,black,7.8,60,45,75
+,Vikarabad,Telangana,17.338,77.904,black,7.8,60,45,75
+,Wanaparthy,Telangana,16.364,78.073,black,7.8,60,45,75
+,Warangal,Telangana,17.9689,79.5941,black,7.8,60,45,75
+,Yadadri Bhuvanagiri,Telangana,17.518,79.235,black,7.8,60,45,75
+,Agra,Uttar Pradesh,27.1767,78.0081,alluvial,6.8,70,45,55
+,Aligarh,Uttar Pradesh,27.8974,78.088,alluvial,6.8,70,45,55
+,Allahabad,Uttar Pradesh,25.4358,81.8463,alluvial,6.8,70,45,55
+,Ambedkar Nagar,Uttar Pradesh,26.4054,82.66,alluvial,6.8,70,45,55
+,Amethi,Uttar Pradesh,26.154,81.787,alluvial,6.8,70,45,55
+,Amroha,Uttar Pradesh,28.903,78.467,alluvial,6.8,70,45,55
+,Auraiya,Uttar Pradesh,26.4637,79.511,alluvial,6.8,70,45,55
+,Azamgarh,Uttar Pradesh,26.0739,83.1859,alluvial,6.8,70,45,55
+,Baghpat,Uttar Pradesh,28.9448,77.218,alluvial,6.8,70,45,55
+,Bahraich,Uttar Pradesh,27.5743,81.595,alluvial,6.8,70,45,55
+,Ballia,Uttar Pradesh,25.7584,84.1485,alluvial,6.8,70,45,55
+,Balrampur,Uttar Pradesh,27.4299,82.18,alluvial,6.8,70,45,55
+,Banda,Uttar Pradesh,25.4756,80.3388,alluvial,6.8,70,45,55
+,Barabanki,Uttar Pradesh,26.9412,81.746,alluvial,6.8,70,45,55
+,Bareilly,Uttar Pradesh,28.367,79.4304,alluvial,6.8,70,45,55
+,Basti,Uttar Pradesh,26.8084,82.763,alluvial,6.8,70,45,55
+,Bhadohi,Uttar Pradesh,25.3953,82.5703,alluvial,6.8,70,45,55
+,Bijnor,Uttar Pradesh,29.3724,78.1364,alluvial,6.8,70,45,55
+,Budaun,Uttar Pradesh,28.0381,79.1267,alluvial,6.8,70,45,55
+,Bulandshahr,Uttar Pradesh,28.4069,77.8498,alluvial,6.8,70,45,55
+,Chandauli,Uttar Pradesh,25.261,83.264,alluvial,6.8,70,45,55
+,Chitrakoot,Uttar Pradesh,25.126,81.078,alluvial,6.8,70,45,55
+,Deoria,Uttar Pradesh,26.5017,83.779,alluvial,6.8,70,45,55
+,Etah,Uttar Pradesh,27.5588,78.6626,alluvial,6.8,70,45,55
+,Etawah,Uttar Pradesh,26.7848,79.0219,alluvial,6.8,70,45,55
+,Farrukhabad,Uttar Pradesh,27.3824,79.5941,alluvial,6.8,70,45,55
+,Fatehpur,Uttar Pradesh,25.921,80.8,alluvial,6.8,70,45,55
+,Firozabad,Uttar Pradesh,27.1591,78.3957,alluvial,6.8,70,45,55
+,Gautam Buddha Nagar,Uttar Pradesh,28.5355,77.391,alluvial,6.8,70,45,55
+,Ghaziabad,Uttar Pradesh,28.6692,77.4538,alluvial,6.8,70,45,55
+,Ghazipur,Uttar Pradesh,25.584,83.585,alluvial,6.8,70,45,55
+,Gonda,Uttar Pradesh,27.133,81.953,alluvial,6.8,70,45,55
+,Gorakhpur,Uttar Pradesh,26.7606,83.3732,alluvial,6.8,70,45,55
+,Hamirpur,Uttar Pradesh,25.9585,79.0517,alluvial,6.8,70,45,55
+,Hapur,Uttar Pradesh,28.73,77.78,alluvial,6.8,70,45,55
+,Hardoi,Uttar Pradesh,27.402,80.125,alluvial,6.8,70,45,55
+,Hathras,Uttar Pradesh,27.5955,78.051,alluvial,6.8,70,45,55
+,Jalaun,Uttar Pradesh,26.143,79.336,alluvial,6.8,70,45,55
+,Jaunpur,Uttar Pradesh,25.746,82.683,alluvial,6.8,70,45,55
+,Jhansi,Uttar Pradesh,25.4484,78.5685,alluvial,6.8,70,45,55
+,Kannauj,Uttar Pradesh,27.0545,79.918,alluvial,6.8,70,45,55
+,Kanpur Dehat,Uttar Pradesh,26.415,79.9632,alluvial,6.8,70,45,55
+,Kanpur Nagar,Uttar Pradesh,26.4499,80.3319,alluvial,6.8,70,45,55
+,Kasganj,Uttar Pradesh,27.8147,78.648,alluvial,6.8,70,45,55
+,Kaushambi,Uttar Pradesh,25.53,81.372,alluvial,6.8,70,45,55
+,Kheri,Uttar Pradesh,27.896,80.784,alluvial,6.8,70,45,55
+,Kushinagar,Uttar Pradesh,26.74,83.88,alluvial,6.8,70,45,55
+,Lalitpur,Uttar Pradesh,24.688,78.412,alluvial,6.8,70,45,55
+,Lucknow,Uttar Pradesh,26.8467,80.9462,alluvial,6.8,70,45,55
+,Maharajganj,Uttar Pradesh,27.15,83.56,alluvial,6.8,70,45,55
+,Mahoba,Uttar Pradesh,25.2919,79.872,alluvial,6.8,70,45,55
+,Mainpuri,Uttar Pradesh,27.2285,79.026,alluvial,6.8,70,45,55
+,Mathura,Uttar Pradesh,27.4924,77.6737,alluvial,6.8,70,45,55
+,Mau,Uttar Pradesh,25.96,83.561,alluvial,6.8,70,45,55
+,Meerut,Uttar Pradesh,28.9845,77.7064,alluvial,6.8,70,45,55
+,Mirzapur,Uttar Pradesh,25.148,82.569,alluvial,6.8,70,45,55
+,Moradabad,Uttar Pradesh,28.8386,78.7733,alluvial,6.8,70,45,55
+,Muzaffarnagar,Uttar Pradesh,29.4709,77.703,alluvial,6.8,70,45,55
+,Pilibhit,Uttar Pradesh,28.63,79.804,alluvial,6.8,70,45,55
+,Pratapgarh,Uttar Pradesh,25.88,81.966,alluvial,6.8,70,45,55
+,Raebareli,Uttar Pradesh,26.234,81.24,alluvial,6.8,70,45,55
+,Rampur,Uttar Pradesh,28.81,79.025,alluvial,6.8,70,45,55
+,Saharanpur,Uttar Pradesh,29.968,77.555,alluvial,6.8,70,45,55
+,Sambhal,Uttar Pradesh,28.585,78.55,alluvial,6.8,70,45,55
+,Sant Kabir Nagar,Uttar Pradesh,26.79,83.04,alluvial,6.8,70,45,55
+,Shahjahanpur,Uttar Pradesh,27.88,79.91,alluvial,6.8,70,45,55
+,Shamli,Uttar Pradesh,29.448,77.385,alluvial,6.8,70,45,55
+,Shravasti,Uttar Pradesh,27.512,81.933,alluvial,6.8,70,45,55
+,Siddharthnagar,Uttar Pradesh,27.27,83.05,alluvial,6.8,70,45,55
+,Sitapur,Uttar Pradesh,27.5612,80.686,alluvial,6.8,70,45,55
+,Sonbhadra,Uttar Pradesh,24.402,83.053,red,6.5,40,30,40
+,Sultanpur,Uttar Pradesh,26.261,82.073,alluvial,6.8,70,45,55
+,Unnao,Uttar Pradesh,26.547,80.487,alluvial,6.8,70,45,55
+,Varanasi,Uttar Pradesh,25.3176,82.9739,alluvial,6.8,70,45,55
+,Dhalai,Tripura,23.84,91.99,laterite,6.0,30,25,30
+,Gomati,Tripura,23.567,91.492,laterite,6.0,30,25,30
+,Khowai,Tripura,24.07,91.612,laterite,6.0,30,25,30
+,North Tripura,Tripura,24.172,92.006,laterite,6.0,30,25,30
+,Sepahijala,Tripura,23.545,91.35,laterite,6.0,30,25,30
+,South Tripura,Tripura,23.281,91.455,laterite,6.0,30,25,30
+,Unakoti,Tripura,24.246,91.983,laterite,6.0,30,25,30
+,West Tripura,Tripura,23.94,91.321,laterite,6.0,30,25,30
+,Almora,Uttarakhand,29.5892,79.6467,laterite,6.0,30,25,30
+,Bageshwar,Uttarakhand,29.8376,79.7714,laterite,6.0,30,25,30
+,Chamoli,Uttarakhand,30.404,79.32,sandy,6.0,20,15,20
+,Champawat,Uttarakhand,29.336,80.09,loamy,7.0,60,50,60
+,Dehradun,Uttarakhand,30.3165,78.0322,loamy,7.0,60,50,60
+,Haridwar,Uttarakhand,29.9457,78.1642,alluvial,6.8,70,45,55
+,Nainital,Uttarakhand,29.38,79.463,laterite,6.0,30,25,30
+,Pauri Garhwal,Uttarakhand,30.152,78.777,laterite,6.0,30,25,30
+,Pithoragarh,Uttarakhand,29.583,80.218,sandy,6.0,20,15,20
+,Rudraprayag,Uttarakhand,30.284,78.98,sandy,6.0,20,15,20
+,Tehri Garhwal,Uttarakhand,30.379,78.477,laterite,6.0,30,25,30
+,Udham Singh Nagar,Uttarakhand,28.9695,79.515,alluvial,6.8,70,45,55
+,Uttarkashi,Uttarakhand,30.7268,78.4359,sandy,6.0,20,15,20
+,Alipurduar,West Bengal,26.483,89.533,alluvial,6.8,70,45,55
+,Bankura,West Bengal,23.24,87.07,laterite,6.0,30,25,30
+,Birbhum,West Bengal,23.838,87.618,laterite,6.0,30,25,30
+,Cooch Behar,West Bengal,26.322,89.449,alluvial,6.8,70,45,55
+,Dakshin Dinajpur,West Bengal,25.216,88.76,alluvial,6.8,70,45,55
+,Darjeeling,West Bengal,27.038,88.2627,loamy,7.0,60,50,60
+,Hooghly,West Bengal,22.902,88.397,alluvial,6.8,70,45,55
+,Howrah,West Bengal,22.5958,88.2636,alluvial,6.8,70,45,55
+,Jalpaiguri,West Bengal,26.517,88.732,alluvial,6.8,70,45,55
+,Jhargram,West Bengal,22.453,86.994,laterite,6.0,30,25,30
+,Kalimpong,West Bengal,27.063,88.469,loamy,7.0,60,50,60
+,Kolkata,West Bengal,22.5726,88.3639,alluvial,6.8,70,45,55
+,Malda,West Bengal,25.011,88.141,alluvial,6.8,70,45,55
+,Murshidabad,West Bengal,24.183,88.27,alluvial,6.8,70,45,55
+,Nadia,West Bengal,23.471,88.556,alluvial,6.8,70,45,55
+,North 24 Parganas,West Bengal,22.616,88.402,alluvial,6.8,70,45,55
+,Paschim Bardhaman,West Bengal,23.69,87.18,laterite,6.0,30,25,30
+,Paschim Medinipur,West Bengal,22.42,87.32,laterite,6.0,30,25,30
+,Purba Bardhaman,West Bengal,23.2324,87.8615,alluvial,6.8,70,45,55
+,Purba Medinipur,West Bengal,22.292,87.924,alluvial,6.8,70,45,55
+,Purulia,West Bengal,23.33,86.36,laterite,6.0,30,25,30
+,South 24 Parganas,West Bengal,22.135,88.401,alluvial,6.8,70,45,55
+,Uttar Dinajpur,West Bengal,25.626,88.125,alluvial,6.8,70,45,55
