@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api/schemes';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/schemes';
 
 export interface GovernmentScheme {
   id: number;

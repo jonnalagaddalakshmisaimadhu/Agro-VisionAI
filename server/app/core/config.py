@@ -15,8 +15,12 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite:///./farmiq.db"
     
+    # MongoDB
+    MONGO_URI: str = "mongodb://localhost:27017/"
+    MONGO_DB_NAME: str = "farmiq"
+    
     # CORS
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:8080"
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:8080,https://farmiq-agrovisionai.web.app,https://farmiq-agrovisionai.firebaseapp.com"
     
     @property
     def allowed_origins_list(self) -> List[str]:
@@ -26,6 +30,8 @@ class Settings(BaseSettings):
     OPENWEATHER_API_KEY: str = "5b88263f64d6c71a355d39ea646359c6"
     AGRIMART_API_KEY: str = ""
     AGMARKNET_RESOURCE_ID: str = "9ef84268-d588-465a-a308-a864a43d0070"
+    GEMINI_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
     
     # File Upload
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB

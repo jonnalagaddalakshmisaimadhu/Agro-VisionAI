@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { localAuthService, User } from "@/services/localAuthService";
+import { signInWithGoogle } from "@/lib/firebase";
 
 type AuthUser = {
   id: string;
@@ -15,6 +16,7 @@ type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   login: (username: string, password: string) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
   register: (username: string, email: string, password: string, full_name: string, phone?: string, location?: string, farm_size?: string) => Promise<boolean>;
   logout: () => void;
   updateUser: (updates: Partial<AuthUser>) => Promise<boolean>;
@@ -44,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       const result = await localAuthService.login(username, password);
-      
+
       if (result.success && result.user) {
         setUser(result.user);
         return true;
@@ -58,10 +60,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginWithGoogle = async (): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      const { user: firebaseUser } = await signInWithGoogle();
+
+      if (firebaseUser) {
+        // Map Firebase user to our AuthUser type
+        const userData: AuthUser = {
+          id: firebaseUser.uid,
+          username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "user",
+          email: firebaseUser.email || "",
+          full_name: firebaseUser.displayName || "",
+          created_at: new Date().toISOString()
+        };
+
+        setUser(userData);
+        // Persist to local storage like localAuthService does
+        localStorage.setItem('farmiq_current_user', JSON.stringify(userData));
+        localStorage.setItem('farmiq_logged_in', 'true');
+
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Google Login failed:", error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async (
-    username: string, 
-    email: string, 
-    password: string, 
+    username: string,
+    email: string,
+    password: string,
     full_name: string,
     phone?: string,
     location?: string,
@@ -78,7 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         location,
         farm_size
       );
-      
+
       if (result.success) {
         return true;
       }
@@ -118,13 +151,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = useMemo(() => ({ 
-    user, 
-    login, 
-    register, 
-    logout, 
-    updateUser, 
-    isLoading 
+  const value = useMemo(() => ({
+    user,
+    login,
+    loginWithGoogle,
+    register,
+    logout,
+    updateUser,
+    isLoading
   }), [user, isLoading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

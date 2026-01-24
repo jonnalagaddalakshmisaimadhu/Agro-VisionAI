@@ -1,6 +1,6 @@
 import marketPricesConnectionService from './marketPricesConnectionService';
 
-const API_BASE_URL = '/api/market-prices';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '') + '/api/market-prices';
 
 export interface MarketPrice {
   id: number;
@@ -495,13 +495,13 @@ class MarketPricesService {
     limit?: number;
   }): Promise<MarketPrice[]> {
     const searchParams = new URLSearchParams();
-    
+
     if (params?.location) searchParams.append('location', params.location);
     if (params?.limit) searchParams.append('limit', params.limit.toString());
 
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/prices/vegetables?${queryString}` : '/prices/vegetables';
-    
+
     return this.fetchFromAPI<MarketPrice[]>(endpoint);
   }
 
@@ -511,13 +511,13 @@ class MarketPricesService {
     limit?: number;
   }): Promise<MarketPrice[]> {
     const searchParams = new URLSearchParams();
-    
+
     if (params?.location) searchParams.append('location', params.location);
     if (params?.limit) searchParams.append('limit', params.limit.toString());
 
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/prices/fruits?${queryString}` : '/prices/fruits';
-    
+
     return this.fetchFromAPI<MarketPrice[]>(endpoint);
   }
 
@@ -528,13 +528,13 @@ class MarketPricesService {
     limit?: number;
   }): Promise<MarketPrice[]> {
     const searchParams = new URLSearchParams();
-    
+
     if (params?.location) searchParams.append('location', params.location);
     if (params?.limit) searchParams.append('limit', params.limit.toString());
 
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/prices/fiber?${queryString}` : '/prices/fiber';
-    
+
     return this.fetchFromAPI<MarketPrice[]>(endpoint);
   }
 
@@ -554,7 +554,7 @@ class MarketPricesService {
 
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/prices/${encodeURIComponent(cropName)}?${queryString}` : `/prices/${encodeURIComponent(cropName)}`;
-    
+
     return this.fetchFromAPI<MarketPrice[]>(endpoint);
   }
 

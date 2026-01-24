@@ -1,6 +1,7 @@
 const DEFAULT_SOIL = 'mixed';
-const BACKEND_ENDPOINT = '/api/predict-soil';
-const DISTRICT_ENDPOINT = '/api/soil';
+const API_URL = import.meta.env.VITE_API_URL || '';
+const BACKEND_ENDPOINT = `${API_URL}/api/predict-soil`;
+const DISTRICT_ENDPOINT = `${API_URL}/api/soil`;
 const NOMINATIM_ENDPOINT =
   'https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&addressdetails=1';
 

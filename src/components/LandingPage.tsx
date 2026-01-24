@@ -4,12 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { 
-  Sprout, 
-  Shield, 
-  ShoppingCart, 
-  FileText, 
-  TrendingUp, 
+import {
+  Sprout,
+  Shield,
+  ShoppingCart,
+  FileText,
+  TrendingUp,
   Smartphone,
   Leaf,
   Brain,
@@ -96,7 +96,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
       icon: Camera
     },
     {
-      step: "2", 
+      step: "2",
       title: "Get AI Insights",
       description: "Our AI analyzes your data and provides profit predictions and recommendations",
       icon: Brain
@@ -121,7 +121,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
     },
     {
       name: "Charith Katakam",
-      location: "Warangal", 
+      location: "Warangal",
       crop: "Tomato",
       quote: "The government schemes checker helped me get ₹50,000 subsidy that I didn't know existed. Game changer!",
       rating: 5,
@@ -179,7 +179,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
               <Leaf className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold text-foreground">FarmIQ</span>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="w-32">
@@ -193,23 +193,22 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                   <SelectItem value="bn">বাংলা</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <Button variant="outline" className="hidden sm:flex" onClick={onClickLogin}>Login</Button>
-              <Button className="bg-primary hover:bg-primary/90">Get Started</Button>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-success/5">        
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-success/5">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-6 lg:space-y-8">
               <Badge className="w-fit bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
                 🌾 AI-Powered Smart Farming Platform
               </Badge>
-              
+
               <div className="space-y-4 lg:space-y-6">
                 <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-foreground leading-tight">
                   Smarter Farming,{" "}
@@ -217,12 +216,12 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                     Higher Profits
                   </span>
                 </h1>
-                
+
                 <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed">
                   Choose the right crops, detect diseases early, get weather alerts, and earn more profits – all in one app.
                 </p>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
                 <Button size="lg" className="h-12 lg:h-14 px-6 lg:px-8 text-base lg:text-lg bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
                   <Smartphone className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
@@ -243,10 +242,10 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                     <div className="w-16 h-16 lg:w-20 lg:h-20 bg-primary/20 rounded-2xl flex items-center justify-center animate-float">
                       <Smartphone className="h-8 w-8 lg:h-10 lg:w-10 text-primary" />
                     </div>
-                    <div className="w-16 h-16 lg:w-20 lg:h-20 bg-accent/20 rounded-2xl flex items-center justify-center animate-float" style={{animationDelay: '1s'}}>
+                    <div className="w-16 h-16 lg:w-20 lg:h-20 bg-accent/20 rounded-2xl flex items-center justify-center animate-float" style={{ animationDelay: '1s' }}>
                       <Camera className="h-8 w-8 lg:h-10 lg:w-10 text-accent" />
                     </div>
-                    <div className="w-16 h-16 lg:w-20 lg:h-20 bg-success/20 rounded-2xl flex items-center justify-center animate-float" style={{animationDelay: '2s'}}>
+                    <div className="w-16 h-16 lg:w-20 lg:h-20 bg-success/20 rounded-2xl flex items-center justify-center animate-float" style={{ animationDelay: '2s' }}>
                       <Sprout className="h-8 w-8 lg:h-10 lg:w-10 text-success" />
                     </div>
                   </div>
@@ -335,19 +334,19 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {coreFeatures.map((feature, index) => (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className="group relative overflow-hidden border-2 border-transparent hover:border-primary/20 transition-all duration-300 hover:shadow-hover-lift"
               >
                 <CardContent className="p-6 lg:p-8">
                   <div className={`w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gradient-to-r ${feature.gradient} p-3 lg:p-4 mb-4 lg:mb-6 group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon className="h-full w-full text-white" />
                   </div>
-                  
+
                   <h3 className="text-lg lg:text-xl font-bold mb-2 lg:mb-3 group-hover:text-primary transition-colors">
                     {feature.title}
                   </h3>
-                  
+
                   <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
@@ -505,17 +504,17 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                       <p className="text-sm text-muted-foreground">{testimonial.location} • {testimonial.crop}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex mb-3 lg:mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="h-4 w-4 lg:h-5 lg:w-5 fill-warning text-warning" />
                     ))}
                   </div>
-                  
+
                   <p className="text-sm lg:text-base text-muted-foreground mb-4 italic">
                     "{testimonial.quote}"
                   </p>
-                  
+
                   <Badge variant="secondary" className="bg-success/10 text-success">
                     {testimonial.improvement}
                   </Badge>
@@ -563,15 +562,15 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
             <Badge className="bg-primary/20 text-primary border-primary/30 mx-auto">
               🚀 Ready to Start?
             </Badge>
-            
+
             <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-foreground">
               Ready to Grow Smarter?
             </h2>
-            
+
             <p className="text-lg lg:text-2xl text-muted-foreground max-w-3xl mx-auto">
               Join 2 lakh+ farmers already using FarmIQ to earn more and waste less.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 justify-center items-center pt-6 lg:pt-8">
               <Button size="lg" className="h-14 lg:h-16 px-8 lg:px-10 text-lg lg:text-xl bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all animate-pulse-glow">
                 <Smartphone className="mr-3 h-5 w-5 lg:h-6 lg:w-6" />
@@ -583,7 +582,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex justify-center items-center space-x-8 pt-8 text-muted-foreground">
               <div className="flex items-center space-x-2">
                 <Star className="h-5 w-5 fill-warning text-warning" />
@@ -615,7 +614,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                 AI-powered farming platform helping farmers increase profits and reduce crop losses.
               </p>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-sm lg:text-base opacity-80">
@@ -624,7 +623,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                 <li><a href="#" className="hover:text-primary transition-colors">Blog</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-sm lg:text-base opacity-80">
@@ -634,7 +633,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                 <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <div className="space-y-2 text-sm lg:text-base opacity-80">
@@ -649,7 +648,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="border-t border-background/20 mt-8 lg:mt-12 pt-6 lg:pt-8 text-center text-sm lg:text-base opacity-60">
             <p>&copy; 2024 FarmIQ. All rights reserved. Made with ❤️ for Indian farmers.</p>
           </div>

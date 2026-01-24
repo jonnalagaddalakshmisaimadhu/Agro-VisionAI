@@ -135,7 +135,3 @@ server/*.sqlite
 server/*.sqlite3
 dist/
 FarmIQ-Assistance/
-
-server/models/*.pt
-
-*.pt
