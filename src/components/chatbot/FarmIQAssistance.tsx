@@ -180,17 +180,22 @@ export const FarmIQAssistance = () => {
                                             <ReactMarkdown
                                                 remarkPlugins={[remarkGfm]}
                                                 components={{
-                                                    h3: ({ node, ...props }) => <h3 className="text-black font-bold text-base mt-3 mb-1 block break-words" {...props} />,
-                                                    ul: ({ node, ...props }) => <ul className="list-disc pl-4 space-y-1 my-2 block" {...props} />,
-                                                    li: ({ node, ...props }) => <li className="text-green-600 font-medium break-words leading-relaxed" {...props} />,
-                                                    p: ({ node, ...props }) => <p className="mb-2 text-slate-700 block break-words leading-relaxed" {...props} />,
-                                                    strong: ({ node, ...props }) => <strong className="font-bold text-black" {...props} />,
-                                                    table: ({ node, ...props }) => <div className="my-3 w-full overflow-x-auto rounded-lg border border-slate-200"><table className="min-w-full divide-y divide-slate-200" {...props} /></div>,
-                                                    thead: ({ node, ...props }) => <thead className="bg-slate-50 text-slate-700" {...props} />,
-                                                    tbody: ({ node, ...props }) => <tbody className="bg-white divide-y divide-slate-200" {...props} />,
-                                                    tr: ({ node, ...props }) => <tr className="" {...props} />,
-                                                    th: ({ node, ...props }) => <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-700 bg-slate-100/80 sticky top-0 backdrop-blur-sm" {...props} />,
-                                                    td: ({ node, ...props }) => <td className="px-3 py-2 text-sm text-slate-600 align-top" {...props} />,
+                                                    h3: ({ node, ...props }) => <h3 className="text-slate-950 font-bold text-lg mt-4 mb-2 block break-words border-l-4 border-green-500 pl-2" {...props} />,
+                                                    ul: ({ node, ...props }) => <ul className="list-disc pl-6 space-y-2 my-3 block" {...props} />,
+                                                    ol: ({ node, ...props }) => <ol className="list-decimal pl-6 space-y-2 my-3 block" {...props} />,
+                                                    li: ({ node, ...props }) => <li className="text-green-700 font-semibold break-words leading-relaxed" {...props} />,
+                                                    p: ({ node, ...props }) => <p className="mb-3 text-slate-800 block break-words leading-relaxed last:mb-0" {...props} />,
+                                                    strong: ({ node, ...props }) => <strong className="font-bold text-slate-950 underline decoration-green-500/30 underline-offset-2" {...props} />,
+                                                    table: ({ node, ...props }) => (
+                                                        <div className="my-4 w-full overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                                                            <table className="min-w-full divide-y divide-slate-200" {...props} />
+                                                        </div>
+                                                    ),
+                                                    thead: ({ node, ...props }) => <thead className="bg-slate-50 text-slate-900" {...props} />,
+                                                    tbody: ({ node, ...props }) => <tbody className="bg-white divide-y divide-slate-100" {...props} />,
+                                                    tr: ({ node, ...props }) => <tr className="hover:bg-slate-50/50 transition-colors" {...props} />,
+                                                    th: ({ node, ...props }) => <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-green-800 bg-green-50/50" {...props} />,
+                                                    td: ({ node, ...props }) => <td className="px-4 py-3 text-sm text-slate-700 align-top border-r last:border-0 border-slate-50" {...props} />,
                                                 }}
                                             >
                                                 {msg.content}

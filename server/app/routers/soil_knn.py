@@ -8,8 +8,8 @@ import math
 
 router = APIRouter()
 
-MODEL_PATH = Path(__file__).resolve().parents[3] / "ALL INDIA CSV" / "soil_knn_model.pkl"
-CSV_PATH = Path(__file__).resolve().parents[3] / "ALL INDIA CSV" / "india_district_soil_with_npk.csv"
+MODEL_PATH = Path(__file__).resolve().parents[2] / "data" / "all_india_csv" / "soil_knn_model.pkl"
+CSV_PATH = Path(__file__).resolve().parents[2] / "data" / "all_india_csv" / "india_district_soil_with_npk.csv"
 _model = None
 _district_rows = None
 

@@ -304,7 +304,23 @@ class MarketPricesService:
 
     def get_monthly_price_history(self, db: Session, crops: List[str] = ["Wheat", "Rice", "Tomato"]) -> List[Dict]:
         """Get or generate monthly price history for charts"""
-        months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+        # Generate 6 months ending at current month
+        months = []
+        now = datetime.now()
+        for i in range(5, -1, -1):
+            # Calculate month/year correctly
+            month_date = now.replace(day=1)
+            # Go back i months
+            # Using simple math for month/year subtraction
+            m = now.month - i
+            y = now.year
+            if m <= 0:
+                m += 12
+                y -= 1
+            
+            month_name = datetime(y, m, 1).strftime("%b")
+            months.append(month_name)
+            
         history_data = []
         
         # Base prices for fallback/generation
@@ -331,34 +347,19 @@ class MarketPricesService:
             else:
                 current_prices[crop] = base_prices.get(crop, 2000)
 
-        # Generate 6 months of data
         import random
-        from datetime import datetime
-        
-        current_month_idx = datetime.now().month - 1 # 0-11
-        # Adjust months list to end at current month
-        # For simplicity in this demo, we'll just use Jan-Jun as requested or dynamic
-        # But to match the user's specific "Market Price Trends" chart which shows Jan-Jun:
         
         for i, month in enumerate(months):
             point = {"month": month}
             
             for crop in crops:
-                # Create a realistic curve: low start, peak in middle, or random fluctuation
-                # If we have current price (assumed to be for 'Jun'), work backwards?
-                # Or just generate a consistent curve ending near current price.
-                
                 base = current_prices.get(crop, 2000)
                 
                 # Add some seasonality/randomness
-                # Wheat harvest is April-May, so prices might drop then? 
-                # Let's just do random fluctuation around base for now to ensure graph looks good.
-                
                 fluctuation = random.uniform(-0.15, 0.15) # +/- 15%
                 
                 # Make trend somewhat consistent per crop
                 if crop == "Tomato":
-                    # Volatile
                     fluctuation = random.uniform(-0.3, 0.3)
                 
                 price = base * (1 + fluctuation)
@@ -368,8 +369,8 @@ class MarketPricesService:
                 if price < 200:
                     price *= 100
                 
-                # Ensure the last month (Jun) is close to current live price
-                if month == "Jun":
+                # Ensure the last month (Current Month) is close to current live price
+                if i == len(months) - 1:
                     # Also normalize base if needed
                     if base < 200:
                          price = base * 100

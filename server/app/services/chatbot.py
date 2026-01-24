@@ -7,43 +7,47 @@ from app.services.weather import weather_service
 
 class ChatbotService:
     def __init__(self):
-        # Initialize Groq client
-        self.api_key = os.getenv("GROQ_API_KEY", "YOUR_API_KEY_HERE")
-        self.client = Groq(api_key=self.api_key)
+        # Initialize API keys from settings first, then fall back to env
+        from app.core.config import settings
+        self.groq_api_key = settings.GROQ_API_KEY or os.getenv("GROQ_API_KEY", "YOUR_API_KEY_HERE")
+        self.gemini_api_key = settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")
+        
+        self.use_gemini = False
+        
+        # Determine which AI provider to use
+        if self.groq_api_key and self.groq_api_key != "YOUR_API_KEY_HERE":
+            print(f"DEBUG: Initializing Groq Chatbot with key starting with: {self.groq_api_key[:8]}...")
+            self.client = Groq(api_key=self.groq_api_key)
+        elif self.gemini_api_key:
+            print("DEBUG: Groq API key not found or default, switching to Gemini for Chatbot.")
+            import google.generativeai as genai
+            genai.configure(api_key=self.gemini_api_key)
+            self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+            self.use_gemini = True
+        else:
+            print("WARNING: Neither Groq nor Gemini API keys found for Chatbot.")
+            # We'll still try to initialize Groq to avoid attribute errors if a key is provided later via env
+            self.client = Groq(api_key=self.groq_api_key)
         
         self.system_prompt = """
-        You are 'Farm IQ Assistance', an intelligent agricultural assistant for the Farm IQ platform.
+        You are 'Farm IQ Assistance', an intelligent agricultural expert.
         
         Your Mission:
-        - Provide accurate, helpful, and scientific information related to agriculture, farming, crops, soil health, plant diseases, and agri-tech.
-        - Explain the features and usage of the Farm IQ project (this application).
-        - Assist farmers in making informed decisions.
-        - **WEATHER REPORTING:** You have access to real-time weather data. When a user asks about the weather/climate, use the provided JSON data to give a detailed report including temperature, humidity, and specific farming recommendations (planting, irrigation, etc.).
+        - Provide accurate, scientific, and helpful information about agriculture.
+        - Assist users with crop management, soil health, and pest control.
+        - **WEATHER REPORTING:** Use real-time data provided in systemic injections to give detailed advisories.
         
-        Guidelines:
-        - STRICTLY answer only questions related to Agriculture, Farming, Gardening, Agri-Tech, and this Farm IQ platform.
-        - **LANGUAGE SUPPORT:** Always detect the language of the user's query and respond in the **SAME LANGUAGE**.
-        - Be concise, professional, and encouraging.
-        - **FORMATTING RULES (STRICT):**
-            - **RESPONSE STRUCTURE:**
-                1. **Introduction**: Brief greeting or answer summary.
-                2. **Detailed Point 1** (e.g., Symptoms/Steps)
-                3. **Detailed Point 2** (e.g., Treatment/Advice)
-                4. **Conclusion**
-            - **STYLING:**
-                - All **Side Headings** must be **Bold**.
-                - IMPORTANT: ALL Bullet points must start with the '🟢' emoji to indicate a Green Point.
-                - Use **Bold** for key terms within sentences.
-            - **Example:**
-                **Introduction**
-                Here is the information you requested about Wheat...
-                
-                **Key Benefits**
-                🟢 High yield potential in loamy soil.
-                🟢 Resistant to common pests.
-                
-                **Recommended Action**
-                🟢 Apply Nitrogen fertilizer at week 4.
+        FORMATTING RULES (MANDATORY):
+        1. **STRUCTURE**: Always provide a clear, line-by-line structure. Use double newlines between sections to avoid "bunched up" text.
+        2. **HEADINGS**: Use **Bold Text** (e.g., **Introduction**) for all side headings. NEVER use '#' for headings.
+        3. **TABLES**: If the user asks for a **Comparison**, **Schedule**, **Plan**, or **Data List**, you MUST respond with a **Markdown Table**. 
+           - **PURCHASE LINKS**: Whenever recommending a pesticide or fertilizer in a table, ALWAYS include a column for 'Purchase Link' with a generic search URL (e.g., [Order Now](https://www.google.com/search?q=buy+Pesticide+Name)).
+        4. **MAIN POINTS (GREEN)**: All main points or recommendations MUST be written as **Markdown Bullet Points** (using '-' or '*'). 
+           - **LINE-BY-LINE PRECAUTIONS**: Safety precautions MUST be listed one per line with a blank line between them for maximum clarity.
+           - Do NOT use emoji like '🟢' manually; the UI will handle it.
+        5. **CONCISENESS**: Be detailed but well-organized. Use "Line by Line" matter for better readability.
+
+        STRICT COMPLIANCE: If you are explaining a process or comparing two things, use a Table. For advice, use bold headings followed by green bullet points.
         """
 
     async def _extract_city(self, message: str) -> Optional[str]:
@@ -65,13 +69,17 @@ class ChatbotService:
             Output ONLY the word.
             """
             
-            completion = self.client.chat.completions.create(
-                messages=[{"role": "user", "content": extraction_prompt}],
-                model="llama-3.3-70b-versatile",
-                temperature=0.1,
-                max_tokens=10,
-            )
-            result = completion.choices[0].message.content.strip()
+            if self.use_gemini:
+                response = await self.gemini_model.generate_content_async(extraction_prompt)
+                result = response.text.strip()
+            else:
+                completion = self.client.chat.completions.create(
+                    messages=[{"role": "user", "content": extraction_prompt}],
+                    model="llama-3.3-70b-versatile",
+                    temperature=0.1,
+                    max_tokens=10,
+                )
+                result = completion.choices[0].message.content.strip()
             
             if result in ["NONE", "CURRENT_LOCATION"]: # Handling CURRENT_LOCATION later if we get frontend coords
                 # For now, if "here" is asked without coords, we can't do much unless frontend sends it.
@@ -126,15 +134,30 @@ class ChatbotService:
         messages.append({"role": "user", "content": message})
         
         try:
-            chat_completion = self.client.chat.completions.create(
-                messages=messages,
-                model="llama-3.3-70b-versatile", # Using latest Llama 3.3
-                temperature=0.7,
-                max_tokens=1024,
-            )
-            return chat_completion.choices[0].message.content
+            if self.use_gemini:
+                # Convert history for Gemini
+                gemini_history = []
+                for msg in (history or []):
+                    role = "user" if msg["role"] == "user" else "model"
+                    gemini_history.append({"role": role, "parts": [msg["content"]]})
+                
+                chat = self.gemini_model.start_chat(history=gemini_history)
+                # Inject system prompt via specialized instructions if possible, 
+                # or just as a first message. For 1.5-flash, we can use system_instruction in GenerativeModel init,
+                # but let's keep it simple and prepend to the message.
+                full_message = f"[SYSTEM INSTRUCTION]: {self.system_prompt}\n\nUser Message: {message}"
+                response = await chat.send_message_async(full_message)
+                return response.text
+            else:
+                chat_completion = self.client.chat.completions.create(
+                    messages=messages,
+                    model="llama-3.3-70b-versatile", # Using latest Llama 3.3
+                    temperature=0.7,
+                    max_tokens=1024,
+                )
+                return chat_completion.choices[0].message.content
         except Exception as e:
-            print(f"Error calling Groq API: {e}")
+            print(f"Error calling LLM API (Gemini={self.use_gemini}): {e}")
             return "I apologize, but I am currently experiencing connection issues. Please try again later."
 
 chatbot_service = ChatbotService()

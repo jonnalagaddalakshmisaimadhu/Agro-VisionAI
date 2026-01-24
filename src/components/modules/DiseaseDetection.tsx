@@ -102,12 +102,7 @@ const DiseaseDetection = () => {
 
       console.log('✅ Disease detection completed:', result);
 
-      // Check if confidence is below 75%
-      const confidence = typeof result.confidence === 'string'
-        ? parseInt(result.confidence.replace('%', ''))
-        : result.confidence;
-
-      if (confidence < 75) {
+      if (result.confidence < 75) {
         console.log('⚠️ Low confidence detected, showing low accuracy message...');
         setLowAccuracyResult(result);
         return;
@@ -141,9 +136,7 @@ const DiseaseDetection = () => {
     // Store the low accuracy case data
     const lowAccuracyCase = {
       plantType: lowAccuracyResult.diseaseName || 'Unknown Plant',
-      confidence: typeof lowAccuracyResult.confidence === 'string'
-        ? parseInt(lowAccuracyResult.confidence.replace('%', ''))
-        : lowAccuracyResult.confidence,
+      confidence: lowAccuracyResult.confidence,
       symptoms: lowAccuracyResult.symptoms || [],
       imageUrl: selectedImage,
       timestamp: new Date().toISOString(),
@@ -239,13 +232,13 @@ const DiseaseDetection = () => {
                         <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">Max 5MB</span>
                       </div>
 
-                      <div className="mt-6 flex items-center gap-3">
-                        <Button onClick={handleScanCrop} className="bg-green-600 hover:bg-green-700 text-white">
-                          <Upload className="h-4 w-4" />
+                      <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 w-full">
+                        <Button onClick={handleScanCrop} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto py-6 text-lg rounded-xl">
+                          <Upload className="h-5 w-5 mr-2" />
                           Choose Image
                         </Button>
-                        <Button variant="secondary" onClick={handleOpenCamera} className="">
-                          <Camera className="h-4 w-4" />
+                        <Button variant="secondary" onClick={handleOpenCamera} className="w-full sm:w-auto py-6 text-lg rounded-xl">
+                          <Camera className="h-5 w-5 mr-2" />
                           Use Camera
                         </Button>
                       </div>
@@ -334,13 +327,9 @@ const DiseaseDetection = () => {
                       <p className="mt-2 text-lg text-gray-700">
                         Possible: {lowAccuracyResult.diseaseName}
                       </p>
-                      <p className="mt-2 text-gray-600">
-                        Confidence: <span className="font-semibold text-orange-600">
-                          {typeof lowAccuracyResult.confidence === 'string'
-                            ? lowAccuracyResult.confidence
-                            : `${lowAccuracyResult.confidence}%`}
-                        </span>
-                      </p>
+                      Confidence: <span className="font-semibold text-orange-600">
+                        {lowAccuracyResult.confidence}%
+                      </span>
                       <p className="mt-2 text-gray-700 max-w-3xl">
                         {lowAccuracyResult.description}
                       </p>
@@ -528,8 +517,8 @@ const DiseaseDetection = () => {
                         <Badge className="bg-green-100 text-green-800 border-green-200">{analysisResult.confidence}% Confidence</Badge>
                       </div>
                       <div className="mt-4 flex flex-wrap gap-3">
-                        <Badge variant="outline" className="text-yellow-700 border-yellow-300">Severity: {analysisResult.severity}</Badge>
-                        <Badge variant="outline" className="text-red-700 border-red-300">Action Required: {analysisResult.action}</Badge>
+                        <Badge variant="outline" className="text-yellow-700 border-yellow-300">Severity: {analysisResult.severityLevel}</Badge>
+                        <Badge variant="outline" className="text-red-700 border-red-300">Action Required: {analysisResult.actionRequired}</Badge>
                       </div>
                     </CardContent>
                   </Card>
@@ -600,27 +589,27 @@ const DiseaseDetection = () => {
                 )}
                 {scanHistory.map((scan) => (
                   <div key={scan.id} className={`flex items-center justify-between p-4 rounded-lg border ${scan.issue.toLowerCase().includes('healthy')
-                      ? 'bg-green-50 border-green-100'
-                      : scan.issue.toLowerCase().includes('background without leaves')
-                        ? 'bg-gray-50 border-gray-100'
-                        : 'bg-blue-50 border-blue-100'
+                    ? 'bg-green-50 border-green-100'
+                    : scan.issue.toLowerCase().includes('background without leaves')
+                      ? 'bg-gray-50 border-gray-100'
+                      : 'bg-blue-50 border-blue-100'
                     }`}>
                     <div>
                       <p className="font-medium text-gray-900">{scan.crop}</p>
                       <p className={`text-sm ${scan.issue.toLowerCase().includes('healthy')
-                          ? 'text-green-700'
-                          : scan.issue.toLowerCase().includes('background without leaves')
-                            ? 'text-gray-600'
-                            : 'text-gray-600'
+                        ? 'text-green-700'
+                        : scan.issue.toLowerCase().includes('background without leaves')
+                          ? 'text-gray-600'
+                          : 'text-gray-600'
                         }`}>{scan.issue}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-500">{scan.date}</p>
                       <Badge variant="outline" className={`text-xs ${scan.issue.toLowerCase().includes('healthy')
-                          ? 'bg-green-100 text-green-800 border-green-200'
-                          : scan.issue.toLowerCase().includes('background without leaves')
-                            ? 'bg-gray-100 text-gray-800 border-gray-200'
-                            : 'bg-blue-100 text-blue-800 border-blue-200'
+                        ? 'bg-green-100 text-green-800 border-green-200'
+                        : scan.issue.toLowerCase().includes('background without leaves')
+                          ? 'bg-gray-100 text-gray-800 border-gray-200'
+                          : 'bg-blue-100 text-blue-800 border-blue-200'
                         }`}>
                         {scan.treatment}
                       </Badge>

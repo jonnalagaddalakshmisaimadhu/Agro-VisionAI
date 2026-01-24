@@ -5,7 +5,7 @@ import math
 
 router = APIRouter()
 
-CSV_PATH = Path(__file__).resolve().parents[3] / "ALL INDIA CSV" / "india_district_soil_with_npk.csv"
+CSV_PATH = Path(__file__).resolve().parents[2] / "data" / "all_india_csv" / "india_district_soil_with_npk.csv"
 district_rows = []
 
 def haversine(lat1, lon1, lat2, lon2):

@@ -398,7 +398,9 @@ const Marketplace = () => {
       price: "",
       quantity: "",
       harvestDate: "",
-      description: ""
+      description: "",
+      image: null,
+      video: null
     });
 
     toast({
@@ -416,7 +418,9 @@ const Marketplace = () => {
       price: "",
       quantity: "",
       harvestDate: "",
-      description: ""
+      description: "",
+      image: null,
+      video: null
     });
   };
 
@@ -467,7 +471,7 @@ const Marketplace = () => {
           </div>
 
           {/* Product Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <Card key={product.id} className="border-0 shadow-card-shadow hover:shadow-hover-lift transition-all duration-300">
                 <CardHeader className="pb-3">

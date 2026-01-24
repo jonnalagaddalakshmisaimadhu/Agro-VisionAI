@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Home,
   TrendingUp,
   BarChart3,
@@ -11,7 +11,8 @@ import {
   Settings,
   Sprout,
   Menu,
-  X
+  X,
+  Youtube
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,61 +23,67 @@ interface DashboardSidebarProps {
   onToggle: () => void;
 }
 
-const DashboardSidebar = ({ 
-  activeModule, 
-  setActiveModule, 
-  isCollapsed, 
-  onToggle 
+const DashboardSidebar = ({
+  activeModule,
+  setActiveModule,
+  isCollapsed,
+  onToggle
 }: DashboardSidebarProps) => {
-  
+
   const navigationItems = [
-    { 
-      id: "home", 
-      icon: Home, 
-      label: "Home", 
-      badge: null 
+    {
+      id: "home",
+      icon: Home,
+      label: "Home",
+      badge: null
     },
-    { 
-      id: "crop-profit-predictor", 
-      icon: TrendingUp, 
-      label: "Crop Profit Predictor", 
-      badge: "AI" 
+    {
+      id: "crop-profit-predictor",
+      icon: TrendingUp,
+      label: "Crop Profit Predictor",
+      badge: "AI"
     },
-    { 
-      id: "market-supply-tracker", 
-      icon: BarChart3, 
-      label: "Weather & alerts", 
-      badge: "Live" 
+    {
+      id: "market-supply-tracker",
+      icon: BarChart3,
+      label: "Weather & alerts",
+      badge: "Live"
     },
-    { 
-      id: "government-schemes", 
-      icon: FileText, 
-      label: "Government Schemes", 
-      badge: "Gov" 
+    {
+      id: "government-schemes",
+      icon: FileText,
+      label: "Government Schemes",
+      badge: "Gov"
     },
-    { 
-      id: "marketplace", 
-      icon: ShoppingCart, 
-      label: "Marketplace", 
-      badge: null 
+    {
+      id: "marketplace",
+      icon: ShoppingCart,
+      label: "Marketplace",
+      badge: null
     },
-    { 
-      id: "disease-detection", 
-      icon: Sprout, 
-      label: "Crop Disease Detection", 
-      badge: "AI" 
+    {
+      id: "disease-detection",
+      icon: Sprout,
+      label: "Crop Disease Detection",
+      badge: "AI"
     },
-    { 
-      id: "rentals", 
-      icon: Truck, 
-      label: "Equipment Rentals", 
-      badge: null 
+    {
+      id: "rentals",
+      icon: Truck,
+      label: "Equipment Rentals",
+      badge: null
     },
-    { 
-      id: "help", 
-      icon: MessageCircle, 
-      label: "Help", 
-      badge: null 
+    {
+      id: "help",
+      icon: MessageCircle,
+      label: "Help",
+      badge: null
+    },
+    {
+      id: "video-session",
+      icon: Youtube,
+      label: "Video Session",
+      badge: "New"
     },
     // FarmIQ Assistance removed from navigation
   ];
@@ -85,12 +92,12 @@ const DashboardSidebar = ({
     <>
       {/* Mobile backdrop */}
       {!isCollapsed && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={onToggle}
         />
       )}
-      
+
       {/* Sidebar */}
       <aside className={cn(
         "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-card shadow-sm z-50 transition-all duration-300 overflow-y-auto",
@@ -141,8 +148,8 @@ const DashboardSidebar = ({
                 <div className="flex items-center justify-between w-full">
                   <span className="text-sm">{item.label}</span>
                   {item.badge && (
-                    <Badge 
-                      variant={activeModule === item.id ? "secondary" : "outline"} 
+                    <Badge
+                      variant={activeModule === item.id ? "secondary" : "outline"}
                       className="text-xs"
                     >
                       {item.badge}

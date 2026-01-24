@@ -103,7 +103,7 @@ class MarketPricesConnectionService {
     verified_only?: boolean;
   }): Promise<MarketPrice[]> {
     const cacheKey = this.generateCacheKey('market_prices', params);
-    
+
     // Try to get from cache first
     const cachedData = this.getFromCache<MarketPrice[]>(cacheKey);
     if (cachedData && this.isCacheValid(cachedData)) {
@@ -129,7 +129,7 @@ class MarketPricesConnectionService {
     days?: number;
   }): Promise<PriceTrend[]> {
     const cacheKey = this.generateCacheKey('price_trends', params);
-    
+
     const cachedData = this.getFromCache<PriceTrend[]>(cacheKey);
     if (cachedData && this.isCacheValid(cachedData)) {
       return cachedData.data;
@@ -143,7 +143,7 @@ class MarketPricesConnectionService {
    */
   async fetchMarketStats(): Promise<MarketStats> {
     const cacheKey = this.generateCacheKey('market_stats');
-    
+
     const cachedData = this.getFromCache<MarketStats>(cacheKey);
     if (cachedData && this.isCacheValid(cachedData)) {
       return cachedData.data;
@@ -161,7 +161,7 @@ class MarketPricesConnectionService {
     limit?: number;
   }): Promise<MarketPrice[]> {
     const cacheKey = this.generateCacheKey('search', { searchTerm, ...params });
-    
+
     const cachedData = this.getFromCache<MarketPrice[]>(cacheKey);
     if (cachedData && this.isCacheValid(cachedData)) {
       return cachedData.data;
@@ -187,53 +187,53 @@ class MarketPricesConnectionService {
     }
 
     let lastError: Error | null = null;
-    
+
     for (let attempt = 0; attempt <= this.retryConfig.maxRetries; attempt++) {
       try {
         const startTime = Date.now();
         this.setConnectionState(ConnectionState.CONNECTING);
-        
+
         const result = await this.executeWithTimeout(fetchFunction, 10000); // 10 second timeout
-        
+
         const responseTime = Date.now() - startTime;
         this.updateMetrics(true, responseTime);
         this.setConnectionState(ConnectionState.CONNECTED);
-        
+
         // Cache the successful result
         this.setCache(cacheKey, result);
-        
+
         // Reset circuit breaker on success
         if (this.circuitBreakerState === CircuitBreakerState.HALF_OPEN) {
           this.circuitBreakerState = CircuitBreakerState.CLOSED;
         }
-        
+
         return result;
-        
+
       } catch (error) {
         lastError = error as Error;
         this.updateMetrics(false, 0);
-        
+
         // Don't retry on certain errors
         if (this.isNonRetryableError(error)) {
           break;
         }
-        
+
         // Wait before retry (exponential backoff)
         if (attempt < this.retryConfig.maxRetries) {
           const delay = Math.min(
             this.retryConfig.baseDelay * Math.pow(this.retryConfig.backoffMultiplier, attempt),
             this.retryConfig.maxDelay
           );
-          
+
           await this.sleep(delay);
         }
       }
     }
-    
+
     // All retries failed
     this.handleCircuitBreakerFailure();
     this.setConnectionState(ConnectionState.ERROR);
-    
+
     // Return fallback data
     return this.getFallbackData<T>(cacheKey);
   }
@@ -247,7 +247,7 @@ class MarketPricesConnectionService {
   ): Promise<T> {
     return Promise.race([
       fn(),
-      new Promise<never>((_, reject) => 
+      new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
       )
     ]);
@@ -258,7 +258,7 @@ class MarketPricesConnectionService {
    */
   private async fetchFreshPrices(params?: any): Promise<MarketPrice[]> {
     const searchParams = new URLSearchParams();
-    
+
     if (params?.category) searchParams.append('category', params.category);
     if (params?.location) searchParams.append('location', params.location);
     if (params?.limit) searchParams.append('limit', params.limit.toString());
@@ -266,7 +266,7 @@ class MarketPricesConnectionService {
 
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/prices?${queryString}` : '/prices';
-    
+
     const response = await fetch(`/api/market-prices${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -289,13 +289,13 @@ class MarketPricesConnectionService {
    */
   private async fetchFreshTrends(params?: any): Promise<PriceTrend[]> {
     const searchParams = new URLSearchParams();
-    
+
     if (params?.crop_name) searchParams.append('crop_name', params.crop_name);
     if (params?.days) searchParams.append('days', params.days.toString());
 
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/prices/trends?${queryString}` : '/prices/trends';
-    
+
     const response = await fetch(`/api/market-prices${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -337,7 +337,7 @@ class MarketPricesConnectionService {
    */
   private async fetchSearchResults(searchTerm: string, params?: any): Promise<MarketPrice[]> {
     const searchParams = new URLSearchParams();
-    
+
     searchParams.append('search', searchTerm);
     if (params?.category) searchParams.append('category', params.category);
     if (params?.location) searchParams.append('location', params.location);
@@ -345,7 +345,7 @@ class MarketPricesConnectionService {
 
     const queryString = searchParams.toString();
     const endpoint = `/prices/search?${queryString}`;
-    
+
     const response = await fetch(`/api/market-prices${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -370,11 +370,11 @@ class MarketPricesConnectionService {
     return prices.filter(price => {
       // Basic validation
       return price &&
-             typeof price.crop_name === 'string' &&
-             typeof price.current_price === 'number' &&
-             price.current_price > 0 &&
-             typeof price.category === 'string' &&
-             typeof price.market_location === 'string';
+        typeof price.crop_name === 'string' &&
+        typeof price.current_price === 'number' &&
+        price.current_price > 0 &&
+        typeof price.category === 'string' &&
+        typeof price.market_location === 'string';
     }).map(price => ({
       ...price,
       // Sanitize string fields
@@ -450,14 +450,14 @@ class MarketPricesConnectionService {
 
     const locations = ["Mumbai", "Delhi", "Bangalore", "Pune", "Chennai", "Hyderabad", "Kolkata"];
     const trends = ["up", "down", "stable"];
-    
+
     return basePrices.map((item, index) => {
       const variation = (Math.random() - 0.5) * 2 * item.volatility;
       const currentPrice = Math.max(1, item.basePrice * (1 + variation));
       const previousPrice = currentPrice * (1 + (Math.random() - 0.5) * 0.1);
       const priceChange = ((currentPrice - previousPrice) / previousPrice) * 100;
       const trend = priceChange > 2 ? "up" : priceChange < -2 ? "down" : "stable";
-      
+
       return {
         id: index + 1,
         crop_name: item.name,
@@ -485,7 +485,7 @@ class MarketPricesConnectionService {
   private generateFallbackTrends(): PriceTrend[] {
     const crops = ["Tomato", "Onion", "Potato", "Rice", "Wheat"];
     const locations = ["Mumbai", "Delhi", "Bangalore"];
-    
+
     return crops.map((crop, index) => ({
       crop_name: crop,
       current_price: 30 + Math.random() * 50,
@@ -569,7 +569,7 @@ class MarketPricesConnectionService {
   private handleCircuitBreakerFailure(): void {
     this.metrics.failureCount++;
     this.metrics.lastFailureTime = Date.now();
-    
+
     if (this.metrics.failureCount >= this.circuitBreakerConfig.failureThreshold) {
       this.circuitBreakerState = CircuitBreakerState.OPEN;
     }
@@ -607,7 +607,7 @@ class MarketPricesConnectionService {
     if (success) {
       this.metrics.successCount++;
       this.metrics.lastSuccessTime = Date.now();
-      this.metrics.averageResponseTime = 
+      this.metrics.averageResponseTime =
         (this.metrics.averageResponseTime + responseTime) / 2;
     } else {
       this.metrics.failureCount++;
@@ -628,10 +628,10 @@ class MarketPricesConnectionService {
     try {
       const startTime = Date.now();
       const response = await fetch('/api/market-prices/prices/stats/summary', {
-        method: 'HEAD',
+        method: 'GET',
         signal: AbortSignal.timeout(5000)
       });
-      
+
       if (response.ok) {
         this.setConnectionState(ConnectionState.CONNECTED);
         this.updateMetrics(true, Date.now() - startTime);
@@ -697,7 +697,7 @@ class MarketPricesConnectionService {
     const totalHits = Array.from(this.cache.values()).reduce((sum, entry) => sum + entry.hits, 0);
     const totalRequests = this.metrics.successCount + this.metrics.failureCount;
     const hitRate = totalRequests > 0 ? totalHits / totalRequests : 0;
-    
+
     return {
       size: this.cache.size,
       hitRate: Math.round(hitRate * 100) / 100

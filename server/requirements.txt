@@ -28,3 +28,4 @@ cachetools
 brotli
 groq
 google-generativeai
+motor

@@ -22,8 +22,21 @@ import {
   X,
   Trash2,
   Image as ImageIcon,
-  Video as VideoIcon
+  Video as VideoIcon,
+  Check,
+  ChevronRight,
+  Info
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
 interface ListedEquipment {
@@ -49,6 +62,10 @@ interface ListedEquipment {
   imageFile?: string; // URL for the uploaded image
   videoFile?: string; // URL for the uploaded video
   phoneNumber?: string;
+  operatorAvailable?: boolean;
+  operatorName?: string;
+  operatorFee?: string;
+  nearbyShop?: string;
 }
 
 
@@ -70,7 +87,11 @@ const EquipmentRental = () => {
     features: "",
     image: null as File | null,
     video: null as File | null,
-    phoneNumber: ""
+    phoneNumber: "",
+    operatorAvailable: false,
+    operatorName: "",
+    operatorFee: "",
+    nearbyShop: ""
   });
 
   // State for user's listed equipment
@@ -87,6 +108,16 @@ const EquipmentRental = () => {
     specifications: "",
     location: "",
     features: ""
+  });
+
+  // Booking modal state
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [selectedBookingEquipment, setSelectedBookingEquipment] = useState<ListedEquipment | null>(null);
+  const [bookingOptions, setBookingOptions] = useState({
+    includeOperator: false,
+    includeShopService: false,
+    includeRepairPackage: false,
+    selectedShop: true // Added shop selection state
   });
 
   // State for managing user's rentals
@@ -132,7 +163,11 @@ const EquipmentRental = () => {
         fuel: "Diesel",
         year: "2020"
       },
-      listedAt: "2024-01-10"
+      listedAt: "2024-01-10",
+      operatorAvailable: true,
+      operatorName: "Rajesh Kumar",
+      operatorFee: "500",
+      nearbyShop: "Green Valley Service Center (Nashik)"
     },
     {
       id: 2,
@@ -268,7 +303,11 @@ const EquipmentRental = () => {
       listedAt: new Date().toISOString().split('T')[0],
       imageFile: equipmentForm.image ? URL.createObjectURL(equipmentForm.image) : undefined,
       videoFile: equipmentForm.video ? URL.createObjectURL(equipmentForm.video) : undefined,
-      phoneNumber: equipmentForm.phoneNumber
+      phoneNumber: equipmentForm.phoneNumber,
+      operatorAvailable: equipmentForm.operatorAvailable,
+      operatorName: equipmentForm.operatorName,
+      operatorFee: equipmentForm.operatorFee,
+      nearbyShop: equipmentForm.nearbyShop
     };
 
     setUserListedEquipment(prev => [...prev, newEquipment]);
@@ -286,7 +325,11 @@ const EquipmentRental = () => {
       features: "",
       image: null,
       video: null,
-      phoneNumber: ""
+      phoneNumber: "",
+      operatorAvailable: false,
+      operatorName: "",
+      operatorFee: "",
+      nearbyShop: ""
     });
 
     toast({
@@ -397,11 +440,33 @@ const EquipmentRental = () => {
     });
   };
 
-  // Handle booking equipment
+  // Handle booking equipment (opens modal)
   const handleBookEquipment = (equipment: ListedEquipment) => {
-    // Calculate rental amount (assuming 5 days rental for demo)
-    const pricePerDay = parseInt(equipment.pricePerDay.replace('₹', '').replace(',', ''));
-    const rentalAmount = pricePerDay * 5; // 5 days rental
+    setSelectedBookingEquipment(equipment);
+    setBookingOptions({
+      includeOperator: false,
+      includeShopService: false,
+      includeRepairPackage: false,
+      selectedShop: true
+    });
+    setIsBookingModalOpen(true);
+  };
+
+  // Finalize booking
+  const handleConfirmBooking = () => {
+    if (!selectedBookingEquipment) return;
+
+    const equipment = selectedBookingEquipment;
+
+    // Calculate final rental amount
+    const basePrice = parseInt(equipment.pricePerDay.replace('₹', '').replace(',', ''));
+    let totalPerDay = basePrice;
+
+    if (bookingOptions.includeOperator && equipment.operatorFee) {
+      totalPerDay += parseInt(equipment.operatorFee);
+    }
+
+    const rentalAmount = totalPerDay * 5; // 5 days rental for demo
 
     // Generate dates
     const today = new Date();
@@ -415,7 +480,7 @@ const EquipmentRental = () => {
     const newRental = {
       id: Date.now(),
       equipment: equipment.name,
-      renter: "You", // User is the renter
+      renter: "You",
       startDate: startDateStr,
       endDate: endDateStr,
       status: "Active",
@@ -426,26 +491,27 @@ const EquipmentRental = () => {
     // Add to user's rentals
     setMyRentals(prev => [newRental, ...prev]);
 
-    // Update equipment availability in allEquipment state
+    // Update equipment availability
     setAllEquipment(prev => prev.map(item =>
       item.id === equipment.id
         ? { ...item, available: false }
         : item
     ));
 
-    // Update equipment availability in userListedEquipment if it exists there
     setUserListedEquipment(prev => prev.map(item =>
       item.id === equipment.id
         ? { ...item, available: false }
         : item
     ));
 
+    setIsBookingModalOpen(false);
+    setSelectedBookingEquipment(null);
+
     toast({
       title: "Equipment Booked Successfully!",
       description: `You have booked ${equipment.name} from ${startDateStr} to ${endDateStr}`,
     });
 
-    // Switch to My Rentals tab
     setActiveTab("manage");
   };
 
@@ -758,8 +824,73 @@ const EquipmentRental = () => {
                 />
               </div>
 
-              <Button className="w-full" onClick={handleListEquipment}>
-                <Settings className="mr-2 h-4 w-4" />
+              <div className="pt-4 border-t">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="p-1 bg-primary/10 rounded">
+                    <Wrench className="h-4 w-4 text-primary" />
+                  </div>
+                  <h3 className="font-medium">Operator & Services</h3>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="operator-available">Operator Available?</Label>
+                        <p className="text-xs text-muted-foreground">Is an operator included or available for hire?</p>
+                      </div>
+                      <Switch
+                        id="operator-available"
+                        checked={equipmentForm.operatorAvailable}
+                        onCheckedChange={(checked) => handleFormChange('operatorAvailable', checked as any)}
+                      />
+                    </div>
+
+                    {equipmentForm.operatorAvailable && (
+                      <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="space-y-2">
+                          <Label>Operator Name (Optional)</Label>
+                          <Input
+                            placeholder="e.g., Rajesh Kumar"
+                            value={equipmentForm.operatorName}
+                            onChange={(e) => handleFormChange('operatorName', e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Daily Fee (₹)</Label>
+                          <Input
+                            type="number"
+                            placeholder="500"
+                            value={equipmentForm.operatorFee}
+                            onChange={(e) => handleFormChange('operatorFee', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Nearby Support Shop</Label>
+                    <Select
+                      value={equipmentForm.nearbyShop}
+                      onValueChange={(value) => handleFormChange('nearbyShop', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a support shop" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Green Valley Service Center (Nashik)">Green Valley Service Center (Nashik)</SelectItem>
+                        <SelectItem value="Pune Agri-Tech Support">Pune Agri-Tech Support</SelectItem>
+                        <SelectItem value="Satara Machinery Hub">Satara Machinery Hub</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Select a nearby shop for official support and maintenance.</p>
+                  </div>
+                </div>
+              </div>
+
+              <Button className="w-full h-12 text-lg font-semibold bg-success hover:bg-success/90" onClick={handleListEquipment}>
+                <Settings className="mr-2 h-5 w-5" />
                 List Equipment
               </Button>
             </CardContent>
@@ -1024,7 +1155,172 @@ const EquipmentRental = () => {
           </div>
         </TabsContent>
       </Tabs >
-    </div >
+
+      {/* Customize Your Rental Modal */}
+      <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
+        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl">
+          <DialogHeader className="p-6 bg-white border-b shrink-0">
+            <DialogTitle className="text-2xl font-bold">Customize Your Rental</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Add services to your {selectedBookingEquipment?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto max-h-[60vh] p-6 space-y-6 bg-gray-50/50">
+            {/* Equipment Summary Card */}
+            <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center space-x-4">
+              <div className="h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center text-3xl">
+                {selectedBookingEquipment?.imageFile ? (
+                  <img src={selectedBookingEquipment.imageFile} alt="" className="h-full w-full object-cover rounded-lg" />
+                ) : (
+                  selectedBookingEquipment?.image
+                )}
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-lg">{selectedBookingEquipment?.name}</h4>
+                <p className="text-sm text-muted-foreground">{selectedBookingEquipment?.location}</p>
+                <p className="text-success font-bold">{selectedBookingEquipment?.pricePerDay} / day</p>
+              </div>
+            </div>
+
+            {/* Nearby Equipment Shops */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                <Truck className="h-4 w-4" />
+                <span>Nearby Equipment Shops</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Official partners and support providers for this model.</p>
+
+              <div
+                className={`bg-white p-4 rounded-xl border shadow-sm flex items-center justify-between cursor-pointer transition-all ${bookingOptions.selectedShop ? 'border-primary ring-1 ring-primary/20' : 'opacity-70'}`}
+                onClick={() => setBookingOptions(prev => ({ ...prev, selectedShop: !prev.selectedShop }))}
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold">Ramesh Agriculture Services</span>
+                    <Badge variant="secondary" className="text-[10px] bg-blue-50 text-blue-600 border-blue-100">Verified</Badge>
+                  </div>
+                  <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                    <span>1.5 km away</span>
+                    <span>•</span>
+                    <div className="flex items-center">
+                      <Star className="h-3 w-3 text-warning fill-current mr-0.5" />
+                      4.9
+                    </div>
+                  </div>
+                  <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-blue-50 text-blue-700 border border-blue-100">
+                    <Shield className="h-2.5 w-2.5 mr-1" />
+                    Official Partner
+                  </div>
+                </div>
+                <div className="flex flex-col items-end space-y-2">
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${bookingOptions.selectedShop ? 'border-primary bg-primary/10' : 'border-gray-300'}`}>
+                    {bookingOptions.selectedShop && <div className="w-3 h-3 bg-primary rounded-full" />}
+                  </div>
+                  <span className="text-[10px] font-bold text-success">Free Support</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Services Options */}
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-50 rounded-lg">
+                    <Wrench className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">Shop Service</p>
+                    <p className="text-xs text-muted-foreground">Professional maintenance</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={bookingOptions.includeShopService}
+                  onCheckedChange={(checked) => setBookingOptions(prev => ({ ...prev, includeShopService: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-orange-50 rounded-lg">
+                    <Shield className="h-4 w-4 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">Repair Package</p>
+                    <p className="text-xs text-muted-foreground">Comprehensive coverage</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={bookingOptions.includeRepairPackage}
+                  onCheckedChange={(checked) => setBookingOptions(prev => ({ ...prev, includeRepairPackage: checked }))}
+                />
+              </div>
+
+              {selectedBookingEquipment?.operatorAvailable && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-green-50 rounded-lg">
+                      <Settings className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold">Operator ({selectedBookingEquipment.operatorName})</p>
+                      <p className="text-xs text-muted-foreground">Experienced driver</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-bold">₹{selectedBookingEquipment.operatorFee}/day</span>
+                    <Switch
+                      checked={bookingOptions.includeOperator}
+                      onCheckedChange={(checked) => setBookingOptions(prev => ({ ...prev, includeOperator: checked }))}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Cost Breakdown */}
+            <div className="pt-6 border-t space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Equipment</span>
+                <span>{selectedBookingEquipment?.pricePerDay}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Shop Service</span>
+                <span>₹{bookingOptions.includeShopService ? '200' : '0'}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Repair Package</span>
+                <span>₹{bookingOptions.includeRepairPackage ? '150' : '0'}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Operator</span>
+                <span>₹{bookingOptions.includeOperator ? (selectedBookingEquipment?.operatorFee || '0') : '0'}</span>
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t">
+                <span className="text-lg font-bold">Total / Day</span>
+                <span className="text-2xl font-bold">
+                  ₹{(
+                    parseInt(selectedBookingEquipment?.pricePerDay.replace('₹', '').replace(',', '') || '0') +
+                    (bookingOptions.includeShopService ? 200 : 0) +
+                    (bookingOptions.includeRepairPackage ? 150 : 0) +
+                    (bookingOptions.includeOperator ? parseInt(selectedBookingEquipment?.operatorFee || '0') : 0)
+                  ).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="p-6 bg-white border-t flex sm:justify-between gap-4 shrink-0">
+            <Button variant="outline" className="flex-1 h-12 rounded-xl" onClick={() => setIsBookingModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button className="flex-1 h-12 rounded-xl bg-success hover:bg-success/90 text-white font-bold" onClick={handleConfirmBooking}>
+              Confirm & Pay
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

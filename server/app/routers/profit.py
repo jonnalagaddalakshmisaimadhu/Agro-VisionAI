@@ -46,7 +46,12 @@ async def predict_profit(request: ProfitRequest, db: Session = Depends(get_db)):
             prices = service.get_market_prices(db, location=request.market_location, limit=10)
             for p in prices:
                 if p.crop_name.lower() == request.crop_name.lower():
-                    price_used = p.current_price * 100  # stored in ₹/kg or fallback; convert to per quintal assumption
+                    # Handle unit conversion: if price < 200, assume ₹/kg and convert to Quintal (*100)
+                    # If price > 200, assume it's already ₹/Quintal
+                    if p.current_price < 200:
+                        price_used = p.current_price * 100
+                    else:
+                        price_used = p.current_price
                     break
 
         # Fallback price (if still None)

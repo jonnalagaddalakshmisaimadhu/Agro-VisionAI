@@ -36,7 +36,8 @@ async def predict_disease_test(request: DiseaseDetectionRequest):
             "severity": prediction_result["severity"],
             "symptoms": prediction_result["symptoms"],
             "treatment": prediction_result["treatment"],
-            "prevention": prediction_result["prevention"]
+            "prevention": prediction_result["prevention"],
+            "description": prediction_result.get("description", "")
         }
         
     except ValueError as e:

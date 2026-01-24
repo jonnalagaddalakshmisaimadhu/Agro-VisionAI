@@ -14,6 +14,7 @@ class DiseaseDetectionResponse(BaseModel):
     symptoms: Optional[List[str]] = None
     treatment: Optional[List[str]] = None
     prevention: Optional[List[str]] = None
+    description: Optional[str] = None
     is_verified: bool
     expert_comment: Optional[str] = None
     created_at: datetime

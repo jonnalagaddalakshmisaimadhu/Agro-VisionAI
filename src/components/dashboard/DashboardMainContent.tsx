@@ -34,15 +34,28 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
   const { weatherData, loading: weatherLoading, error: weatherError } = useWeather();
   const { user } = useAuth();
 
+  // Helper to get last 6 months labels
+  const getLast6MonthsLabels = () => {
+    const months = [];
+    const today = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      months.push(d.toLocaleString('default', { month: 'short' }));
+    }
+    return months;
+  };
+
   // State for chart data
-  const [priceData, setPriceData] = useState([
-    { month: 'Jan', wheat: 2200, rice: 3200, tomato: 2500 },
-    { month: 'Feb', wheat: 2350, rice: 3100, tomato: 2800 },
-    { month: 'Mar', wheat: 2400, rice: 3300, tomato: 2200 },
-    { month: 'Apr', wheat: 2300, rice: 3250, tomato: 2600 },
-    { month: 'May', wheat: 2450, rice: 3400, tomato: 2900 },
-    { month: 'Jun', wheat: 2500, rice: 3350, tomato: 3100 },
-  ]);
+  const [priceData, setPriceData] = useState(() => {
+    const months = getLast6MonthsLabels();
+    // Default simulated data relative to current months
+    return months.map(month => ({
+      month,
+      wheat: Math.floor(Math.random() * (2600 - 2200) + 2200),
+      rice: Math.floor(Math.random() * (3400 - 3100) + 3100),
+      tomato: Math.floor(Math.random() * (3000 - 2000) + 2000)
+    }));
+  });
   const [loadingPrices, setLoadingPrices] = useState(true);
 
   // Fetch live market prices
@@ -52,16 +65,15 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
         const response = await fetch('/api/market-prices/history');
         if (response.ok) {
           const data = await response.json();
-          // Transform backend data keys to lowercase to match chart expectation if needed
-          // The backend returns keys like 'wheat', 'rice' (lowercase) because I set it so in python: point[crop.lower()]
-          // So it should match directly.
           if (data && data.length > 0) {
+            // Check if data has months matching our dynamic needs, otherwise we keep our simulated data
+            // Or assume backend sends correct recent history. 
+            // We'll trust backend if it returns data.
             setPriceData(data);
           }
         }
       } catch (error) {
         console.error("Failed to fetch price history", error);
-        // Keep default data on error
       } finally {
         setLoadingPrices(false);
       }
@@ -72,12 +84,63 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
     }
   }, [activeModule]);
 
-  const profitData = [
+  const [profitData, setProfitData] = useState([
     { crop: 'Wheat', profit: 45000, loss: 15000 },
     { crop: 'Rice', profit: 52000, loss: 8000 },
     { crop: 'Tomato', profit: 38000, loss: 22000 },
     { crop: 'Cotton', profit: 41000, loss: 19000 },
-  ];
+  ]);
+
+  // Fetch live profit predictions for the chart
+  useEffect(() => {
+    const fetchProfits = async () => {
+      const crops = [
+        { name: 'Wheat', defaultLoss: 15000, defaultProfit: 45000 },
+        { name: 'Rice', defaultLoss: 8000, defaultProfit: 52000 },
+        { name: 'Tomato', defaultLoss: 22000, defaultProfit: 38000 },
+        { name: 'Cotton', defaultLoss: 19000, defaultProfit: 41000 }
+      ];
+
+      try {
+        const promises = crops.map(async (item) => {
+          try {
+            // Using default parameters for general prediction
+            const res = await fetch('/api/profit/predict', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                crop_name: item.name,
+                area_ha: 1,
+                // Optional: add a typical district if known, otherwise leave blank for general
+              })
+            });
+
+            if (res.ok) {
+              const data = await res.json();
+              return {
+                crop: item.name,
+                profit: Math.round(data.profit),
+                loss: Math.round(data.investment) // Mapping Investment to "Loss" (Cost)
+              };
+            }
+          } catch (e) {
+            console.warn(`Failed to fetch profit for ${item.name}`, e);
+          }
+          // Fallback
+          return { crop: item.name, profit: item.defaultProfit, loss: item.defaultLoss };
+        });
+
+        const results = await Promise.all(promises);
+        setProfitData(results);
+      } catch (error) {
+        console.error("Failed to fetch profit data", error);
+      }
+    };
+
+    if (activeModule === "home") {
+      fetchProfits();
+    }
+  }, [activeModule]);
 
   if (activeModule !== "home") {
     return (
@@ -222,9 +285,9 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
+            <div className="h-48 lg:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={priceData}>
+                <LineChart data={priceData} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis dataKey="month" className="text-muted-foreground" />
                   <YAxis className="text-muted-foreground" />
@@ -274,9 +337,9 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
+            <div className="h-48 lg:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={profitData}>
+                <BarChart data={profitData} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis dataKey="crop" className="text-muted-foreground" />
                   <YAxis className="text-muted-foreground" />
