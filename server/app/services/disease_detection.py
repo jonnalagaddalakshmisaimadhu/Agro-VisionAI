@@ -83,7 +83,7 @@ class DiseaseDetectionService:
         self.model = None
         
         # ALWAYS handle Gemini setup
-        gemini_key = os.getenv("GEMINI_API_KEY", "AIzaSyDCZs0XudZj7lwsCr4Z4dxjBkzyuo5TaeU")
+        gemini_key = os.getenv("GEMINI_API_KEY", "AIzaSyDo7yx7Aw0yLmlwItdyFgxiCZp7xSzaU_I")
         genai.configure(api_key=gemini_key)
         
         # Detect best available model fromConfirmed list

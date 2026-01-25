@@ -19,7 +19,8 @@ class MongoDB:
             logger.info("Successfully connected to MongoDB")
         except Exception as e:
             logger.error(f"Error connecting to MongoDB: {e}")
-            raise e
+            # Do not raise to allow app to start without MongoDB
+            # raise e
 
     async def close(self):
         if self.client:
