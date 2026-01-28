@@ -396,47 +396,6 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
         </div>
       </section>
 
-      {/* Certifications Section */}
-      <section className="py-16 lg:py-20 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 lg:mb-16 space-y-4">
-            <Badge className="bg-primary/10 text-primary border-primary/20">
-              🏆 Certified Excellence
-            </Badge>
-            <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-foreground">
-              We Certified This Project In<br />The PU Code Hackathon 3.0
-            </h2>
-            <p className="text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Recognized for innovation and technical excellence at Parul University
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {[
-              { src: "/assets/certificates/certificate_jonnalagadda.jpg", name: "Jonnalagadda Lakshmi Sai Madhu" },
-              { src: "/assets/certificates/certificate_charith.jpg", name: "Charith Katakam" },
-              { src: "/assets/certificates/certificate_madhav.jpg", name: "Madhan Senthilkumar" },
-              { src: "/assets/certificates/certificate_sai.png", name: "Inapakolla Sai" }
-            ].map((cert, index) => (
-              <Card key={index} className="overflow-hidden hover:shadow-xl transition-all duration-300 group border-primary/20">
-                <CardContent className="p-3">
-                  <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
-                    <img
-                      src={cert.src}
-                      alt={`Certificate - ${cert.name}`}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="text-center mt-4 mb-2">
-                    <p className="font-semibold text-lg">{cert.name}</p>
-                    <p className="text-sm text-muted-foreground">Certified Participant</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Impact/Results Section */}
       <section className="py-16 lg:py-20 bg-muted/30">
