@@ -47,8 +47,8 @@ cd farm-iq-ai-agro-main
 ### 2. Backend Setup
 
 ```bash
-# Navigate to server directory
-cd server
+# Navigate to Backend directory
+cd Backend
 
 # Create virtual environment
 python -m venv venv
@@ -68,8 +68,8 @@ pip install -r requirements.txt
 ### 3. Frontend Setup
 
 ```bash
-# Navigate back to root directory
-cd ..
+# Navigate to Frontend directory
+cd ../Frontend
 
 # Install dependencies
 npm install
@@ -77,14 +77,7 @@ npm install
 
 ### 4. Environment Configuration
 
-Create a `.env.local` file in the root directory (copy from `env.example`):
-
-```bash
-# Copy example file
-cp env.example .env.local
-```
-
-Edit `.env.local` and add your API keys:
+Create a `.env.local` file in the `Frontend/` directory:
 
 ```env
 # Google Gemini API Key (for AI features)
@@ -96,22 +89,29 @@ VITE_API_URL=http://localhost:8000
 
 ### 5. Database Setup
 
-The database will be automatically created on first run. The SQLite database file (`farmiq.db`) will be created in the `server/` directory.
+The database will be automatically created on first run. The SQLite database file (`farmiq.db`) will be created in the `Backend/` directory.
 
 ## 🚀 Running the Application
 
-### Option 1: Manual Start (Recommended for Development)
+### Option 1: 1-Click Startup (Windows)
+
+Simply double-click or run:
+```cmd
+start-project.bat
+```
+
+### Option 2: Manual Start
 
 **Terminal 1 - Start Backend:**
 ```bash
-cd server
+cd Backend
 .\venv\Scripts\activate  # Windows
-# or: source venv/bin/activate  # Linux/macOS
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+python main.py
 ```
 
 **Terminal 2 - Start Frontend:**
 ```bash
+cd Frontend
 npm run dev
 ```
 
@@ -120,50 +120,33 @@ The application will be available at:
 - **Backend API**: http://localhost:8000
 - **API Documentation**: http://localhost:8000/docs
 
-### Option 2: Using Startup Scripts
-
-**Windows:**
-```bash
-# Start backend
-.\start-backend.bat
-
-# Start frontend (in another terminal)
-.\start-frontend.bat
-```
-
-**Linux/macOS:**
-```bash
-# Start backend
-chmod +x start-backend.sh
-./start-backend.sh
-
-# Start frontend (in another terminal)
-chmod +x start-frontend.sh
-./start-frontend.sh
-```
-
 ## 📁 Project Structure
 
 ```
-farm-iq-ai-agro-main/
-├── src/                    # Frontend React application
-│   ├── components/         # React components
-│   ├── pages/             # Page components
-│   ├── services/          # API service functions
-│   ├── context/           # React context providers
-│   └── utils/             # Utility functions
-├── server/                # Backend FastAPI application
+Agro-VisionAI/
+├── Frontend/               # React 18 + TypeScript + Vite Application
+│   ├── src/
+│   │   ├── components/     # UI components & feature modules
+│   │   ├── pages/          # Application route pages
+│   │   ├── services/       # API clients & services
+│   │   ├── context/        # React context providers (Auth, Weather, Location)
+│   │   └── types/          # TypeScript interface definitions
+│   └── package.json
+├── Backend/                # FastAPI Application & AI Services
 │   ├── app/
-│   │   ├── routers/       # API route handlers
-│   │   ├── models/        # Database models
-│   │   ├── schemas/       # Pydantic schemas
-│   │   ├── services/      # Business logic
-│   │   └── core/          # Core configuration
-│   ├── models/            # ML model files
-│   └── main.py           # FastAPI application entry point
-├── public/                # Static assets
-├── package.json          # Frontend dependencies
-└── requirements.txt      # Backend dependencies
+│   │   ├── routers/        # REST & WebSocket API endpoints
+│   │   ├── models/         # SQLAlchemy database models
+│   │   ├── schemas/        # Pydantic data schemas
+│   │   ├── services/       # ML inference & external API logic
+│   │   └── core/           # Config, CORS & Security
+│   ├── models/             # PyTorch CNN plant disease models
+│   ├── data/               # Soil datasets & Scikit-Learn KNN models
+│   ├── main.py             # FastAPI entry point
+│   └── requirements.txt
+├── start-project.bat       # Dual-server startup script
+├── PRESENTATION_GUIDE.md   # Presentation script & demo steps
+├── QUICKSTART.md           # Fast onboarding steps
+└── README.md
 ```
 
 ## 🔌 API Endpoints
@@ -178,79 +161,7 @@ The backend provides the following main API endpoints:
 - `/api/schemes/*` - Government schemes
 - `/api/crops/*` - Crop recommendations
 - `/api/market-prices/*` - Market prices
+- `/api/community/*` - Real-time WebSocket farmer community chat
 
 Full API documentation available at `/docs` when backend is running.
 
-## 🧪 Testing
-
-```bash
-# Frontend linting
-npm run lint
-
-# Type checking
-npm run type-check
-
-# Backend health check
-curl http://localhost:8000/health
-```
-
-## 🐳 Docker Deployment (Optional)
-
-For production deployment using Docker:
-
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-This will start:
-- Backend API (port 8000)
-- Frontend (port 80)
-- PostgreSQL database
-- Redis cache
-- Prometheus monitoring
-- Grafana dashboards
-
-## 🔒 Security Notes
-
-- Change the `SECRET_KEY` in `server/app/core/config.py` for production
-- Use environment variables for sensitive data
-- Enable HTTPS in production
-- Configure proper CORS origins
-
-## 📝 Notes
-
-- The frontend uses a proxy configuration in `vite.config.ts` to forward `/api` requests to the backend
-- Backend CORS is configured to allow requests from `http://localhost:8080`
-- ML models should be placed in `server/models/` directory
-- Database migrations are handled automatically by SQLAlchemy
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Troubleshooting
-
-### Backend won't start
-- Ensure Python virtual environment is activated
-- Check that port 8000 is not in use
-- Verify all dependencies are installed: `pip install -r requirements.txt`
-
-### Frontend won't connect to backend
-- Ensure backend is running on port 8000
-- Check CORS configuration in `server/app/core/config.py`
-- Verify proxy settings in `vite.config.ts`
-
-### Database errors
-- Delete `server/farmiq.db` to reset the database
-- Ensure SQLite is properly installed
-
-## 📞 Support
-
-For issues and questions, please open an issue on the repository.

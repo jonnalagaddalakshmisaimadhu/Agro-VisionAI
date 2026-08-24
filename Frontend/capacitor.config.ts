@@ -3,8 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.farmiq.app',
   appName: 'FarmIQ',
-  webDir: 'Frontend/dist'
+  webDir: 'dist'
 };
 
 export default config;
-

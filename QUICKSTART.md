@@ -5,12 +5,12 @@
 ### Step 1: Setup Backend
 
 ```bash
-cd server
+cd Backend
 python -m venv venv
 .\venv\Scripts\activate  # Windows
 # or: source venv/bin/activate  # Linux/macOS
 pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+python main.py
 ```
 
 Backend will be available at: **http://localhost:8000**
@@ -21,11 +21,13 @@ API Docs: **http://localhost:8000/docs**
 Open a **new terminal**:
 
 ```bash
+cd Frontend
 npm install
 npm run dev
 ```
 
 Frontend will be available at: **http://localhost:8080**
+
 
 ### Step 3: Configure Environment (Optional)
 

@@ -10,16 +10,17 @@ Ensure you have the following installed (which you already do!):
 ---
 
 ## 🟢 Step 1: Start the Backend (Brain)
-**Open Terminal #1** (Command Prompt or PowerShell) inside the `farm-iq-ai-agro-main` folder.
+**Open Terminal #1** (Command Prompt or PowerShell) inside the `Agro-VisionAI-main` folder.
 
 Run these commands one by one:
 ```powershell
-cd server
+cd Backend
 .\venv\Scripts\activate
 python main.py
 ```
 **Success Indicator:** 
 You should see: `INFO: Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)`
+
 
 ---
 
