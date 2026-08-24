@@ -1,10 +1,14 @@
 {
-  "name": "agro-vision-ai-master",
+  "name": "agro-vision-ai",
   "version": "1.0.0",
-  "description": "Master folder for Agro-VisionAI Project",
+  "description": "Agro-VisionAI (FarmIQ) - Smart Agriculture & Aquaculture Platform",
+  "private": true,
   "scripts": {
-    "dev": "npm run dev --prefix Frontend",
-    "backend": "cd Backend && venv\\Scripts\\python main.py",
-    "start": "npm run dev"
+    "dev": "npm --prefix Frontend run dev",
+    "build": "npm --prefix Frontend run build",
+    "type-check": "npm --prefix Frontend run type-check",
+    "backend": "cd Backend && python main.py",
+    "start": "npm --prefix Frontend run dev"
   }
 }
+
