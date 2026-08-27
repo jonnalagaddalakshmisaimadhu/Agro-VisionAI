@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.services.recommendation_engine import recommendation_engine
@@ -21,6 +21,7 @@ class RecommendationRequest(BaseModel):
 
 class CropRecommendation(BaseModel):
     crop: str
+    category: Optional[str] = "General"
     profitability: str
     revenue: float
     investment: float
@@ -30,6 +31,12 @@ class CropRecommendation(BaseModel):
     duration_days: tuple
     price_per_kg: float
     price_per_quintal: float
+    break_even_price_per_kg: Optional[float] = None
+    break_even_price_per_quintal: Optional[float] = None
+    roi_percent: Optional[float] = None
+    bc_ratio: Optional[float] = None
+    cost_breakdown: Optional[Dict[str, float]] = None
+    scenarios: Optional[Dict[str, Any]] = None
     suitability_score: float
     profit_score: float
     soil_match: float
@@ -56,14 +63,8 @@ async def get_recommendations(
     db: Session = Depends(get_db)
 ):
     """
-    Get AI-powered crop recommendations with real-time market prices and profit analysis.
-    
-    Returns top 5 recommended crops based on:
-    - Live market prices (from Agmarknet)
-    - Soil suitability
-    - Weather conditions
-    - Profitability calculations
-    - Regional factors
+    Get AI-powered crop recommendations with real-time market prices and profit analysis
+    across ALL categories (Vegetables, Fruits, Grains, Pulses, Oilseeds, Spices, Cash Crops).
     """
     try:
         result = await recommendation_engine.get_recommendations(

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useWeather } from "@/components/dashboard/WeatherContext";
+import LocationMaps from "./LocationMaps";
 
 const WMO_CODES: { [key: number]: { description: string; icon: React.ElementType, emoji: string } } = {
   0: { description: 'Clear sky', icon: Sun, emoji: '☀️' },
@@ -78,10 +79,21 @@ const WeatherAlerts = () => {
     setAlertSettings
   } = useWeather();
 
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted"
+  );
 
   const toggleSetting = (key: keyof typeof alertSettings) => {
     setAlertSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const sendTestNotification = () => {
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+      new Notification("🌾 FarmIQ Agro-Weather Alert Active", {
+        body: "Real-time weather alerts and crop advisories are now active on your device.",
+        icon: "/vite.svg"
+      });
+    }
   };
 
   // Request notification permission
@@ -90,10 +102,12 @@ const WeatherAlerts = () => {
       alert("This browser does not support desktop notifications");
     } else if (Notification.permission === "granted") {
       setNotificationsEnabled(true);
+      sendTestNotification();
     } else if (Notification.permission !== "denied") {
       Notification.requestPermission().then((permission) => {
         if (permission === "granted") {
           setNotificationsEnabled(true);
+          sendTestNotification();
         }
       });
     }
@@ -118,15 +132,16 @@ const WeatherAlerts = () => {
   useEffect(() => {
     if (notificationsEnabled && alerts.length > 0) {
       alerts.forEach(alert => {
-        if (alert.severity === "High" && Notification.permission === "granted") {
-          new Notification(alert.title, {
+        if (alert.severity === "High" && typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+          new Notification(`⚠️ FarmIQ: ${alert.title}`, {
             body: alert.message,
-            icon: '/vite.svg' // Placeholder icon
+            icon: '/vite.svg'
           });
         }
       });
     }
   }, [alerts, notificationsEnabled]);
+
 
   const { currentWeather, weeklyForecast, temperatureData } = useMemo(() => {
     if (!weatherData || !forecastData) {
@@ -206,10 +221,11 @@ const WeatherAlerts = () => {
       </Card>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-fit grid-cols-3">
+        <TabsList className="grid w-fit grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="current">Current</TabsTrigger>
           <TabsTrigger value="forecast">Forecast</TabsTrigger>
           <TabsTrigger value="alerts">Alerts</TabsTrigger>
+          <TabsTrigger value="radar">🛰️ Satellite & Radar</TabsTrigger>
         </TabsList>
 
         <TabsContent value="current" className="space-y-6">
@@ -480,6 +496,30 @@ const WeatherAlerts = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+        
+        <TabsContent value="radar" className="space-y-6">
+          <Card className="border-0 shadow-card-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center space-x-2">
+                  <span className="text-xl">🛰️</span>
+                  <span>Interactive High-Resolution Satellite & Live Weather Radar</span>
+                </span>
+                <Badge variant="outline" className="border-emerald-500 text-emerald-600 bg-emerald-50 font-normal text-xs">
+                  Live Farm Telemetry
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LocationMaps
+                lat={location?.lat}
+                lon={location?.lon}
+                locationName={locationName}
+                height="540px"
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
       </Tabs>

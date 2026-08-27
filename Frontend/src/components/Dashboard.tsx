@@ -14,6 +14,7 @@ import WeatherAlerts from "./modules/WeatherAlerts";
 import GovernmentSchemes from "./modules/GovernmentSchemes";
 import HelpPage from "./modules/HelpPage";
 import VideoSession from "./modules/VideoSession";
+import SettingsPage from "@/pages/Settings";
 import { WeatherProvider } from "@/components/dashboard/WeatherContext";
 import { Suspense } from "react";
 
@@ -58,7 +59,9 @@ const Dashboard = () => {
       case "government-schemes":
         return <GovernmentSchemes />;
       case "help":
-        return <HelpPage />;
+        return <HelpPage setActiveModule={setActiveModule} />;
+      case "settings":
+        return <SettingsPage />;
       case "video-session":
         return <VideoSession />;
       case "home":
@@ -86,7 +89,7 @@ const Dashboard = () => {
           />
 
           {/* Main Content */}
-          <main className={`flex-1 flex flex-col min-w-0 transition-all duration-300 pb-16 lg:pb-0 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-[15.8rem]'
+          <main className={`flex-1 flex flex-col min-w-0 transition-all duration-300 pb-16 lg:pb-0 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-72'
             }`}>
             <div className="flex-1 overflow-auto">
               {renderModuleContent()}

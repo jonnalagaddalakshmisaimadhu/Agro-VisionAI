@@ -216,29 +216,6 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
               <User className="mr-2 h-4 w-4" />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/aquasession")}>
-              <div className="flex items-center">
-                <div className="bg-blue-100 p-1 rounded-full mr-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-blue-600"
-                  >
-                    <path d="M6.5 12c.94-3.46 4.96-6 8.5-6 3.54 0 6.5 2.54 6.5 6 0 1.66-2.96 3-6.5 3-3.08 0-5.69-1.02-6.3-2.45L2 12l2.35-7.05a1.5 1.5 0 0 1 2.15 0Z" />
-                    <path d="M22 12v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3" />
-                    <path d="M9 22v-4h6v4" />
-                  </svg>
-                </div>
-                <span className="text-blue-700 font-medium">Aqua Session</span>
-              </div>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/settings")}>
               <Settings className="mr-2 h-4 w-4" />
               Settings

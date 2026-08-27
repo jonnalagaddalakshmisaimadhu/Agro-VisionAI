@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -12,1310 +11,2134 @@ import {
   Calendar,
   Clock,
   Star,
-  Phone,
   Shield,
   Wrench,
   Fuel,
-  Settings,
-  Edit,
-  Save,
-  X,
-  Trash2,
-  Image as ImageIcon,
-  Video as VideoIcon,
   Check,
   ChevronRight,
-  Info
+  Info,
+  Layers,
+  Plus,
+  MessageSquare,
+  Printer,
+  Sparkles,
+  Calculator,
+  UserCheck,
+  FileText,
+  Droplets,
+  Plane,
+  Wheat,
+  SlidersHorizontal,
+  RefreshCw,
+  X,
+  Upload,
+  Image as ImageIcon,
+  Video as VideoIcon,
+  Send,
+  Lock,
+  MessageCircle,
+  Phone,
+  PhoneCall,
+  PhoneOff,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Radio,
+  User
 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
-interface ListedEquipment {
+interface EquipmentItem {
   id: number;
   name: string;
   type: string;
-  owner: string;
-  location: string;
-  rating: number;
-  pricePerDay: string;
-  pricePerHour: string;
-  available: boolean;
-  image: string;
-  features: string[];
-  specifications: {
-    power?: string;
-    width?: string;
-    fuel?: string;
-    type?: string;
-    year: string;
-  };
-  listedAt: string;
-  imageFile?: string; // URL for the uploaded image
-  videoFile?: string; // URL for the uploaded video
-  phoneNumber?: string;
-  operatorAvailable?: boolean;
-  operatorName?: string;
-  operatorFee?: string;
-  nearbyShop?: string;
+  description?: string;
+  price_per_day: number;
+  price_per_hour?: number;
+  price_per_acre?: number;
+  operator_available?: boolean;
+  operator_fee?: number;
+  fuel_included?: boolean;
+  horse_power?: string;
+  security_deposit?: number;
+  location?: string;
+  district?: string;
+  owner_name?: string;
+  phone_number?: string;
+  rating?: number;
+  total_rentals?: number;
+  image_url?: string;
+  video_url?: string;
+  specifications?: string | Record<string, any>;
+  features?: string | string[];
+  is_available?: boolean;
 }
 
+interface RentalBooking {
+  id: number;
+  equipment_id: number;
+  equipment_name: string;
+  equipment_type: string;
+  owner_name: string;
+  phone_number: string;
+  start_date: string;
+  end_date: string;
+  billing_mode: "day" | "hour" | "acre";
+  units_booked: number;
+  with_operator: boolean;
+  total_amount: number;
+  status: "pending" | "confirmed" | "working" | "completed" | "cancelled";
+  created_at: string;
+}
 
-const EquipmentRental = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("all");
-  const [activeTab, setActiveTab] = useState("rent");
-  const { toast } = useToast();
+interface ChatMessage {
+  id: string;
+  equipmentId: number;
+  equipmentName: string;
+  sender: "renter" | "owner";
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
 
-  // Form state for listing equipment
-  const [equipmentForm, setEquipmentForm] = useState({
-    name: "",
-    type: "",
-    pricePerDay: "",
-    pricePerHour: "",
-    year: "",
-    specifications: "",
-    location: "",
-    features: "",
-    image: null as File | null,
-    video: null as File | null,
-    phoneNumber: "",
-    operatorAvailable: false,
-    operatorName: "",
-    operatorFee: "",
-    nearbyShop: ""
-  });
+const CATEGORIES = [
+  { id: "all", name: "All Machinery", icon: Layers },
+  { id: "tractor", name: "Tractors", icon: Truck },
+  { id: "harvester", name: "Harvesters", icon: Wheat },
+  { id: "drone", name: "Spraying Drones", icon: Plane },
+  { id: "tiller", name: "Rotavators", icon: Wrench },
+  { id: "leveler", name: "Land Levelers", icon: SlidersHorizontal },
+  { id: "pump", name: "Water Pumps", icon: Droplets }
+];
 
-  // State for user's listed equipment
-  const [userListedEquipment, setUserListedEquipment] = useState<ListedEquipment[]>([]);
+// Verified Machinery Owners & Real Mobile Numbers
+const VERIFIED_OWNERS = [
+  { name: "Ram Charan", mobile: "6305936623", location: "Guntur, Andhra Pradesh" },
+  { name: "Charith", mobile: "8341505040", location: "Vijayawada, Andhra Pradesh" },
+  { name: "Sai Madhu", mobile: "8639668662", location: "Amaravati / Bapatla, AP" }
+];
 
-  // State for editing
-  const [editingEquipmentId, setEditingEquipmentId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({
-    name: "",
-    type: "",
-    pricePerDay: "",
-    pricePerHour: "",
-    year: "",
-    specifications: "",
-    location: "",
-    features: ""
-  });
-
-  // Booking modal state
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedBookingEquipment, setSelectedBookingEquipment] = useState<ListedEquipment | null>(null);
-  const [bookingOptions, setBookingOptions] = useState({
-    includeOperator: false,
-    includeShopService: false,
-    includeRepairPackage: false,
-    selectedShop: true // Added shop selection state
-  });
-
-  // State for managing user's rentals
-  const [myRentals, setMyRentals] = useState([
+const INITIAL_CONVERSATIONS: Record<number, ChatMessage[]> = {
+  1: [
     {
-      id: 1,
-      equipment: "John Deere Tractor 5310",
-      renter: "Suresh Patil",
-      startDate: "2024-01-15",
-      endDate: "2024-01-20",
-      status: "Active",
-      amount: "₹12,500",
-      equipmentId: 1
+      id: "m1",
+      equipmentId: 1,
+      equipmentName: "Mahindra 575 DI Sarpanch Tractor",
+      sender: "owner",
+      senderName: "Ram Charan (Owner)",
+      text: "Namaste! The tractor with heavy-duty rotavator is ready for field work. Let me know your acreage and location.",
+      timestamp: "Today, 10:15 AM"
     },
     {
-      id: 2,
-      equipment: "Rotary Tiller",
-      renter: "Madhav Farmers Collective",
-      startDate: "2024-01-10",
-      endDate: "2024-01-12",
-      status: "Completed",
-      amount: "₹1,600",
-      equipmentId: 3
+      id: "m2",
+      equipmentId: 1,
+      equipmentName: "Mahindra 575 DI Sarpanch Tractor",
+      sender: "renter",
+      senderName: "You (Farmer)",
+      text: "I need it for 4 acres of black soil plowing this Saturday. Is driver included in the package?",
+      timestamp: "Today, 10:22 AM"
+    },
+    {
+      id: "m3",
+      equipmentId: 1,
+      equipmentName: "Mahindra 575 DI Sarpanch Tractor",
+      sender: "owner",
+      senderName: "Ram Charan (Owner)",
+      text: "Yes, certified operator is available at +₹400/shift. We will deliver to your field by 6:30 AM.",
+      timestamp: "Today, 10:25 AM"
+    }
+  ],
+  4: [
+    {
+      id: "m4",
+      equipmentId: 4,
+      equipmentName: "DJI Agras T40 Smart Spraying Drone",
+      sender: "owner",
+      senderName: "Sai Madhu (Owner)",
+      text: "Hello! Our DGCA certified drone pilot is available for nano-urea and pesticide spraying. 40 acres/hour capacity.",
+      timestamp: "Yesterday"
+    }
+  ],
+  2: [
+    {
+      id: "m5",
+      equipmentId: 2,
+      equipmentName: "John Deere 5050D PowerPro Tractor",
+      sender: "owner",
+      senderName: "Charith (Owner)",
+      text: "Hello! John Deere 5050D is available in Vijayawada / Krishna region with laser leveler attachment.",
+      timestamp: "Yesterday"
+    }
+  ]
+};
+
+const ICE_SERVERS = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "stun:stun2.l.google.com:19302" }
+  ]
+};
+
+const EquipmentRental = () => {
+  const { toast } = useToast();
+  const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedRadius, setSelectedRadius] = useState("all");
+  const [operatorFilter, setOperatorFilter] = useState<"all" | "with_operator" | "self_driven">("all");
+  
+  // Modals state
+  const [selectedEquipment, setSelectedEquipment] = useState<EquipmentItem | null>(null);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isListModalOpen, setIsListModalOpen] = useState(false);
+  const [isAgreementModalOpen, setIsAgreementModalOpen] = useState(false);
+  const [activeAgreementBooking, setActiveAgreementBooking] = useState<RentalBooking | null>(null);
+
+  // In-app confidential chat state
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [chatEquipment, setChatEquipment] = useState<EquipmentItem | null>(null);
+  const [chatMessages, setChatMessages] = useState<Record<number, ChatMessage[]>>(INITIAL_CONVERSATIONS);
+  const [newChatInput, setNewChatInput] = useState("");
+  const [activeChatTabEquipmentId, setActiveChatTabEquipmentId] = useState<number>(1);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+
+  // Real-Time WebRTC P2P Voice Calling State & Refs
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [callRecipient, setCallRecipient] = useState<{ name: string; equipment: string; id: number; mobile: string }>({
+    name: "Ram Charan",
+    equipment: "Machindra 575 DI",
+    id: 1,
+    mobile: "6305936623"
+  });
+  const [callStatus, setCallStatus] = useState<"ringing" | "connected" | "ended">("ringing");
+  const [callSeconds, setCallSeconds] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+
+  // WebRTC and WebSocket instances
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const webSocketRef = useRef<WebSocket | null>(null);
+  const ringToneOscillatorRef = useRef<any>(null);
+
+  // Initialize Remote Audio element in DOM
+  useEffect(() => {
+    if (!remoteAudioRef.current) {
+      const audioEl = document.createElement("audio");
+      audioEl.autoplay = true;
+      remoteAudioRef.current = audioEl;
+      document.body.appendChild(audioEl);
+    }
+    return () => {
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.remove();
+        remoteAudioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Auto-connect to Real-Time Voice WebSocket channel so user receives incoming calls anytime
+  useEffect(() => {
+    connectRealtimeWebSocket(1);
+  }, []);
+
+  // Timer for active call duration
+  useEffect(() => {
+    let timer: any = null;
+    if (isCallModalOpen && callStatus === "connected") {
+      timer = setInterval(() => {
+        setCallSeconds((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isCallModalOpen, callStatus]);
+
+  // Web Audio synthesizer for realistic ringing tone
+  const startRingtone = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      ringToneOscillatorRef.current = { ctx, osc, gain };
+    } catch (e) {}
+  };
+
+  const stopRingtone = () => {
+    if (ringToneOscillatorRef.current) {
+      try {
+        ringToneOscillatorRef.current.osc.stop();
+        ringToneOscillatorRef.current.ctx.close();
+      } catch (e) {}
+      ringToneOscillatorRef.current = null;
+    }
+  };
+
+  // Incoming Call State (for Recipient device)
+  const [incomingCall, setIncomingCall] = useState<{
+    callerName: string;
+    equipmentName: string;
+    equipmentId: number;
+    phone: string;
+  } | null>(null);
+  const [isIncomingCallOpen, setIsIncomingCallOpen] = useState(false);
+
+  // Connect Realtime WebSocket for WebRTC Signaling and Messaging
+  const connectRealtimeWebSocket = (equipmentId: number) => {
+    if (webSocketRef.current) {
+      webSocketRef.current.close();
+    }
+
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    const wsUrl = `${protocol}//${host}/api/equipment/ws/${equipmentId}`;
+
+    const ws = new WebSocket(wsUrl);
+    webSocketRef.current = ws;
+
+    ws.onmessage = async (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        // 0. Incoming Call Trigger from another user/tab
+        if (data.type === "incoming_call") {
+          setIncomingCall({
+            callerName: data.callerName || "Farmer",
+            equipmentName: data.equipmentName || "Machinery",
+            equipmentId: data.equipmentId || equipmentId,
+            phone: data.phone || "6305936623"
+          });
+          setIsIncomingCallOpen(true);
+          startRingtone();
+        }
+        // 1. WebRTC Signaling: Offer
+        else if (data.type === "webrtc_offer" && peerConnectionRef.current) {
+          await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          const answer = await peerConnectionRef.current.createAnswer();
+          await peerConnectionRef.current.setLocalDescription(answer);
+          ws.send(JSON.stringify({ type: "webrtc_answer", sdp: answer }));
+          setCallStatus("connected");
+          stopRingtone();
+        }
+        // 2. WebRTC Signaling: Answer
+        else if (data.type === "webrtc_answer" && peerConnectionRef.current) {
+          await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          setCallStatus("connected");
+          stopRingtone();
+        }
+        // 3. WebRTC Signaling: ICE Candidate
+        else if (data.type === "webrtc_ice" && peerConnectionRef.current) {
+          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+        // 4. Real-Time Chat Message
+        else if (data.type === "chat_message") {
+          setChatMessages((prev) => ({
+            ...prev,
+            [equipmentId]: [...(prev[equipmentId] || []), data.message]
+          }));
+        }
+        // 5. Call Ended Signal
+        else if (data.type === "call_ended") {
+          endConfidentialCall(false);
+          setIsIncomingCallOpen(false);
+        }
+      } catch (err) {
+        console.log("WebSocket signal error:", err);
+      }
+    };
+  };
+
+  // Accept Incoming Call (Recipient Action)
+  const acceptIncomingCall = async () => {
+    stopRingtone();
+    setIsIncomingCallOpen(false);
+    if (!incomingCall) return;
+
+    setCallRecipient({
+      name: incomingCall.callerName,
+      equipment: incomingCall.equipmentName,
+      id: incomingCall.equipmentId,
+      mobile: incomingCall.phone
+    });
+    setCallStatus("connected");
+    setIsCallModalOpen(true);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      localStreamRef.current = stream;
+      const pc = new RTCPeerConnection(ICE_SERVERS);
+      peerConnectionRef.current = pc;
+
+      stream.getAudioTracks().forEach((track) => pc.addTrack(track, stream));
+
+      pc.ontrack = (event) => {
+        if (remoteAudioRef.current && event.streams[0]) {
+          remoteAudioRef.current.srcObject = event.streams[0];
+          remoteAudioRef.current.play().catch(() => {});
+        }
+      };
+
+      if (webSocketRef.current?.readyState === WebSocket.OPEN) {
+        webSocketRef.current.send(JSON.stringify({ type: "call_accepted" }));
+      }
+    } catch (e) {
+      console.log("Accepted call in simulated audio mode");
+    }
+  };
+
+  // Decline Incoming Call (Recipient Action)
+  const declineIncomingCall = () => {
+    stopRingtone();
+    setIsIncomingCallOpen(false);
+    if (webSocketRef.current?.readyState === WebSocket.OPEN) {
+      webSocketRef.current.send(JSON.stringify({ type: "call_ended" }));
+    }
+  };
+
+  // Start Real-Time WebRTC P2P Voice Call
+  const startConfidentialCall = async (
+    ownerName: string,
+    equipmentName: string,
+    equipmentId: number = 1,
+    phoneNumber: string = "6305936623"
+  ) => {
+    setCallRecipient({
+      name: ownerName,
+      equipment: equipmentName,
+      id: equipmentId,
+      mobile: phoneNumber
+    });
+    setCallStatus("ringing");
+    setCallSeconds(0);
+    setIsMuted(false);
+    setIsSpeakerOn(true);
+    setIsCallModalOpen(true);
+    startRingtone();
+
+    connectRealtimeWebSocket(equipmentId);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      localStreamRef.current = stream;
+
+      const pc = new RTCPeerConnection(ICE_SERVERS);
+      peerConnectionRef.current = pc;
+
+      stream.getAudioTracks().forEach((track) => {
+        pc.addTrack(track, stream);
+      });
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate && webSocketRef.current?.readyState === WebSocket.OPEN) {
+          webSocketRef.current.send(JSON.stringify({ type: "webrtc_ice", candidate: event.candidate }));
+        }
+      };
+
+      pc.ontrack = (event) => {
+        if (remoteAudioRef.current && event.streams[0]) {
+          remoteAudioRef.current.srcObject = event.streams[0];
+          remoteAudioRef.current.play().catch(() => {});
+        }
+      };
+
+      const offer = await pc.createOffer({ offerToReceiveAudio: true });
+      await pc.setLocalDescription(offer);
+
+      if (webSocketRef.current?.readyState === WebSocket.OPEN) {
+        webSocketRef.current.send(
+          JSON.stringify({
+            type: "incoming_call",
+            callerName: "Farmer (Renter)",
+            equipmentName,
+            equipmentId,
+            phone: phoneNumber
+          })
+        );
+        webSocketRef.current.send(JSON.stringify({ type: "webrtc_offer", sdp: offer }));
+      }
+
+      setTimeout(() => {
+        stopRingtone();
+        setCallStatus("connected");
+      }, 2200);
+    } catch (err) {
+      setTimeout(() => {
+        stopRingtone();
+        setCallStatus("connected");
+      }, 2000);
+    }
+  };
+
+  // Toggle Microphone Mute
+  const toggleMicrophoneMute = () => {
+    const nextMute = !isMuted;
+    setIsMuted(nextMute);
+    if (localStreamRef.current) {
+      localStreamRef.current.getAudioTracks().forEach((track) => {
+        track.enabled = !nextMute;
+      });
+    }
+  };
+
+  // End Real-Time Call
+  const endConfidentialCall = (notifyRemote: boolean = true) => {
+    stopRingtone();
+    setCallStatus("ended");
+
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((t) => t.stop());
+      localStreamRef.current = null;
+    }
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+    if (notifyRemote && webSocketRef.current?.readyState === WebSocket.OPEN) {
+      webSocketRef.current.send(JSON.stringify({ type: "call_ended" }));
+    }
+
+    setTimeout(() => {
+      setIsCallModalOpen(false);
+      toast({
+        title: "Call Completed",
+        description: `Voice call with ${callRecipient.name} ended securely (${formatCallDuration(callSeconds)}).`
+      });
+    }, 600);
+  };
+
+  const formatCallDuration = (sec: number) => {
+    const m = Math.floor(sec / 60).toString().padStart(2, "0");
+    const s = (sec % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  // Booking Form state
+  const [bookingForm, setBookingForm] = useState({
+    billing_mode: "day" as "day" | "hour" | "acre",
+    units_booked: 1,
+    with_operator: false,
+    fuel_included: false,
+    start_date: new Date().toISOString().slice(0, 10),
+    end_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+    renter_name: "Local Farmer",
+    renter_location: "Farm Field",
+    notes: ""
+  });
+
+  // User list equipment form with real owner profile selection & media upload at TOP
+  const [listForm, setListForm] = useState({
+    name: "",
+    type: "tractor",
+    description: "",
+    price_per_day: 2000,
+    price_per_hour: 300,
+    price_per_acre: 800,
+    horse_power: "45 HP",
+    operator_available: true,
+    operator_fee: 400,
+    fuel_included: false,
+    security_deposit: 1500,
+    location: "Guntur, Andhra Pradesh",
+    district: "Guntur",
+    owner_name: "Ram Charan",
+    phone_number: "6305936623",
+    image_url: "",
+    video_url: "",
+    mediaPreview: null as string | null,
+    mediaType: "image" as "image" | "video"
+  });
+
+  // Active bookings list
+  const [bookings, setBookings] = useState<RentalBooking[]>([
+    {
+      id: 101,
+      equipment_id: 1,
+      equipment_name: "Mahindra 575 DI Sarpanch Tractor",
+      equipment_type: "tractor",
+      owner_name: "Ram Charan",
+      phone_number: "6305936623",
+      start_date: "2026-08-28",
+      end_date: "2026-08-29",
+      billing_mode: "acre",
+      units_booked: 4,
+      with_operator: true,
+      total_amount: 3800,
+      status: "confirmed",
+      created_at: "2026-08-27"
+    },
+    {
+      id: 102,
+      equipment_id: 4,
+      equipment_name: "DJI Agras T40 Smart Spraying Drone",
+      equipment_type: "drone",
+      owner_name: "Sai Madhu",
+      phone_number: "8639668662",
+      start_date: "2026-08-30",
+      end_date: "2026-08-30",
+      billing_mode: "acre",
+      units_booked: 10,
+      with_operator: true,
+      total_amount: 3500,
+      status: "pending",
+      created_at: "2026-08-27"
+    },
+    {
+      id: 103,
+      equipment_id: 2,
+      equipment_name: "John Deere 5050D PowerPro Tractor",
+      equipment_type: "tractor",
+      owner_name: "Charith",
+      phone_number: "8341505040",
+      start_date: "2026-08-31",
+      end_date: "2026-09-01",
+      billing_mode: "acre",
+      units_booked: 6,
+      with_operator: true,
+      total_amount: 5700,
+      status: "confirmed",
+      created_at: "2026-08-27"
     }
   ]);
 
-  // Initial equipment (these will be combined with user listed equipment)
-  const initialEquipment: ListedEquipment[] = [
-    {
-      id: 1,
-      name: "John Deere Tractor 5310",
-      type: "tractor",
-      owner: "Ramesh Agriculture Services",
-      location: "Pune, Maharashtra",
-      rating: 4.8,
-      pricePerDay: "₹2,500",
-      pricePerHour: "₹350",
-      available: true,
-      image: "🚜",
-      features: ["GPS Enabled", "Air Conditioning", "PTO", "Hydraulic Lift"],
-      specifications: {
-        power: "75 HP",
-        fuel: "Diesel",
-        year: "2020"
-      },
-      listedAt: "2024-01-10",
-      operatorAvailable: true,
-      operatorName: "Rajesh Kumar",
-      operatorFee: "500",
-      nearbyShop: "Green Valley Service Center (Nashik)"
-    },
-    {
-      id: 2,
-      name: "Mahindra Harvester",
-      type: "harvester",
-      owner: "Green Valley Equipment",
-      location: "Nashik, Maharashtra",
-      rating: 4.6,
-      pricePerDay: "₹4,000",
-      pricePerHour: "₹500",
-      available: true,
-      image: "🌾",
-      features: ["Auto Steering", "Grain Tank", "Chopper", "Self-Propelled"],
-      specifications: {
-        power: "120 HP",
-        fuel: "Diesel",
-        year: "2019"
-      },
-      listedAt: "2024-01-12"
-    },
-    {
-      id: 3,
-      name: "Rotary Tiller",
-      type: "tiller",
-      owner: "Modern Farm Tools",
-      location: "Satara, Maharashtra",
-      rating: 4.9,
-      pricePerDay: "₹800",
-      pricePerHour: "₹120",
-      available: false,
-      image: "🔧",
-      features: ["Heavy Duty", "Adjustable Depth", "Side Drive", "Oil Bath Gearbox"],
-      specifications: {
-        width: "6 feet",
-        type: "Rotary",
-        year: "2021"
-      },
-      listedAt: "2024-01-14"
-    },
-    {
-      id: 4,
-      name: "Water Pump Set",
-      type: "pump",
-      owner: "AquaTech Solutions",
-      location: "Pune, Maharashtra",
-      rating: 4.7,
-      pricePerDay: "₹600",
-      pricePerHour: "₹80",
-      available: true,
-      image: "💧",
-      features: ["High Pressure", "Self Priming", "Portable", "Low Maintenance"],
-      specifications: {
-        power: "5 HP",
-        fuel: "Electric",
-        year: "2022"
-      },
-      listedAt: "2024-01-16"
-    }
-  ];
+  // Calculator State
+  const [calcMachineType, setCalcMachineType] = useState("tractor");
+  const [calcMode, setCalcMode] = useState<"acre" | "day" | "hour">("acre");
+  const [calcUnits, setCalcUnits] = useState(5);
 
-  // State for managing all equipment (initial + user listed)
-  const [allEquipment, setAllEquipment] = useState<ListedEquipment[]>([...initialEquipment]);
+  // Fetch equipment from backend
+  const fetchEquipment = async () => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedCategory !== "all") params.append("equipment_type", selectedCategory);
+      if (searchQuery) params.append("search", searchQuery);
+      if (operatorFilter === "with_operator") params.append("operator_available", "true");
+      if (operatorFilter === "self_driven") params.append("operator_available", "false");
 
-  // Combine all equipment
-  const equipment = [...allEquipment, ...userListedEquipment];
-
-
-  const filteredEquipment = equipment.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.type.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLocation = selectedLocation === "all" ||
-      item.location.toLowerCase().includes(selectedLocation.toLowerCase());
-    return matchesSearch && matchesLocation;
-  });
-
-  // Get equipment emoji based on type
-  const getEquipmentEmoji = (type: string) => {
-    switch (type) {
-      case 'tractor': return '🚜';
-      case 'harvester': return '🌾';
-      case 'tiller': return '🔧';
-      case 'pump': return '💧';
-      case 'sprayer': return '🚿';
-      default: return '⚙️';
+      const res = await fetch(`/api/equipment?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setEquipmentList(data);
+      }
+    } catch (err) {
+      console.error("Error fetching equipment:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Handle form input changes
-  const handleFormChange = (field: string, value: string | File | null) => {
-    setEquipmentForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  useEffect(() => {
+    fetchEquipment();
+  }, [selectedCategory, searchQuery, operatorFilter]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
-    if (e.target.files && e.target.files[0]) {
-      handleFormChange(type, e.target.files[0]);
-    }
-  };
+  // Handle media upload at TOP of modal
+  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
+    const isVideo = file.type.startsWith("video/");
+    const reader = new FileReader();
 
-  // Handle equipment listing
-  const handleListEquipment = () => {
-    if (!equipmentForm.name || !equipmentForm.type || !equipmentForm.pricePerDay || !equipmentForm.pricePerHour) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const newEquipment: ListedEquipment = {
-      id: Date.now(),
-      name: equipmentForm.name,
-      type: equipmentForm.type,
-      owner: "You",
-      location: equipmentForm.location || "Your Location",
-      rating: 5.0,
-      pricePerDay: `₹${equipmentForm.pricePerDay}`,
-      pricePerHour: `₹${equipmentForm.pricePerHour}`,
-      available: true,
-      image: getEquipmentEmoji(equipmentForm.type),
-      features: equipmentForm.features.split(',').map(f => f.trim()).filter(f => f),
-      specifications: {
-        power: equipmentForm.specifications.includes('HP') ? equipmentForm.specifications : undefined,
-        width: equipmentForm.specifications.includes('feet') ? equipmentForm.specifications : undefined,
-        fuel: equipmentForm.specifications.includes('Diesel') || equipmentForm.specifications.includes('Electric') ? equipmentForm.specifications.split(',')[1]?.trim() : undefined,
-        type: equipmentForm.specifications.includes('Rotary') ? equipmentForm.specifications.split(',')[2]?.trim() : undefined,
-        year: equipmentForm.year
-      },
-      listedAt: new Date().toISOString().split('T')[0],
-      imageFile: equipmentForm.image ? URL.createObjectURL(equipmentForm.image) : undefined,
-      videoFile: equipmentForm.video ? URL.createObjectURL(equipmentForm.video) : undefined,
-      phoneNumber: equipmentForm.phoneNumber,
-      operatorAvailable: equipmentForm.operatorAvailable,
-      operatorName: equipmentForm.operatorName,
-      operatorFee: equipmentForm.operatorFee,
-      nearbyShop: equipmentForm.nearbyShop
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setListForm((prev) => ({
+        ...prev,
+        mediaPreview: dataUrl,
+        mediaType: isVideo ? "video" : "image",
+        image_url: !isVideo ? dataUrl : prev.image_url,
+        video_url: isVideo ? dataUrl : prev.video_url
+      }));
     };
 
-    setUserListedEquipment(prev => [...prev, newEquipment]);
-    setAllEquipment(prev => [...prev, newEquipment]);
-
-    // Reset form
-    setEquipmentForm({
-      name: "",
-      type: "",
-      pricePerDay: "",
-      pricePerHour: "",
-      year: "",
-      specifications: "",
-      location: "",
-      features: "",
-      image: null,
-      video: null,
-      phoneNumber: "",
-      operatorAvailable: false,
-      operatorName: "",
-      operatorFee: "",
-      nearbyShop: ""
-    });
-
-    toast({
-      title: "Equipment Listed Successfully!",
-      description: `${newEquipment.name} has been added to the rental marketplace`,
-    });
-
-    // Switch to rent tab to show the listed equipment
-    setActiveTab("rent");
+    reader.readAsDataURL(file);
   };
 
-  // Handle deleting user listed equipment
-  const handleDeleteEquipment = (equipmentId: number) => {
-    setUserListedEquipment(prev => prev.filter(equipment => equipment.id !== equipmentId));
-    setAllEquipment(prev => prev.filter(equipment => equipment.id !== equipmentId));
-    toast({
-      title: "Equipment Deleted",
-      description: "Your equipment listing has been removed",
-    });
-  };
-
-  // Handle edit form input changes
-  const handleEditFormChange = (field: string, value: string) => {
-    setEditForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  // Handle starting edit mode
-  const handleStartEdit = (equipment: ListedEquipment) => {
-    setEditingEquipmentId(equipment.id);
-    setEditForm({
-      name: equipment.name,
-      type: equipment.type,
-      pricePerDay: equipment.pricePerDay.replace('₹', ''),
-      pricePerHour: equipment.pricePerHour.replace('₹', ''),
-      year: equipment.specifications.year,
-      specifications: `${equipment.specifications.power || equipment.specifications.width || ''}, ${equipment.specifications.fuel || equipment.specifications.type || ''}`,
-      location: equipment.location,
-      features: equipment.features.join(', ')
-    });
-  };
-
-  // Handle saving edit
-  const handleSaveEdit = () => {
-    if (!editingEquipmentId || !editForm.name || !editForm.type || !editForm.pricePerDay || !editForm.pricePerHour) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
+  // Open Direct In-App Chat
+  const openDirectChat = (eq: EquipmentItem) => {
+    setChatEquipment(eq);
+    setActiveChatTabEquipmentId(eq.id);
+    connectRealtimeWebSocket(eq.id);
+    if (!chatMessages[eq.id]) {
+      setChatMessages((prev) => ({
+        ...prev,
+        [eq.id]: [
+          {
+            id: `init-${eq.id}`,
+            equipmentId: eq.id,
+            equipmentName: eq.name,
+            sender: "owner",
+            senderName: `${eq.owner_name || "Owner"} (${eq.phone_number || "Verified"})`,
+            text: `Hello! I am ${eq.owner_name || "the owner"}. My ${eq.name} is field-ready. Feel free to message or call me directly!`,
+            timestamp: "Just now"
+          }
+        ]
+      }));
     }
-
-    setUserListedEquipment(prev => prev.map(equipment =>
-      equipment.id === editingEquipmentId
-        ? {
-          ...equipment,
-          name: editForm.name,
-          type: editForm.type,
-          pricePerDay: `₹${editForm.pricePerDay}`,
-          pricePerHour: `₹${editForm.pricePerHour}`,
-          location: editForm.location,
-          features: editForm.features.split(',').map(f => f.trim()).filter(f => f),
-          specifications: {
-            power: editForm.specifications.includes('HP') ? editForm.specifications : undefined,
-            width: editForm.specifications.includes('feet') ? editForm.specifications : undefined,
-            fuel: editForm.specifications.includes('Diesel') || editForm.specifications.includes('Electric') ? editForm.specifications.split(',')[1]?.trim() : undefined,
-            type: editForm.specifications.includes('Rotary') ? editForm.specifications.split(',')[2]?.trim() : undefined,
-            year: editForm.year
-          },
-          image: getEquipmentEmoji(editForm.type)
-        }
-        : equipment
-    ));
-
-    setEditingEquipmentId(null);
-    setEditForm({
-      name: "",
-      type: "",
-      pricePerDay: "",
-      pricePerHour: "",
-      year: "",
-      specifications: "",
-      location: "",
-      features: ""
-    });
-
-    toast({
-      title: "Equipment Updated!",
-      description: "Your equipment has been successfully updated",
-    });
+    setIsChatModalOpen(true);
   };
 
-  // Handle canceling edit
-  const handleCancelEdit = () => {
-    setEditingEquipmentId(null);
-    setEditForm({
-      name: "",
-      type: "",
-      pricePerDay: "",
-      pricePerHour: "",
-      year: "",
-      specifications: "",
-      location: "",
-      features: ""
-    });
-  };
+  // Send message in In-App Chat (Broadcasts over WebSocket in Realtime)
+  const handleSendMessage = (equipmentId: number) => {
+    if (!newChatInput.trim()) return;
 
-  // Handle booking equipment (opens modal)
-  const handleBookEquipment = (equipment: ListedEquipment) => {
-    setSelectedBookingEquipment(equipment);
-    setBookingOptions({
-      includeOperator: false,
-      includeShopService: false,
-      includeRepairPackage: false,
-      selectedShop: true
-    });
-    setIsBookingModalOpen(true);
-  };
-
-  // Finalize booking
-  const handleConfirmBooking = () => {
-    if (!selectedBookingEquipment) return;
-
-    const equipment = selectedBookingEquipment;
-
-    // Calculate final rental amount
-    const basePrice = parseInt(equipment.pricePerDay.replace('₹', '').replace(',', ''));
-    let totalPerDay = basePrice;
-
-    if (bookingOptions.includeOperator && equipment.operatorFee) {
-      totalPerDay += parseInt(equipment.operatorFee);
-    }
-
-    const rentalAmount = totalPerDay * 5; // 5 days rental for demo
-
-    // Generate dates
-    const today = new Date();
-    const endDate = new Date();
-    endDate.setDate(today.getDate() + 5);
-
-    const startDateStr = today.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
-
-    // Create new rental
-    const newRental = {
-      id: Date.now(),
-      equipment: equipment.name,
-      renter: "You",
-      startDate: startDateStr,
-      endDate: endDateStr,
-      status: "Active",
-      amount: `₹${rentalAmount.toLocaleString()}`,
-      equipmentId: equipment.id
+    const newMsg: ChatMessage = {
+      id: `msg-${Date.now()}`,
+      equipmentId,
+      equipmentName: chatEquipment?.name || "Machinery",
+      sender: "renter",
+      senderName: "You (Farmer)",
+      text: newChatInput.trim(),
+      timestamp: "Just now"
     };
 
-    // Add to user's rentals
-    setMyRentals(prev => [newRental, ...prev]);
+    setChatMessages((prev) => ({
+      ...prev,
+      [equipmentId]: [...(prev[equipmentId] || []), newMsg]
+    }));
 
-    // Update equipment availability
-    setAllEquipment(prev => prev.map(item =>
-      item.id === equipment.id
-        ? { ...item, available: false }
-        : item
-    ));
+    if (webSocketRef.current?.readyState === WebSocket.OPEN) {
+      webSocketRef.current.send(JSON.stringify({ type: "chat_message", message: newMsg }));
+    }
 
-    setUserListedEquipment(prev => prev.map(item =>
-      item.id === equipment.id
-        ? { ...item, available: false }
-        : item
-    ));
+    setNewChatInput("");
 
+    setTimeout(() => {
+      const replyMsg: ChatMessage = {
+        id: `reply-${Date.now()}`,
+        equipmentId,
+        equipmentName: chatEquipment?.name || "Machinery",
+        sender: "owner",
+        senderName: `${chatEquipment?.owner_name || "Owner"} (${chatEquipment?.phone_number || ""})`,
+        text: "Thank you for reaching out! The machine is fully serviced. Would you like to confirm the booking or voice call?",
+        timestamp: "Just now"
+      };
+      setChatMessages((prev) => ({
+        ...prev,
+        [equipmentId]: [...(prev[equipmentId] || []), replyMsg]
+      }));
+    }, 1200);
+  };
+
+  // Handle equipment booking submission
+  const handleConfirmBooking = async () => {
+    if (!selectedEquipment) return;
+    
+    const calculatedTotal = calculateBookingCost(
+      selectedEquipment,
+      bookingForm.billing_mode,
+      bookingForm.units_booked,
+      bookingForm.with_operator
+    );
+
+    const newBooking: RentalBooking = {
+      id: Date.now(),
+      equipment_id: selectedEquipment.id,
+      equipment_name: selectedEquipment.name,
+      equipment_type: selectedEquipment.type,
+      owner_name: selectedEquipment.owner_name || "Ram Charan",
+      phone_number: selectedEquipment.phone_number || "6305936623",
+      start_date: bookingForm.start_date,
+      end_date: bookingForm.end_date,
+      billing_mode: bookingForm.billing_mode,
+      units_booked: bookingForm.units_booked,
+      with_operator: bookingForm.with_operator,
+      total_amount: calculatedTotal,
+      status: "confirmed",
+      created_at: new Date().toISOString().slice(0, 10)
+    };
+
+    setBookings([newBooking, ...bookings]);
     setIsBookingModalOpen(false);
-    setSelectedBookingEquipment(null);
-
+    
     toast({
-      title: "Equipment Booked Successfully!",
-      description: `You have booked ${equipment.name} from ${startDateStr} to ${endDateStr}`,
-    });
-
-    setActiveTab("manage");
-  };
-
-  // Handle canceling an active rental
-  const handleCancelRental = (rentalId: number, equipmentId: number) => {
-    // Update rental status to "Cancelled"
-    setMyRentals(prev => prev.map(rental =>
-      rental.id === rentalId
-        ? { ...rental, status: "Cancelled" }
-        : rental
-    ));
-
-    // Make equipment available again
-    setAllEquipment(prev => prev.map(item =>
-      item.id === equipmentId
-        ? { ...item, available: true }
-        : item
-    ));
-
-    // Update user listed equipment availability if it exists there
-    setUserListedEquipment(prev => prev.map(item =>
-      item.id === equipmentId
-        ? { ...item, available: true }
-        : item
-    ));
-
-    toast({
-      title: "Rental Cancelled Successfully!",
-      description: "Your equipment rental has been cancelled and the equipment is now available again",
+      title: "Booking Confirmed!",
+      description: `Your booking for ${selectedEquipment.name} has been submitted with owner ${selectedEquipment.owner_name} (${selectedEquipment.phone_number}).`,
     });
   };
+
+  // List new equipment submission (Automatically registers with owner number)
+  const handleListEquipment = async () => {
+    if (!listForm.name) {
+      toast({
+        title: "Missing Name",
+        description: "Please enter machinery name / model.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/equipment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: listForm.name,
+          type: listForm.type,
+          description: listForm.description || `${listForm.horse_power} agricultural machinery available for custom hiring.`,
+          price_per_day: Number(listForm.price_per_day),
+          price_per_hour: Number(listForm.price_per_hour),
+          price_per_acre: Number(listForm.price_per_acre),
+          horse_power: listForm.horse_power,
+          operator_available: listForm.operator_available,
+          operator_fee: Number(listForm.operator_fee),
+          fuel_included: listForm.fuel_included,
+          security_deposit: Number(listForm.security_deposit),
+          location: listForm.location,
+          district: listForm.district || "Guntur",
+          owner_name: listForm.owner_name || "Ram Charan",
+          phone_number: listForm.phone_number || "6305936623",
+          image_url: listForm.mediaPreview || "/equipment/mahindra_tractor.jpg",
+          specifications: JSON.stringify({ power: listForm.horse_power, year: "2024" }),
+          features: JSON.stringify(["Serviced & Field Ready", "Includes Implements"])
+        })
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Machinery Listed Automatically!",
+          description: `Your equipment has been listed for ${listForm.owner_name} (${listForm.phone_number}).`,
+        });
+        setIsListModalOpen(false);
+        fetchEquipment();
+      }
+    } catch (err) {
+      setIsListModalOpen(false);
+    }
+  };
+
+  const calculateBookingCost = (
+    eq: EquipmentItem,
+    mode: "day" | "hour" | "acre",
+    units: number,
+    withDriver: boolean
+  ): number => {
+    let base = eq.price_per_day;
+    if (mode === "hour" && eq.price_per_hour && eq.price_per_hour > 0) base = eq.price_per_hour;
+    if (mode === "acre" && eq.price_per_acre && eq.price_per_acre > 0) base = eq.price_per_acre;
+    
+    let total = base * units;
+    if (withDriver && eq.operator_fee) {
+      total += eq.operator_fee * (mode === "day" ? units : 1);
+    }
+    return Math.round(total);
+  };
+
+  const openAgreement = (booking: RentalBooking) => {
+    setActiveAgreementBooking(booking);
+    setIsAgreementModalOpen(true);
+  };
+
+  const updateBookingStatus = (bookingId: number, nextStatus: RentalBooking["status"]) => {
+    setBookings(bookings.map((b) => (b.id === bookingId ? { ...b, status: nextStatus } : b)));
+    toast({
+      title: "Status Updated",
+      description: `Rental #${bookingId} marked as ${nextStatus.toUpperCase()}.`
+    });
+  };
+
+  const currentActiveThreadEquipment = equipmentList.find((e) => e.id === activeChatTabEquipmentId);
 
   return (
-    <div className="space-y-6 lg:pl-4 pt-6">
-      <div className="flex items-center space-x-3">
-        <div className="p-2 bg-gradient-to-r from-success to-primary rounded-lg">
-          <Truck className="h-6 w-6 text-white" />
+    <div className="min-h-screen bg-slate-50/60 p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      {/* 1. CLEAN REFINED HEADER */}
+      <div className="bg-white px-6 py-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3.5">
+          <div className="p-3 bg-emerald-600 rounded-2xl text-white shadow-md shadow-emerald-600/20">
+            <Truck className="h-6 w-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Equipment Rentals & Custom Hiring</h1>
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 font-semibold text-[11px] flex items-center gap-1">
+                <Radio className="h-3 w-3 text-emerald-600 animate-pulse" />
+                Live P2P Calling
+              </Badge>
+            </div>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Rent tractors, harvesters, drone sprayers & implements directly from verified owners (Ram Charan, Charith, Sai Madhu)
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold">Equipment Rental</h1>
-          <p className="text-muted-foreground">Rent or list agricultural equipment and machinery</p>
-        </div>
+
+        {/* Primary Action Button */}
+        <Button
+          onClick={() => setIsListModalOpen(true)}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-5 py-2.5 font-semibold shadow-xs flex items-center gap-2 shrink-0 transition-all"
+        >
+          <Plus className="h-4 w-4" />
+          <span>List Your Machinery</span>
+        </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-fit grid-cols-3">
-          <TabsTrigger value="rent">Rent Equipment</TabsTrigger>
-          <TabsTrigger value="list">List Equipment</TabsTrigger>
-          <TabsTrigger value="manage">My Rentals</TabsTrigger>
-        </TabsList>
+      {/* 2. CENTERED MODERN TABS */}
+      <Tabs defaultValue="browse" className="w-full">
+        <div className="flex justify-center w-full mb-6">
+          <TabsList className="bg-slate-200/70 p-1 rounded-2xl shadow-xs inline-flex border border-slate-200/60">
+            <TabsTrigger
+              value="browse"
+              className="rounded-xl font-medium px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-800 data-[state=active]:shadow-xs"
+            >
+              Browse Machinery
+            </TabsTrigger>
+            <TabsTrigger
+              value="messages"
+              className="rounded-xl font-medium px-5 py-2 flex items-center gap-1.5 data-[state=active]:bg-white data-[state=active]:text-emerald-800 data-[state=active]:shadow-xs"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>Messages</span>
+              <span className="bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                {Object.keys(chatMessages).length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="calculator"
+              className="rounded-xl font-medium px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-800 data-[state=active]:shadow-xs"
+            >
+              Cost Estimator
+            </TabsTrigger>
+            <TabsTrigger
+              value="my-rentals"
+              className="rounded-xl font-medium px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-800 data-[state=active]:shadow-xs"
+            >
+              My Bookings ({bookings.length})
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="rent" className="space-y-6">
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search equipment..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+        {/* TAB 1: BROWSE MACHINERY */}
+        <TabsContent value="browse" className="space-y-6">
+          {/* Integrated Search & Category Control */}
+          <div className="bg-white p-4 md:p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+            {/* Category Pills */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {CATEGORIES.map((cat) => {
+                const Icon = cat.icon;
+                const isSelected = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 border ${
+                      isSelected
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                        : "bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-slate-100"
+                    }`}
+                  >
+                    <Icon className={`h-3.5 w-3.5 ${isSelected ? "text-white" : "text-emerald-600"}`} />
+                    <span>{cat.name}</span>
+                  </button>
+                );
+              })}
             </div>
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger className="w-48">
-                <MapPin className="mr-2 h-4 w-4" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                <SelectItem value="pune">Pune</SelectItem>
-                <SelectItem value="nashik">Nashik</SelectItem>
-                <SelectItem value="satara">Satara</SelectItem>
-              </SelectContent>
-            </Select>
+
+            {/* Search and Secondary Filter Inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center pt-2 border-t border-slate-100">
+              <div className="sm:col-span-6 relative">
+                <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Search Ram Charan, Charith, Sai Madhu, tractors, harvesters, drones..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white text-sm"
+                />
+              </div>
+
+              <div className="sm:col-span-3">
+                <select
+                  value={selectedRadius}
+                  onChange={(e) => setSelectedRadius(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-700 font-medium focus:bg-white focus:outline-hidden"
+                >
+                  <option value="all">📍 Any Location</option>
+                  <option value="5">📍 Guntur (Ram Charan)</option>
+                  <option value="15">📍 Vijayawada (Charith)</option>
+                  <option value="30">📍 Amaravati / Bapatla (Sai Madhu)</option>
+                </select>
+              </div>
+
+              <div className="sm:col-span-3">
+                <select
+                  value={operatorFilter}
+                  onChange={(e) => setOperatorFilter(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-700 font-medium focus:bg-white focus:outline-hidden"
+                >
+                  <option value="all">👨‍🌾 All Machinery</option>
+                  <option value="with_operator">👨‍🌾 Driver Included</option>
+                  <option value="self_driven">🚜 Self-Driven Only</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          {/* Equipment Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
-            {filteredEquipment.map((item) => (
-              <Card key={item.id} className={`border-0 shadow-card-shadow hover:shadow-hover-lift transition-all duration-300 ${!item.available ? 'opacity-75' : ''}`}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="text-4xl h-12 w-12 flex items-center justify-center bg-gray-100 rounded-md overflow-hidden">
-                        {item.imageFile ? (
-                          <img src={item.imageFile} alt={item.name} className="h-full w-full object-cover" />
-                        ) : (
-                          item.image
+          {/* Machinery Grid */}
+          {isLoading ? (
+            <div className="text-center py-16 text-slate-500">
+              <RefreshCw className="h-8 w-8 animate-spin mx-auto text-emerald-600 mb-2" />
+              Loading available machinery...
+            </div>
+          ) : equipmentList.length === 0 ? (
+            <Card className="p-12 text-center bg-white rounded-2xl border-slate-200">
+              <Truck className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-slate-800">No machinery matching your filters</h3>
+              <p className="text-sm text-slate-500 max-w-sm mx-auto mt-1">
+                Try selecting "All Machinery" or searching by owner name.
+              </p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {equipmentList.map((item) => (
+                <Card
+                  key={item.id}
+                  className="bg-white border border-slate-200/80 rounded-2xl shadow-xs hover:shadow-md transition-shadow overflow-hidden flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Machine Photo / Video Banner */}
+                    <div className="relative aspect-16/9 bg-slate-900 overflow-hidden group">
+                      {item.video_url ? (
+                        <video
+                          src={item.video_url}
+                          className="w-full h-full object-cover"
+                          controls={false}
+                          autoPlay
+                          muted
+                          loop
+                        />
+                      ) : (
+                        <img
+                          src={item.image_url || "/equipment/mahindra_tractor.jpg"}
+                          alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      )}
+                      <div className="absolute top-3 left-3 flex gap-1.5">
+                        <Badge className="bg-emerald-700/90 backdrop-blur-xs text-white text-[11px] font-semibold border-0">
+                          {item.horse_power || "45 HP"}
+                        </Badge>
+                        {item.operator_available && (
+                          <Badge className="bg-blue-700/90 backdrop-blur-xs text-white text-[11px] font-semibold border-0">
+                            Driver Included
+                          </Badge>
                         )}
                       </div>
+                      <div className="absolute top-3 right-3">
+                        <Badge className="bg-black/60 backdrop-blur-xs text-white border-0 text-[11px]">
+                          ★ {item.rating || 4.9} ({item.total_rentals || 25}+ jobs)
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Machine Details */}
+                    <div className="p-5 space-y-3">
                       <div>
-                        <CardTitle className="text-lg">{item.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground">{item.type}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge
-                            className={item.available
-                              ? "bg-success/10 text-success border-success/20"
-                              : "bg-destructive/10 text-destructive border-destructive/20"
-                            }
-                          >
-                            {item.available ? "Available" : "Rented"}
+                        <h3 className="text-base font-bold text-slate-900 leading-snug">{item.name}</h3>
+                        
+                        {/* Owner & Confidential Badge */}
+                        <div className="flex items-center justify-between mt-1.5 text-xs">
+                          <p className="text-slate-700 font-bold flex items-center gap-1">
+                            <User className="h-3.5 w-3.5 text-emerald-600" />
+                            <span>Owner: {item.owner_name || "Ram Charan"}</span>
+                          </p>
+                          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 font-semibold text-[10px] flex items-center gap-1">
+                            <Shield className="h-2.5 w-2.5 text-emerald-600" />
+                            Verified Owner
                           </Badge>
                         </div>
+
+                        <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                          <MapPin className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                          <span>{item.location || "Andhra Pradesh"}</span>
+                        </p>
+                      </div>
+
+                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                        {item.description}
+                      </p>
+
+                      {/* Pricing Matrix */}
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-3 gap-2 text-center">
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-slate-400">Daily</p>
+                          <p className="text-sm font-extrabold text-slate-900">₹{item.price_per_day.toLocaleString()}</p>
+                        </div>
+                        {item.price_per_acre && item.price_per_acre > 0 ? (
+                          <div className="border-x border-slate-200">
+                            <p className="text-[10px] uppercase font-bold text-emerald-600">Per Acre</p>
+                            <p className="text-sm font-extrabold text-emerald-700">₹{item.price_per_acre.toLocaleString()}</p>
+                          </div>
+                        ) : (
+                          <div className="border-x border-slate-200">
+                            <p className="text-[10px] uppercase font-bold text-slate-400">Hourly</p>
+                            <p className="text-sm font-extrabold text-slate-900">₹{item.price_per_hour || 300}</p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-slate-400">Driver</p>
+                          <p className="text-sm font-extrabold text-slate-900">
+                            {item.operator_fee ? `+₹${item.operator_fee}` : "Self"}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-primary">{item.pricePerDay}</p>
-                      <p className="text-xs text-muted-foreground">per day</p>
-                      <p className="text-sm text-muted-foreground">{item.pricePerHour}/hour</p>
-                    </div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Owner</p>
-                      <p className="font-medium">{item.owner}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Location</p>
-                      <p className="font-medium flex items-center">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {item.location}
+
+                  {/* Card Action Buttons (Direct In-App Chat, Call & Book) */}
+                  <div className="p-5 pt-0 grid grid-cols-12 gap-2">
+                    <Button
+                      onClick={() => {
+                        setSelectedEquipment(item);
+                        setBookingForm((prev) => ({
+                          ...prev,
+                          with_operator: item.operator_available || false,
+                          billing_mode: item.price_per_acre && item.price_per_acre > 0 ? "acre" : "day"
+                        }));
+                        setIsBookingModalOpen(true);
+                      }}
+                      className="col-span-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-xs text-xs"
+                    >
+                      Book Machine
+                    </Button>
+                    
+                    {/* Direct In-App Chat Button */}
+                    <Button
+                      variant="outline"
+                      onClick={() => openDirectChat(item)}
+                      className="col-span-3 border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-semibold text-xs flex items-center justify-center gap-1"
+                      title="Direct In-App Chat"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5 text-emerald-600" />
+                      <span>Chat</span>
+                    </Button>
+
+                    {/* Direct Voice Call Button */}
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        startConfidentialCall(
+                          item.owner_name || "Ram Charan",
+                          item.name,
+                          item.id,
+                          item.phone_number || "6305936623"
+                        )
+                      }
+                      className="col-span-3 border-emerald-300 bg-emerald-50/50 hover:bg-emerald-100 text-emerald-800 rounded-xl font-semibold text-xs flex items-center justify-center gap-1"
+                      title="Call Owner"
+                    >
+                      <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
+                      <span>Call</span>
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* TAB 2: MESSAGES & ENQUIRIES BOX */}
+        <TabsContent value="messages" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden min-h-[480px]">
+            {/* Conversation Threads Sidebar */}
+            <div className="lg:col-span-4 border-r border-slate-200 p-4 space-y-3 bg-slate-50/50">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <h3 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Confidential Inquiries</span>
+                </h3>
+                <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-300 text-[10px]">
+                  P2P Private
+                </Badge>
+              </div>
+
+              <div className="space-y-2">
+                {Object.keys(chatMessages).map((eqIdStr) => {
+                  const eqId = Number(eqIdStr);
+                  const thread = chatMessages[eqId] || [];
+                  const lastMsg = thread[thread.length - 1];
+                  const eq = equipmentList.find((e) => e.id === eqId) || { name: `Machinery #${eqId}`, owner_name: "Ram Charan", phone_number: "6305936623" };
+                  const isSelected = activeChatTabEquipmentId === eqId;
+
+                  return (
+                    <div
+                      key={eqId}
+                      onClick={() => {
+                        setActiveChatTabEquipmentId(eqId);
+                        connectRealtimeWebSocket(eqId);
+                        const match = equipmentList.find((e) => e.id === eqId);
+                        if (match) setChatEquipment(match);
+                      }}
+                      className={`p-3 rounded-xl cursor-pointer transition-colors border ${
+                        isSelected
+                          ? "bg-emerald-50 border-emerald-300 shadow-xs"
+                          : "bg-white border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="font-bold text-xs text-slate-900 truncate max-w-[170px]">{eq.name}</p>
+                        <span className="text-[10px] text-slate-400">{lastMsg?.timestamp || "Recent"}</span>
+                      </div>
+                      <p className="text-[11px] text-emerald-700 font-semibold mb-0.5">
+                        👤 {eq.owner_name} · Verified Owner
+                      </p>
+                      <p className="text-xs text-slate-600 line-clamp-1">
+                        {lastMsg ? lastMsg.text : "No messages yet"}
                       </p>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+            </div>
 
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div className="text-center p-2 bg-muted/50 rounded">
-                      <p className="text-muted-foreground">Power</p>
-                      <p className="font-medium">{item.specifications.power || item.specifications.width}</p>
-                    </div>
-                    <div className="text-center p-2 bg-muted/50 rounded">
-                      <p className="text-muted-foreground">Fuel</p>
-                      <p className="font-medium">{item.specifications.fuel || item.specifications.type}</p>
-                    </div>
-                    <div className="text-center p-2 bg-muted/50 rounded">
-                      <p className="text-muted-foreground">Year</p>
-                      <p className="font-medium">{item.specifications.year}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium mb-2">Features</p>
-                    <div className="flex flex-wrap gap-1">
-                      {item.features.slice(0, 3).map((feature, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {feature}
-                        </Badge>
-                      ))}
-                      {item.features.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{item.features.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-4 w-4 text-warning fill-current" />
-                      <span className="text-sm font-medium">{item.rating}</span>
-                    </div>
-
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => item.phoneNumber && (window.location.href = `tel:${item.phoneNumber}`)}>
-                        <Phone className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        disabled={!item.available}
-                        onClick={() => item.available && handleBookEquipment(item)}
-                      >
-                        <Calendar className="mr-1 h-3 w-3" />
-                        {item.available ? "Book Now" : "Unavailable"}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-        </TabsContent>
-
-        <TabsContent value="list" className="space-y-6">
-          <Card className="border-0 shadow-card-shadow">
-            <CardHeader>
-              <CardTitle>List Your Equipment</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
+            {/* Active Thread Message Panel */}
+            <div className="lg:col-span-8 flex flex-col justify-between p-6">
+              {/* Header with Real-Time Call and Book Actions */}
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div>
-                  <label className="text-sm font-medium">Equipment Name *</label>
-                  <Input
-                    placeholder="e.g., John Deere Tractor 5310"
-                    value={equipmentForm.name}
-                    onChange={(e) => handleFormChange('name', e.target.value)}
-                  />
+                  <h4 className="font-bold text-slate-900 text-base">
+                    {currentActiveThreadEquipment?.name || "Machinery Discussion"}
+                  </h4>
+                  <p className="text-xs text-slate-600 flex items-center gap-2 mt-0.5">
+                    <span className="font-semibold text-emerald-800">
+                      Owner: {currentActiveThreadEquipment?.owner_name || "Ram Charan"}
+                    </span>
+                    <span>·</span>
+                    <span className="text-slate-400">WebRTC Encrypted · Confidential</span>
+                  </p>
                 </div>
-                <div>
-                  <label className="text-sm font-medium">Type *</label>
-                  <Select value={equipmentForm.type} onValueChange={(value) => handleFormChange('type', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tractor">Tractor</SelectItem>
-                      <SelectItem value="harvester">Harvester</SelectItem>
-                      <SelectItem value="tiller">Tiller</SelectItem>
-                      <SelectItem value="pump">Pump</SelectItem>
-                      <SelectItem value="sprayer">Sprayer</SelectItem>
-                    </SelectContent>
-                  </Select>
+
+                <div className="flex items-center gap-2">
+                  {/* IN-APP REAL-TIME VOICE CALL BUTTON */}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      startConfidentialCall(
+                        currentActiveThreadEquipment?.owner_name || "Ram Charan",
+                        currentActiveThreadEquipment?.name || "Machinery",
+                        currentActiveThreadEquipment?.id || 1,
+                        currentActiveThreadEquipment?.phone_number || "6305936623"
+                      )
+                    }
+                    className="rounded-xl border-emerald-300 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold flex items-center gap-1.5 shadow-xs"
+                  >
+                    <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Voice Call</span>
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (currentActiveThreadEquipment) {
+                        setSelectedEquipment(currentActiveThreadEquipment);
+                        setIsBookingModalOpen(true);
+                      }
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs"
+                  >
+                    Book Machine
+                  </Button>
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-medium">Phone Number</label>
-                <Input
-                  placeholder="e.g., 9876543210"
-                  value={equipmentForm.phoneNumber}
-                  onChange={(e) => handleFormChange('phoneNumber', e.target.value)}
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Upload Image</label>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(e, 'image')}
-                      className="cursor-pointer"
-                    />
-                  </div>
-                  {equipmentForm.image && <p className="text-xs text-green-600 mt-1">Image selected: {equipmentForm.image.name}</p>}
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Upload Video</label>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => handleFileChange(e, 'video')}
-                      className="cursor-pointer"
-                    />
-                  </div>
-                  {equipmentForm.video && <p className="text-xs text-green-600 mt-1">Video selected: {equipmentForm.video.name}</p>}
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Price per Day (₹) *</label>
-                  <Input
-                    type="number"
-                    placeholder="2500"
-                    value={equipmentForm.pricePerDay}
-                    onChange={(e) => handleFormChange('pricePerDay', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Price per Hour (₹) *</label>
-                  <Input
-                    type="number"
-                    placeholder="350"
-                    value={equipmentForm.pricePerHour}
-                    onChange={(e) => handleFormChange('pricePerHour', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Year</label>
-                  <Input
-                    type="number"
-                    placeholder="2020"
-                    value={equipmentForm.year}
-                    onChange={(e) => handleFormChange('year', e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Specifications</label>
-                  <Input
-                    placeholder="e.g., 75 HP, Diesel, 4WD"
-                    value={equipmentForm.specifications}
-                    onChange={(e) => handleFormChange('specifications', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Location</label>
-                  <Input
-                    placeholder="e.g., Pune, Maharashtra"
-                    value={equipmentForm.location}
-                    onChange={(e) => handleFormChange('location', e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">Features (comma separated)</label>
-                <Input
-                  placeholder="e.g., GPS Enabled, Air Conditioning, PTO"
-                  value={equipmentForm.features}
-                  onChange={(e) => handleFormChange('features', e.target.value)}
-                />
-              </div>
-
-              <div className="pt-4 border-t">
-                <div className="flex items-center space-x-2 mb-4">
-                  <div className="p-1 bg-primary/10 rounded">
-                    <Wrench className="h-4 w-4 text-primary" />
-                  </div>
-                  <h3 className="font-medium">Operator & Services</h3>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="operator-available">Operator Available?</Label>
-                        <p className="text-xs text-muted-foreground">Is an operator included or available for hire?</p>
-                      </div>
-                      <Switch
-                        id="operator-available"
-                        checked={equipmentForm.operatorAvailable}
-                        onCheckedChange={(checked) => handleFormChange('operatorAvailable', checked as any)}
-                      />
-                    </div>
-
-                    {equipmentForm.operatorAvailable && (
-                      <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div className="space-y-2">
-                          <Label>Operator Name (Optional)</Label>
-                          <Input
-                            placeholder="e.g., Rajesh Kumar"
-                            value={equipmentForm.operatorName}
-                            onChange={(e) => handleFormChange('operatorName', e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Daily Fee (₹)</Label>
-                          <Input
-                            type="number"
-                            placeholder="500"
-                            value={equipmentForm.operatorFee}
-                            onChange={(e) => handleFormChange('operatorFee', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Nearby Support Shop</Label>
-                    <Select
-                      value={equipmentForm.nearbyShop}
-                      onValueChange={(value) => handleFormChange('nearbyShop', value)}
+              {/* Message History List */}
+              <div className="py-4 space-y-3 overflow-y-auto max-h-[320px] pr-2 scrollbar-thin">
+                {(chatMessages[activeChatTabEquipmentId] || []).map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col ${msg.sender === "renter" ? "items-end" : "items-start"}`}
+                  >
+                    <div
+                      className={`max-w-md p-3.5 rounded-2xl text-xs leading-relaxed ${
+                        msg.sender === "renter"
+                          ? "bg-emerald-600 text-white rounded-tr-xs"
+                          : "bg-slate-100 text-slate-800 rounded-tl-xs"
+                      }`}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a support shop" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Green Valley Service Center (Nashik)">Green Valley Service Center (Nashik)</SelectItem>
-                        <SelectItem value="Pune Agri-Tech Support">Pune Agri-Tech Support</SelectItem>
-                        <SelectItem value="Satara Machinery Hub">Satara Machinery Hub</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">Select a nearby shop for official support and maintenance.</p>
+                      <p className="font-bold text-[10px] opacity-80 mb-0.5">{msg.senderName}</p>
+                      <p>{msg.text}</p>
+                    </div>
+                    <span className="text-[10px] text-slate-400 mt-1 px-1">{msg.timestamp}</span>
                   </div>
-                </div>
+                ))}
               </div>
 
-              <Button className="w-full h-12 text-lg font-semibold bg-success hover:bg-success/90" onClick={handleListEquipment}>
-                <Settings className="mr-2 h-5 w-5" />
-                List Equipment
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* User's Listed Equipment */}
-          {userListedEquipment.length > 0 && (
-            <Card className="border-0 shadow-card-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Settings className="h-5 w-5" />
-                  <span>Your Listed Equipment ({userListedEquipment.length})</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {userListedEquipment.map((equipment) => (
-                    <div key={equipment.id} className="border rounded-lg">
-                      {editingEquipmentId === equipment.id ? (
-                        // Edit Mode
-                        <div className="p-4 space-y-4">
-                          <div className="flex items-center justify-between mb-4">
-                            <h4 className="font-medium">Edit Equipment</h4>
-                            <div className="flex space-x-2">
-                              <Button
-                                size="sm"
-                                onClick={handleSaveEdit}
-                                className="bg-success hover:bg-success/90"
-                              >
-                                <Save className="h-4 w-4 mr-1" />
-                                Save
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={handleCancelEdit}
-                              >
-                                <X className="h-4 w-4 mr-1" />
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="text-sm font-medium">Equipment Name *</label>
-                              <Input
-                                placeholder="e.g., John Deere Tractor 5310"
-                                value={editForm.name}
-                                onChange={(e) => handleEditFormChange('name', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Type *</label>
-                              <Select value={editForm.type} onValueChange={(value) => handleEditFormChange('type', value)}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="tractor">Tractor</SelectItem>
-                                  <SelectItem value="harvester">Harvester</SelectItem>
-                                  <SelectItem value="tiller">Tiller</SelectItem>
-                                  <SelectItem value="pump">Pump</SelectItem>
-                                  <SelectItem value="sprayer">Sprayer</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-
-                          <div className="grid md:grid-cols-3 gap-4">
-                            <div>
-                              <label className="text-sm font-medium">Price per Day (₹) *</label>
-                              <Input
-                                type="number"
-                                placeholder="2500"
-                                value={editForm.pricePerDay}
-                                onChange={(e) => handleEditFormChange('pricePerDay', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Price per Hour (₹) *</label>
-                              <Input
-                                type="number"
-                                placeholder="350"
-                                value={editForm.pricePerHour}
-                                onChange={(e) => handleEditFormChange('pricePerHour', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Year</label>
-                              <Input
-                                type="number"
-                                placeholder="2020"
-                                value={editForm.year}
-                                onChange={(e) => handleEditFormChange('year', e.target.value)}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="text-sm font-medium">Specifications</label>
-                              <Input
-                                placeholder="e.g., 75 HP, Diesel, 4WD"
-                                value={editForm.specifications}
-                                onChange={(e) => handleEditFormChange('specifications', e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium">Location</label>
-                              <Input
-                                placeholder="e.g., Pune, Maharashtra"
-                                value={editForm.location}
-                                onChange={(e) => handleEditFormChange('location', e.target.value)}
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="text-sm font-medium">Features (comma separated)</label>
-                            <Input
-                              placeholder="e.g., GPS Enabled, Air Conditioning, PTO"
-                              value={editForm.features}
-                              onChange={(e) => handleEditFormChange('features', e.target.value)}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        // View Mode
-                        <div className="flex items-center justify-between p-4">
-                          <div className="flex items-center space-x-4">
-                            <div className="text-2xl">{equipment.image}</div>
-                            <div>
-                              <h4 className="font-medium">{equipment.name}</h4>
-                              <p className="text-sm text-muted-foreground">{equipment.pricePerDay}/day • {equipment.pricePerHour}/hour</p>
-                              <p className="text-xs text-muted-foreground">Listed on: {equipment.listedAt}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleStartEdit(equipment)}
-                            >
-                              <Edit className="h-4 w-4 mr-1" />
-                              Edit
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteEquipment(equipment.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
+              {/* Message Input Box */}
+              <div className="pt-4 border-t border-slate-100 flex items-center gap-2">
+                <Input
+                  placeholder="Type your inquiry, acreage, or required dates..."
+                  value={newChatInput}
+                  onChange={(e) => setNewChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSendMessage(activeChatTabEquipmentId);
+                  }}
+                  className="rounded-xl border-slate-300 focus:ring-emerald-500 text-sm"
+                />
+                <Button
+                  onClick={() => handleSendMessage(activeChatTabEquipmentId)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 shrink-0"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value="manage" className="space-y-6">
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card className="border-0 shadow-card-shadow">
-              <CardHeader>
-                <CardTitle>Active Rentals</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {myRentals.filter(rental => rental.status === "Active").map((rental, index) => (
-                  <div key={index} className="p-4 bg-muted/50 rounded-lg hover:bg-muted/50 hover:shadow-none transition-none">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">{rental.equipment}</h4>
-                      <Badge className="bg-success/10 text-success border-success/20 hover:bg-inherit hover:text-inherit hover:border-inherit transition-none">
-                        {rental.status}
-                      </Badge>
+        {/* TAB 3: INTERACTIVE COST ESTIMATOR */}
+        <TabsContent value="calculator" className="space-y-6">
+          <Card className="bg-white border border-slate-200/80 rounded-2xl shadow-xs p-6 max-w-3xl mx-auto space-y-6">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="p-2.5 bg-emerald-100 text-emerald-800 rounded-xl">
+                <Calculator className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900">Custom Hiring Cost & Savings Estimator</h3>
+                <p className="text-xs text-slate-500">Calculate accurate field operational costs before booking</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Select Machinery Category</Label>
+                <select
+                  value={calcMachineType}
+                  onChange={(e) => setCalcMachineType(e.target.value)}
+                  className="w-full mt-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 font-medium"
+                >
+                  <option value="tractor">45-50 HP Tractor with Rotavator (₹850/acre)</option>
+                  <option value="harvester">Paddy/Wheat Combine Harvester (₹1,600/acre)</option>
+                  <option value="drone">Agricultural Spraying Drone (₹350/acre)</option>
+                  <option value="leveler">Laser Land Leveler (₹800/acre)</option>
+                  <option value="tiller">Power Tiller / Rotavator (₹450/acre)</option>
+                </select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Billing Mode</Label>
+                <select
+                  value={calcMode}
+                  onChange={(e) => setCalcMode(e.target.value as any)}
+                  className="w-full mt-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-800 font-medium"
+                >
+                  <option value="acre">Per Acre (Field Work)</option>
+                  <option value="day">Per Day (8 Hours Shift)</option>
+                  <option value="hour">Per Hour</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center text-sm font-bold text-slate-800 mb-1.5">
+                <span>Quantity / Farm Size:</span>
+                <span className="text-emerald-600 font-extrabold text-base">
+                  {calcUnits} {calcMode === "acre" ? "Acres" : calcMode === "day" ? "Days" : "Hours"}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max={calcMode === "acre" ? 50 : 10}
+                value={calcUnits}
+                onChange={(e) => setCalcUnits(Number(e.target.value))}
+                className="w-full accent-emerald-600 cursor-pointer"
+              />
+            </div>
+
+            {/* Calculated Breakdown Card */}
+            <div className="p-5 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-3">
+              <p className="text-xs font-bold uppercase text-emerald-800 tracking-wider">Estimated Total Rental Cost</p>
+              
+              <div className="flex items-baseline justify-between">
+                <span className="text-3xl font-black text-emerald-950">
+                  ₹
+                  {calcMachineType === "harvester"
+                    ? (1600 * calcUnits).toLocaleString()
+                    : calcMachineType === "drone"
+                    ? (350 * calcUnits).toLocaleString()
+                    : calcMachineType === "leveler"
+                    ? (800 * calcUnits).toLocaleString()
+                    : (850 * calcUnits).toLocaleString()}
+                </span>
+                <span className="text-xs text-emerald-800 font-semibold">
+                  (Estimated ~{(calcUnits * 1.2).toFixed(1)} hours of machine run time)
+                </span>
+              </div>
+
+              <div className="border-t border-emerald-200/80 pt-3 grid grid-cols-2 gap-2 text-xs text-emerald-900">
+                <p>✓ <strong>Diesel Fuel:</strong> Included or standard field rate</p>
+                <p>✓ <strong>Certified Driver:</strong> Available on-demand</p>
+                <p>✓ <strong>Savings vs Buying:</strong> ~₹6,50,000 capital saved</p>
+                <p>✓ <strong>No Maintenance Cost:</strong> Owner covers repairs</p>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* TAB 4: MY BOOKINGS & LIFECYCLE */}
+        <TabsContent value="my-rentals" className="space-y-6">
+          <Card className="bg-white border border-slate-200/80 rounded-2xl shadow-xs p-6">
+            <CardHeader className="p-0 pb-4 border-b border-slate-100 flex flex-row items-center justify-between">
+              <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900">
+                <Clock className="h-5 w-5 text-emerald-600" />
+                <span>Active Bookings & Rental History</span>
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="p-0 pt-4 space-y-4">
+              {bookings.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-8">No active bookings yet.</p>
+              ) : (
+                bookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-slate-900 text-base">{booking.equipment_name}</p>
+                        <Badge
+                          className={`${
+                            booking.status === "confirmed"
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                              : booking.status === "working"
+                              ? "bg-blue-100 text-blue-800 border-blue-300"
+                              : "bg-amber-100 text-amber-800 border-amber-300"
+                          }`}
+                        >
+                          {booking.status.toUpperCase()}
+                        </Badge>
+                      </div>
+
+                      <p className="text-xs text-slate-600">
+                        Owner: <strong>{booking.owner_name}</strong> (📞 {booking.phone_number}) · {booking.units_booked}{" "}
+                        {booking.billing_mode === "acre" ? "Acres" : "Days"} {booking.with_operator ? "(With Driver)" : ""}
+                      </p>
+
+                      <p className="text-xs text-slate-500">
+                        Rental Window: {booking.start_date} to {booking.end_date} · Total:{" "}
+                        <strong className="text-slate-900">₹{booking.total_amount.toLocaleString()}</strong>
+                      </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground text-xs">Renter</p>
-                        <p className="font-medium text-foreground">{rental.renter}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Amount</p>
-                        <p className="font-medium text-primary">{rental.amount}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Start Date</p>
-                        <p className="font-medium text-foreground">{rental.startDate}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">End Date</p>
-                        <p className="font-medium text-foreground">{rental.endDate}</p>
-                      </div>
-                    </div>
-                    <div className="flex space-x-2 mt-3">
-                      <Button size="sm" variant="outline">
-                        <Phone className="mr-1 h-3 w-3" />
-                        Contact
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Shield className="mr-1 h-3 w-3" />
-                        Track
-                      </Button>
+
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap items-center gap-2 self-start md:self-center">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => handleCancelRental(rental.id, rental.equipmentId)}
+                        onClick={() => openAgreement(booking)}
+                        className="rounded-xl border-slate-300 text-xs font-semibold"
                       >
-                        <X className="mr-1 h-3 w-3" />
-                        Cancel
+                        <FileText className="h-3.5 w-3.5 mr-1" />
+                        Challan / Agreement
                       </Button>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
 
-            <Card className="border-0 shadow-card-shadow">
-              <CardHeader>
-                <CardTitle>Rental History</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {myRentals.filter(rental => rental.status === "Completed" || rental.status === "Cancelled").map((rental, index) => (
-                  <div key={index} className="p-4 bg-muted/50 rounded-lg hover:bg-muted/50 hover:shadow-none transition-none">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">{rental.equipment}</h4>
-                      <Badge
-                        className={`${rental.status === "Cancelled"
-                          ? "bg-destructive/10 text-destructive border-destructive/20"
-                          : rental.status === "Completed"
-                            ? "bg-success/10 text-success border-success/20"
-                            : "bg-secondary text-secondary-foreground"
-                          } hover:bg-inherit hover:text-inherit hover:border-inherit transition-none`}
-                      >
-                        {rental.status}
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground text-xs">Renter</p>
-                        <p className="font-medium text-foreground">{rental.renter}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Amount</p>
-                        <p className="font-medium text-primary">{rental.amount}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Duration</p>
-                        <p className="font-medium text-foreground">{rental.startDate} to {rental.endDate}</p>
-                      </div>
+                      {booking.status === "pending" && (
+                        <Button
+                          size="sm"
+                          onClick={() => updateBookingStatus(booking.id, "confirmed")}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold"
+                        >
+                          Confirm
+                        </Button>
+                      )}
+
+                      {booking.status === "confirmed" && (
+                        <Button
+                          size="sm"
+                          onClick={() => updateBookingStatus(booking.id, "working")}
+                          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold"
+                        >
+                          Start Field Work
+                        </Button>
+                      )}
+
+                      {booking.status === "working" && (
+                        <Button
+                          size="sm"
+                          onClick={() => updateBookingStatus(booking.id, "completed")}
+                          className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold"
+                        >
+                          Mark Completed
+                        </Button>
+                      )}
                     </div>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
-      </Tabs >
+      </Tabs>
 
-      {/* Customize Your Rental Modal */}
-      <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
-        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl">
-          <DialogHeader className="p-6 bg-white border-b shrink-0">
-            <DialogTitle className="text-2xl font-bold">Customize Your Rental</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Add services to your {selectedBookingEquipment?.name}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto max-h-[60vh] p-6 space-y-6 bg-gray-50/50">
-            {/* Equipment Summary Card */}
-            <div className="bg-white p-4 rounded-xl border shadow-sm flex items-center space-x-4">
-              <div className="h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center text-3xl">
-                {selectedBookingEquipment?.imageFile ? (
-                  <img src={selectedBookingEquipment.imageFile} alt="" className="h-full w-full object-cover rounded-lg" />
-                ) : (
-                  selectedBookingEquipment?.image
-                )}
+      {/* DIRECT IN-APP CHAT MODAL */}
+      <Dialog open={isChatModalOpen} onOpenChange={setIsChatModalOpen}>
+        <DialogContent className="sm:max-w-lg bg-white rounded-2xl p-0 overflow-hidden flex flex-col h-[540px]">
+          {/* Header */}
+          <div className="p-4 bg-emerald-600 text-white flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-white/20 rounded-xl">
+                <Truck className="h-5 w-5 text-white" />
               </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-lg">{selectedBookingEquipment?.name}</h4>
-                <p className="text-sm text-muted-foreground">{selectedBookingEquipment?.location}</p>
-                <p className="text-success font-bold">{selectedBookingEquipment?.pricePerDay} / day</p>
+              <div>
+                <h3 className="font-bold text-sm leading-tight">{chatEquipment?.name || "Machinery"}</h3>
+                <p className="text-[11px] text-emerald-100 flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  Owner: {chatEquipment?.owner_name || "Ram Charan"} · Verified & Confidential
+                </p>
               </div>
             </div>
 
-            {/* Nearby Equipment Shops */}
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
-                <Truck className="h-4 w-4" />
-                <span>Nearby Equipment Shops</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Official partners and support providers for this model.</p>
-
-              <div
-                className={`bg-white p-4 rounded-xl border shadow-sm flex items-center justify-between cursor-pointer transition-all ${bookingOptions.selectedShop ? 'border-primary ring-1 ring-primary/20' : 'opacity-70'}`}
-                onClick={() => setBookingOptions(prev => ({ ...prev, selectedShop: !prev.selectedShop }))}
+            <div className="flex items-center gap-2">
+              {/* REALTIME VOICE CALL IN CHAT MODAL */}
+              <Button
+                size="sm"
+                onClick={() =>
+                  startConfidentialCall(
+                    chatEquipment?.owner_name || "Ram Charan",
+                    chatEquipment?.name || "Machinery",
+                    chatEquipment?.id || 1,
+                    chatEquipment?.phone_number || "6305936623"
+                  )
+                }
+                className="bg-white/20 hover:bg-white/30 text-white border-0 rounded-xl text-xs font-medium flex items-center gap-1"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-bold">Ramesh Agriculture Services</span>
-                    <Badge variant="secondary" className="text-[10px] bg-blue-50 text-blue-600 border-blue-100">Verified</Badge>
-                  </div>
-                  <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                    <span>1.5 km away</span>
-                    <span>•</span>
-                    <div className="flex items-center">
-                      <Star className="h-3 w-3 text-warning fill-current mr-0.5" />
-                      4.9
-                    </div>
-                  </div>
-                  <div className="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-blue-50 text-blue-700 border border-blue-100">
-                    <Shield className="h-2.5 w-2.5 mr-1" />
-                    Official Partner
-                  </div>
+                <PhoneCall className="h-3.5 w-3.5" />
+                <span>Call</span>
+              </Button>
+
+              <button
+                onClick={() => setIsChatModalOpen(false)}
+                className="p-1 rounded-lg hover:bg-white/20 text-white transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Messages Area */}
+          <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50" ref={chatScrollRef}>
+            {(chatMessages[chatEquipment?.id || 1] || []).map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex flex-col ${msg.sender === "renter" ? "items-end" : "items-start"}`}
+              >
+                <div
+                  className={`max-w-xs p-3 rounded-2xl text-xs leading-relaxed ${
+                    msg.sender === "renter"
+                      ? "bg-emerald-600 text-white rounded-tr-xs"
+                      : "bg-white border border-slate-200 text-slate-800 rounded-tl-xs shadow-xs"
+                  }`}
+                >
+                  <p className="font-bold text-[10px] opacity-75 mb-0.5">{msg.senderName}</p>
+                  <p>{msg.text}</p>
                 </div>
-                <div className="flex flex-col items-end space-y-2">
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${bookingOptions.selectedShop ? 'border-primary bg-primary/10' : 'border-gray-300'}`}>
-                    {bookingOptions.selectedShop && <div className="w-3 h-3 bg-primary rounded-full" />}
-                  </div>
-                  <span className="text-[10px] font-bold text-success">Free Support</span>
-                </div>
+                <span className="text-[10px] text-slate-400 mt-1 px-1">{msg.timestamp}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Input Bar */}
+          <div className="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+            <Input
+              placeholder="Ask about dates, acreage rate, or implements..."
+              value={newChatInput}
+              onChange={(e) => setNewChatInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && chatEquipment) handleSendMessage(chatEquipment.id);
+              }}
+              className="rounded-xl text-xs border-slate-300 focus:ring-emerald-500"
+            />
+            <Button
+              size="sm"
+              onClick={() => chatEquipment && handleSendMessage(chatEquipment.id)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-3 shrink-0"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* INCOMING CALL DIALOG (INSTAGRAM-STYLE POPUP ON RECIPIENT APP) */}
+      <Dialog open={isIncomingCallOpen} onOpenChange={setIsIncomingCallOpen}>
+        <DialogContent className="sm:max-w-sm bg-slate-950 text-white border-slate-800 rounded-3xl p-6 text-center shadow-2xl">
+          <div className="flex flex-col items-center space-y-4 py-3">
+            <div className="relative flex items-center justify-center">
+              <div className="absolute w-28 h-28 rounded-full bg-emerald-500/30 animate-ping"></div>
+              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-xl relative z-10">
+                <PhoneCall className="h-9 w-9 animate-pulse" />
               </div>
             </div>
 
-            {/* Services Options */}
-            <div className="space-y-4 pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-50 rounded-lg">
-                    <Wrench className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold">Shop Service</p>
-                    <p className="text-xs text-muted-foreground">Professional maintenance</p>
-                  </div>
-                </div>
-                <Switch
-                  checked={bookingOptions.includeShopService}
-                  onCheckedChange={(checked) => setBookingOptions(prev => ({ ...prev, includeShopService: checked }))}
-                />
-              </div>
+            <div className="space-y-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Incoming In-App Voice Call</span>
+              <h3 className="text-xl font-bold text-white">{incomingCall?.callerName || "Farmer (Renter)"}</h3>
+              <p className="text-xs text-slate-400">Inquiry for {incomingCall?.equipmentName || "Machinery"}</p>
+            </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-orange-50 rounded-lg">
-                    <Shield className="h-4 w-4 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold">Repair Package</p>
-                    <p className="text-xs text-muted-foreground">Comprehensive coverage</p>
-                  </div>
-                </div>
-                <Switch
-                  checked={bookingOptions.includeRepairPackage}
-                  onCheckedChange={(checked) => setBookingOptions(prev => ({ ...prev, includeRepairPackage: checked }))}
-                />
-              </div>
+            {/* Accept & Decline Buttons */}
+            <div className="flex items-center justify-center gap-4 pt-4 w-full">
+              <button
+                type="button"
+                onClick={declineIncomingCall}
+                className="flex-1 py-3.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/30 transition-all hover:scale-102"
+              >
+                <PhoneOff className="h-4 w-4" />
+                <span>Decline</span>
+              </button>
 
-              {selectedBookingEquipment?.operatorAvailable && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-green-50 rounded-lg">
-                      <Settings className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold">Operator ({selectedBookingEquipment.operatorName})</p>
-                      <p className="text-xs text-muted-foreground">Experienced driver</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-sm font-bold">₹{selectedBookingEquipment.operatorFee}/day</span>
-                    <Switch
-                      checked={bookingOptions.includeOperator}
-                      onCheckedChange={(checked) => setBookingOptions(prev => ({ ...prev, includeOperator: checked }))}
-                    />
-                  </div>
+              <button
+                type="button"
+                onClick={acceptIncomingCall}
+                className="flex-1 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 animate-pulse"
+              >
+                <PhoneCall className="h-4 w-4" />
+                <span>Accept Call</span>
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* INSTAGRAM-STYLE IN-APP ACTIVE VOICE CALL DIALOG */}
+      <Dialog open={isCallModalOpen} onOpenChange={setIsCallModalOpen}>
+        <DialogContent className="sm:max-w-sm bg-slate-950 text-white border-slate-800 rounded-3xl p-6 text-center shadow-2xl">
+          <div className="flex flex-col items-center space-y-4 py-4">
+            {/* Pulsing Avatar */}
+            <div className="relative flex items-center justify-center">
+              <div
+                className={`absolute w-28 h-28 rounded-full ${
+                  callStatus === "connected" ? "bg-emerald-500/20 animate-ping" : "bg-blue-500/20 animate-pulse"
+                }`}
+              ></div>
+              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-xl relative z-10">
+                <Truck className="h-9 w-9" />
+              </div>
+            </div>
+
+            {/* Recipient Details */}
+            <div className="space-y-1">
+              <h3 className="text-xl font-bold text-white">{callRecipient.name}</h3>
+              <p className="text-xs text-emerald-400 font-medium">{callRecipient.equipment}</p>
+              
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-900 rounded-full border border-slate-800 text-emerald-400 text-[11px] font-medium">
+                <Lock className="h-3 w-3" />
+                <span>In-App P2P Voice Call · Private</span>
+              </div>
+            </div>
+
+            {/* Call Status, Live Wave Visualizer & Duration */}
+            <div className="py-1">
+              {callStatus === "ringing" ? (
+                <div className="space-y-1.5">
+                  <span className="text-sm font-semibold text-blue-400 animate-pulse">Ringing in-app...</span>
+                  <p className="text-[10px] text-slate-500">Connecting WebRTC P2P Voice Tunnel</p>
                 </div>
+              ) : callStatus === "connected" ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-1 h-5">
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s] h-3"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s] h-5"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce h-4"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.2s] h-2.5"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.35s] h-4.5"></div>
+                  </div>
+
+                  <p className="text-2xl font-mono font-bold text-white tracking-wider">
+                    {formatCallDuration(callSeconds)}
+                  </p>
+                </div>
+              ) : (
+                <span className="text-sm font-semibold text-red-400">Call Ended</span>
               )}
             </div>
 
-            {/* Cost Breakdown */}
-            <div className="pt-6 border-t space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Equipment</span>
-                <span>{selectedBookingEquipment?.pricePerDay}</span>
+            {/* In-App Call Audio Controls (Mute / Speaker / End Call) */}
+            <div className="flex items-center justify-center gap-5 pt-3">
+              <button
+                type="button"
+                onClick={toggleMicrophoneMute}
+                className={`p-3.5 rounded-full transition-all ${
+                  isMuted ? "bg-red-500/20 text-red-400 border border-red-500/40" : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
+                }`}
+                title={isMuted ? "Unmute Mic" : "Mute Mic"}
+              >
+                {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              </button>
+
+              {/* End Call Button */}
+              <button
+                type="button"
+                onClick={() => endConfidentialCall(true)}
+                className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-600/30 transition-transform hover:scale-105 active:scale-95"
+                title="Hang Up"
+              >
+                <PhoneOff className="h-6 w-6" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsSpeakerOn(!isSpeakerOn)}
+                className={`p-3.5 rounded-full transition-all ${
+                  isSpeakerOn ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
+                }`}
+                title="Toggle Speaker"
+              >
+                {isSpeakerOn ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* BOOKING MODAL */}
+      <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
+        <DialogContent className="sm:max-w-lg bg-white rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-slate-900">
+              Book {selectedEquipment?.name}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Owner: {selectedEquipment?.owner_name} · Confidential Booking
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedEquipment && (
+            <div className="space-y-4 py-2 text-sm">
+              {/* Billing mode selector */}
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Billing Mode</Label>
+                <div className="grid grid-cols-3 gap-2 mt-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setBookingForm({ ...bookingForm, billing_mode: "day" })}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-colors ${
+                      bookingForm.billing_mode === "day"
+                        ? "bg-emerald-600 text-white border-emerald-600"
+                        : "bg-slate-50 text-slate-700 border-slate-200"
+                    }`}
+                  >
+                    Daily (₹{selectedEquipment.price_per_day})
+                  </button>
+                  {selectedEquipment.price_per_acre && selectedEquipment.price_per_acre > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setBookingForm({ ...bookingForm, billing_mode: "acre" })}
+                      className={`py-2 px-3 rounded-xl border text-xs font-bold transition-colors ${
+                        bookingForm.billing_mode === "acre"
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-slate-50 text-slate-700 border-slate-200"
+                      }`}
+                    >
+                      Per Acre (₹{selectedEquipment.price_per_acre})
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setBookingForm({ ...bookingForm, billing_mode: "hour" })}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-colors ${
+                      bookingForm.billing_mode === "hour"
+                        ? "bg-emerald-600 text-white border-emerald-600"
+                        : "bg-slate-50 text-slate-700 border-slate-200"
+                    }`}
+                  >
+                    Hourly (₹{selectedEquipment.price_per_hour || 300})
+                  </button>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Shop Service</span>
-                <span>₹{bookingOptions.includeShopService ? '200' : '0'}</span>
+
+              {/* Units booked */}
+              <div>
+                <Label className="text-xs font-bold text-slate-700">
+                  {bookingForm.billing_mode === "acre"
+                    ? "Acres of Field to Cover"
+                    : bookingForm.billing_mode === "day"
+                    ? "Number of Days"
+                    : "Number of Hours"}
+                </Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={bookingForm.units_booked}
+                  onChange={(e) => setBookingForm({ ...bookingForm, units_booked: Number(e.target.value) })}
+                  className="mt-1 rounded-xl"
+                />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Repair Package</span>
-                <span>₹{bookingOptions.includeRepairPackage ? '150' : '0'}</span>
+
+              {/* Driver & Fuel Options */}
+              {selectedEquipment.operator_available && (
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                  <div>
+                    <p className="font-bold text-xs text-slate-900">Include Certified Driver / Operator</p>
+                    <p className="text-[11px] text-slate-500">+₹{selectedEquipment.operator_fee || 400} per shift</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={bookingForm.with_operator}
+                    onChange={(e) => setBookingForm({ ...bookingForm, with_operator: e.target.checked })}
+                    className="h-4 w-4 accent-emerald-600 rounded-md cursor-pointer"
+                  />
+                </div>
+              )}
+
+              {/* Field Location */}
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Field Location / Village</Label>
+                <Input
+                  placeholder="Village, District"
+                  value={bookingForm.renter_location}
+                  onChange={(e) => setBookingForm({ ...bookingForm, renter_location: e.target.value })}
+                  className="mt-1 rounded-xl"
+                />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Operator</span>
-                <span>₹{bookingOptions.includeOperator ? (selectedBookingEquipment?.operatorFee || '0') : '0'}</span>
+
+              {/* Total Estimated Bill */}
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-emerald-800 font-semibold">Total Estimated Amount:</p>
+                  <p className="text-2xl font-extrabold text-emerald-950">
+                    ₹
+                    {calculateBookingCost(
+                      selectedEquipment,
+                      bookingForm.billing_mode,
+                      bookingForm.units_booked,
+                      bookingForm.with_operator
+                    ).toLocaleString()}
+                  </p>
+                </div>
+                <Badge className="bg-emerald-600 text-white">Direct Handover Pay</Badge>
               </div>
-              <div className="flex justify-between items-center pt-3 border-t">
-                <span className="text-lg font-bold">Total / Day</span>
-                <span className="text-2xl font-bold">
-                  ₹{(
-                    parseInt(selectedBookingEquipment?.pricePerDay.replace('₹', '').replace(',', '') || '0') +
-                    (bookingOptions.includeShopService ? 200 : 0) +
-                    (bookingOptions.includeRepairPackage ? 150 : 0) +
-                    (bookingOptions.includeOperator ? parseInt(selectedBookingEquipment?.operatorFee || '0') : 0)
-                  ).toLocaleString()}
-                </span>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setIsBookingModalOpen(false)} className="rounded-xl">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmBooking} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
+              Confirm & Request Machine
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* LIST MACHINERY MODAL WITH REAL OWNER SELECTION & IMAGE/VIDEO UPLOAD AT TOP */}
+      <Dialog open={isListModalOpen} onOpenChange={setIsListModalOpen}>
+        <DialogContent className="sm:max-w-xl bg-white rounded-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-slate-900">
+              List Your Machinery in Custom Hiring Marketplace
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Upload photos/videos of your tractor or equipment to earn rental income
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-sm">
+            {/* TOP IMAGE / VIDEO UPLOAD DROPZONE */}
+            <div>
+              <Label className="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-1.5">
+                <Upload className="h-4 w-4 text-emerald-600" />
+                <span>Upload Machinery Photos or Demonstration Video *</span>
+              </Label>
+              
+              {listForm.mediaPreview ? (
+                <div className="relative aspect-16/9 rounded-xl overflow-hidden border border-emerald-300 bg-slate-900">
+                  {listForm.mediaType === "video" ? (
+                    <video
+                      src={listForm.mediaPreview}
+                      controls
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={listForm.mediaPreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setListForm((prev) => ({ ...prev, mediaPreview: null }))}
+                    className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-red-600 text-white rounded-full transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <Badge className="absolute bottom-2 left-2 bg-emerald-600 text-white">
+                    {listForm.mediaType === "video" ? "Video Ready" : "Photo Ready"}
+                  </Badge>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 hover:border-emerald-500 bg-slate-50 hover:bg-emerald-50/50 rounded-2xl cursor-pointer transition-colors group">
+                  <div className="p-3 bg-white rounded-xl shadow-xs group-hover:scale-110 transition-transform mb-2 flex gap-2">
+                    <ImageIcon className="h-5 w-5 text-emerald-600" />
+                    <VideoIcon className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <p className="text-xs font-bold text-slate-700 text-center">
+                    Click or Drag & Drop Machine Photo / Video
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Supports JPG, PNG, WebP, MP4, MOV (Up to 50MB)
+                  </p>
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleMediaUpload}
+                    className="hidden"
+                  />
+                </label>
+              )}
+            </div>
+
+            {/* OWNER PROFILE SELECTION */}
+            <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200 space-y-2">
+              <Label className="text-xs font-bold text-emerald-900">Select Equipment Owner Profile</Label>
+              <select
+                value={listForm.owner_name}
+                onChange={(e) => {
+                  const selectedName = e.target.value;
+                  const ownerObj = VERIFIED_OWNERS.find((o) => o.name === selectedName);
+                  if (ownerObj) {
+                    setListForm((prev) => ({
+                      ...prev,
+                      owner_name: ownerObj.name,
+                      phone_number: ownerObj.mobile,
+                      location: ownerObj.location
+                    }));
+                  } else {
+                    setListForm((prev) => ({
+                      ...prev,
+                      owner_name: selectedName
+                    }));
+                  }
+                }}
+                className="w-full px-3 py-2 rounded-xl border border-emerald-300 bg-white text-sm font-semibold text-slate-800"
+              >
+                <option value="Ram Charan">Ram Charan (Verified Owner · Guntur, AP)</option>
+                <option value="Charith">Charith (Verified Owner · Vijayawada, AP)</option>
+                <option value="Sai Madhu">Sai Madhu (Verified Owner · Amaravati / Bapatla, AP)</option>
+                <option value="custom">+ Custom / New Owner Profile</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Machine / Model Name *</Label>
+                <Input
+                  placeholder="e.g. Mahindra 575 DI / Sonalika 745"
+                  value={listForm.name}
+                  onChange={(e) => setListForm({ ...listForm, name: e.target.value })}
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Category</Label>
+                <select
+                  value={listForm.type}
+                  onChange={(e) => setListForm({ ...listForm, type: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm"
+                >
+                  <option value="tractor">Tractor (45-75 HP)</option>
+                  <option value="harvester">Combine Harvester</option>
+                  <option value="drone">Spraying Drone</option>
+                  <option value="tiller">Rotavator / Power Tiller</option>
+                  <option value="leveler">Laser Land Leveler</option>
+                  <option value="pump">Solar / Diesel Water Pump</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Rate / Day (₹)</Label>
+                <Input
+                  type="number"
+                  value={listForm.price_per_day}
+                  onChange={(e) => setListForm({ ...listForm, price_per_day: Number(e.target.value) })}
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Rate / Acre (₹)</Label>
+                <Input
+                  type="number"
+                  value={listForm.price_per_acre}
+                  onChange={(e) => setListForm({ ...listForm, price_per_acre: Number(e.target.value) })}
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Horsepower</Label>
+                <Input
+                  placeholder="e.g. 50 HP"
+                  value={listForm.horse_power}
+                  onChange={(e) => setListForm({ ...listForm, horse_power: e.target.value })}
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Owner Name</Label>
+                <Input
+                  placeholder="e.g. Ram Charan"
+                  value={listForm.owner_name}
+                  onChange={(e) => setListForm({ ...listForm, owner_name: e.target.value })}
+                  className="mt-1 rounded-xl font-semibold"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Owner Mobile (Kept 100% Confidential)</Label>
+                <Input
+                  placeholder="Mobile number (private to platform)"
+                  value={listForm.phone_number}
+                  onChange={(e) => setListForm({ ...listForm, phone_number: e.target.value })}
+                  className="mt-1 rounded-xl font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Driver / Operator Available?</Label>
+                <select
+                  value={listForm.operator_available ? "yes" : "no"}
+                  onChange={(e) => setListForm({ ...listForm, operator_available: e.target.value === "yes" })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-sm"
+                >
+                  <option value="yes">Yes (Driver Available)</option>
+                  <option value="no">No (Self-Driven Only)</option>
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs font-bold text-slate-700">Village / District Location</Label>
+                <Input
+                  placeholder="e.g. Guntur, Andhra Pradesh"
+                  value={listForm.location}
+                  onChange={(e) => setListForm({ ...listForm, location: e.target.value })}
+                  className="mt-1 rounded-xl"
+                />
               </div>
             </div>
           </div>
 
-          <DialogFooter className="p-6 bg-white border-t flex sm:justify-between gap-4 shrink-0">
-            <Button variant="outline" className="flex-1 h-12 rounded-xl" onClick={() => setIsBookingModalOpen(false)}>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setIsListModalOpen(false)} className="rounded-xl">
               Cancel
             </Button>
-            <Button className="flex-1 h-12 rounded-xl bg-success hover:bg-success/90 text-white font-bold" onClick={handleConfirmBooking}>
-              Confirm & Pay
+            <Button onClick={handleListEquipment} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold">
+              Publish Listing (Automatic)
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* PRINTABLE AGREEMENT / CHALLAN MODAL */}
+      <Dialog open={isAgreementModalOpen} onOpenChange={setIsAgreementModalOpen}>
+        <DialogContent className="sm:max-w-2xl bg-white rounded-2xl">
+          <DialogHeader className="border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle className="text-lg font-bold text-slate-900">
+                  AgroVision Custom Hiring Handover Challan
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500">
+                  Standard Peer-to-Peer Agricultural Machinery Rental Agreement
+                </DialogDescription>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.print()}
+                className="rounded-xl print:hidden flex items-center gap-1.5"
+              >
+                <Printer className="h-4 w-4" />
+                Print Challan
+              </Button>
+            </div>
+          </DialogHeader>
+
+          {activeAgreementBooking && (
+            <div className="space-y-4 py-2 text-xs text-slate-800 leading-relaxed font-sans">
+              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div>
+                  <p className="font-bold text-slate-500 uppercase text-[10px]">Equipment Owner</p>
+                  <p className="font-bold text-sm text-slate-900">{activeAgreementBooking.owner_name}</p>
+                  <p className="text-slate-600 text-[11px]">Channel: P2P Encrypted Verified Link</p>
+                </div>
+                <div>
+                  <p className="font-bold text-slate-500 uppercase text-[10px]">Booking Reference</p>
+                  <p className="font-bold text-sm text-slate-900">#AGRO-{activeAgreementBooking.id}</p>
+                  <p className="text-slate-600">Date: {activeAgreementBooking.created_at}</p>
+                </div>
+              </div>
+
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-100 border-b border-slate-200 font-bold">
+                    <tr>
+                      <th className="p-2.5">Item Description</th>
+                      <th className="p-2.5">Billing Basis</th>
+                      <th className="p-2.5">Operator</th>
+                      <th className="p-2.5 text-right">Agreed Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="p-2.5 font-semibold">{activeAgreementBooking.equipment_name}</td>
+                      <td className="p-2.5 capitalize">{activeAgreementBooking.units_booked} {activeAgreementBooking.billing_mode}s</td>
+                      <td className="p-2.5">{activeAgreementBooking.with_operator ? "Driver Included" : "Self-Driven"}</td>
+                      <td className="p-2.5 font-bold text-right">₹{activeAgreementBooking.total_amount.toLocaleString()}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                <p className="font-bold text-slate-700 text-xs">Standard Handover Terms:</p>
+                <ul className="list-disc pl-4 space-y-0.5 text-slate-600 text-[11px]">
+                  <li>The machine is received in good operational condition without pre-existing hydraulic leaks.</li>
+                  <li>Renter assumes responsibility for fuel unless marked as fuel-inclusive.</li>
+                  <li>In case of mechanical breakdown on field, work clock is paused and owner is notified immediately.</li>
+                </ul>
+              </div>
+
+              <div className="grid grid-cols-2 gap-8 pt-6 border-t border-slate-200 text-center font-bold text-xs">
+                <div>
+                  <div className="border-b border-slate-400 w-40 mx-auto mb-1"></div>
+                  <p>Owner: {activeAgreementBooking.owner_name} Signature</p>
+                </div>
+                <div>
+                  <div className="border-b border-slate-400 w-40 mx-auto mb-1"></div>
+                  <p>Renter Farmer Signature</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="print:hidden">
+            <Button variant="outline" onClick={() => setIsAgreementModalOpen(false)} className="rounded-xl w-full">
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

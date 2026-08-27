@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useWeather } from "@/components/dashboard/WeatherContext";
 import { Loader2 } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 import { getCropRecommendations } from "@/services/geminiService";
 import { getSoilTypeForLocation, getSoilNutrientsForLocation, SoilNutrients } from "@/services/soilService";
 import { CropRecommendation as CropRecommendationType } from "@/types/cropPrediction";
@@ -29,6 +28,22 @@ import LocationMaps from "./LocationMaps";
 const CropRecommendation = () => {
   const { weatherData, loading: weatherLoading, error: weatherError, fetchWeatherByCity, useCurrentLocation, locationName, location } = useWeather();
   const [cityInput, setCityInput] = useState("");
+
+  const [formData, setFormData] = useState({
+    location: "Delhi",
+    soilType: "loamy",
+    farmSize: "5",
+    budget: "100000",
+    season: "kharif",
+    previousCrop: "Rice",
+    category: "All"
+  });
+
+  const [recommendations, setRecommendations] = useState<CropRecommendationType[]>([]);
+  const [soilNutrients, setSoilNutrients] = useState<SoilNutrients | null>(null);
+  const [iotData, setIotData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setFormData(prev => {
@@ -60,12 +75,6 @@ const CropRecommendation = () => {
         // Update nutrients based on location and soil
         const nutrients = getSoilNutrientsForLocation(location.lat, location.lon, soil);
         setSoilNutrients(nutrients);
-
-        // Move focus to next field (farm size)
-        const farmSizeInput = document.getElementById('farmSize');
-        if (farmSizeInput) {
-          (farmSizeInput as HTMLInputElement).focus();
-        }
       } catch (err) {
         console.warn('Soil lookup error', err);
       }
@@ -73,20 +82,6 @@ const CropRecommendation = () => {
     updateSoil();
     return () => { mounted = false; };
   }, [location]);
-  const [formData, setFormData] = useState({
-    location: "Delhi",
-    soilType: "loamy",
-    farmSize: "12",
-    budget: "100000",
-    season: "rabi",
-    previousCrop: "Rice"
-  });
-
-  const [recommendations, setRecommendations] = useState<CropRecommendationType[]>([]);
-  const [soilNutrients, setSoilNutrients] = useState<SoilNutrients | null>(null);
-  const [iotData, setIotData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Fetch IoT Sensor Data from Open-Meteo
   useEffect(() => {
@@ -105,14 +100,14 @@ const CropRecommendation = () => {
     return () => { mounted = false; };
   }, [location]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setLoading(true);
     setError(null);
     setRecommendations([]);
 
     try {
-      console.log('🚀 Getting AI-powered crop recommendations with data:', formData);
+      console.log('🚀 Getting AI-powered dynamic crop recommendations with data:', formData);
 
       const aiRecommendations = await getCropRecommendations({
         location: formData.location,
@@ -120,14 +115,14 @@ const CropRecommendation = () => {
         soilType: formData.soilType,
         season: formData.season,
         budget: formData.budget,
-        previousCrop: formData.previousCrop
+        previousCrop: formData.previousCrop,
+        category: formData.category
       });
 
       console.log('📊 Received AI recommendations:', aiRecommendations);
-
       setRecommendations(aiRecommendations);
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error getting recommendations:", err);
       setError("Failed to get AI-powered crop recommendations. Please try again.");
     } finally {
@@ -179,93 +174,105 @@ const CropRecommendation = () => {
                 <Button type="button" onClick={() => cityInput.trim() && fetchWeatherByCity(cityInput.trim())}>Search</Button>
                 <Button type="button" variant="outline" onClick={useCurrentLocation}><MapPin className="h-4 w-4 mr-1.5" />Use Current</Button>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="location">Location / District</Label>
                   <Input
                     id="location"
-                    placeholder="e.g., Pune, Maharashtra"
                     value={formData.location}
-                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    placeholder="e.g. Pune, Ludhiana, Guntur"
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="farmSize">Farm Size (acres)</Label>
+                  <Label htmlFor="farmSize">Farm Size (Acres)</Label>
                   <Input
                     id="farmSize"
-                    placeholder="e.g., 12"
                     type="number"
+                    step="0.5"
+                    min="0.5"
                     value={formData.farmSize}
-                    onChange={(e) => handleInputChange("farmSize", e.target.value)}
+                    onChange={(e) => handleInputChange('farmSize', e.target.value)}
+                    placeholder="e.g. 5"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="soilType">Soil Type</Label>
-                  <Select value={formData.soilType} onValueChange={(value) => handleInputChange("soilType", value)}>
-                    <SelectTrigger className="w-full">
+                  <Select value={formData.soilType} onValueChange={(val) => handleInputChange('soilType', val)}>
+                    <SelectTrigger id="soilType">
                       <SelectValue placeholder="Select soil type" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border border-gray-200 shadow-lg">
-                      <SelectItem value="loamy" className="text-gray-900 hover:bg-gray-100">Loamy Soil</SelectItem>
-                      <SelectItem value="clay" className="text-gray-900 hover:bg-gray-100">Clay Soil</SelectItem>
-                      <SelectItem value="sandy" className="text-gray-900 hover:bg-gray-100">Sandy Soil</SelectItem>
-                      <SelectItem value="silt" className="text-gray-900 hover:bg-gray-100">Silt Soil</SelectItem>
-                      <SelectItem value="black" className="text-gray-900 hover:bg-gray-100">Black Soil</SelectItem>
-                      <SelectItem value="red" className="text-gray-900 hover:bg-gray-100">Red Soil</SelectItem>
-                      <SelectItem value="alluvial" className="text-gray-900 hover:bg-gray-100">Alluvial Soil</SelectItem>
-                      <SelectItem value="mixed" className="text-gray-900 hover:bg-gray-100">Mixed Soil</SelectItem>
+                    <SelectContent>
+                      <SelectItem value="loamy">Loamy Soil</SelectItem>
+                      <SelectItem value="clay">Clay Soil</SelectItem>
+                      <SelectItem value="sandy">Sandy Soil</SelectItem>
+                      <SelectItem value="black">Black Soil</SelectItem>
+                      <SelectItem value="red">Red Soil</SelectItem>
+                      <SelectItem value="alluvial">Alluvial Soil</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div>
                   <Label htmlFor="season">Season</Label>
-                  <Select value={formData.season} onValueChange={(value) => handleInputChange("season", value)}>
-                    <SelectTrigger>
+                  <Select value={formData.season} onValueChange={(val) => handleInputChange('season', val)}>
+                    <SelectTrigger id="season">
                       <SelectValue placeholder="Select season" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="kharif">Kharif (Monsoon)</SelectItem>
-                      <SelectItem value="rabi">Rabi (Winter)</SelectItem>
-                      <SelectItem value="zaid">Zaid (Summer)</SelectItem>
+                      <SelectItem value="kharif">Kharif (Monsoon: Jun - Oct)</SelectItem>
+                      <SelectItem value="rabi">Rabi (Winter: Oct - Mar)</SelectItem>
+                      <SelectItem value="zaid">Zaid / Summer (Mar - Jun)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="budget">Budget (₹)</Label>
+                  <Label htmlFor="category">Crop Category</Label>
+                  <Select value={formData.category} onValueChange={(val) => handleInputChange('category', val)}>
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">🌟 All Crops (Vegetables, Fruits, Grains)</SelectItem>
+                      <SelectItem value="Vegetables">🥦 Vegetables</SelectItem>
+                      <SelectItem value="Fruits">🍎 Fruits</SelectItem>
+                      <SelectItem value="Grains & Millets">🌾 Grains & Millets</SelectItem>
+                      <SelectItem value="Pulses & Legumes">🫘 Pulses & Legumes</SelectItem>
+                      <SelectItem value="Oilseeds & Spices">🌻 Oilseeds & Spices</SelectItem>
+                      <SelectItem value="Cash & Plantation">🎋 Cash & Plantation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="budget">Available Budget (₹)</Label>
                   <Input
                     id="budget"
-                    placeholder="e.g., 100000"
                     type="number"
                     value={formData.budget}
-                    onChange={(e) => handleInputChange("budget", e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="previousCrop">Previous Crop</Label>
-                  <Input
-                    id="previousCrop"
-                    placeholder="e.g., Rice"
-                    value={formData.previousCrop}
-                    onChange={(e) => handleInputChange("previousCrop", e.target.value)}
+                    onChange={(e) => handleInputChange('budget', e.target.value)}
+                    placeholder="e.g. 100000"
                   />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2.5">
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
+                    Analyzing Live Weather & Real-Time Mandi Prices...
                   </>
                 ) : (
                   <>
-                    <Target className="mr-2 h-4 w-4" />
+                    <Brain className="mr-2 h-4 w-4" />
                     Get Recommendations
                   </>
                 )}
@@ -274,146 +281,128 @@ const CropRecommendation = () => {
           </CardContent>
         </Card>
 
-        {/* Location Maps Grid */}
-        <div className="space-y-6">
-          {location && <LocationMaps lat={location.lat} lon={location.lon} />}
+        {/* Live Soil & Weather Intelligence Card */}
+        <Card className="border-0 shadow-card-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Thermometer className="h-5 w-5 text-primary" />
+              <span>Live Soil & Weather Intelligence</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <LocationMaps
+              lat={location?.lat}
+              lon={location?.lon}
+              locationName={formData.location || locationName}
+              height="280px"
+            />
 
-          {/* Current Conditions */}
-          <Card className="border-0 shadow-card-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Thermometer className="h-5 w-5" />
-                <span>Real-Time IoT Sensor Data (Simulated)</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {weatherLoading ? (
-                <div className="flex items-center justify-center h-24">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+            {iotData && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="p-3 bg-amber-50/70 rounded-lg border border-amber-100">
+                  <div className="flex items-center space-x-1.5 mb-1">
+                    <Thermometer className="h-4 w-4 text-amber-600" />
+                    <span className="text-xs font-semibold text-amber-900">Air Temp</span>
+                  </div>
+                  <p className="text-xl font-bold text-amber-700">{iotData.temperature_2m}°C</p>
+                  <p className="text-[11px] text-amber-600/80">Ambient</p>
                 </div>
-              ) : weatherError || !weatherData ? (
-                <p className="text-sm text-destructive">{weatherError || "Could not load weather."}</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Thermometer className="h-4 w-4 text-warning" />
-                      <span className="text-sm font-medium">Temperature</span>
-                    </div>
-                    <p className="text-2xl font-bold">{iotData ? iotData.temperature_2m : Math.round(weatherData.main.temp)}°C</p>
-                    <p className="text-xs text-muted-foreground">{weatherData.weather[0].main}</p>
-                  </div>
 
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Droplets className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">Humidity</span>
-                    </div>
-                    <p className="text-2xl font-bold">{iotData ? iotData.relative_humidity_2m : weatherData.main.humidity}%</p>
-                    <p className="text-xs text-muted-foreground">Air moisture level</p>
+                <div className="p-3 bg-blue-50/70 rounded-lg border border-blue-100">
+                  <div className="flex items-center space-x-1.5 mb-1">
+                    <Droplets className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-semibold text-blue-900">Humidity</span>
                   </div>
+                  <p className="text-xl font-bold text-blue-700">{iotData.relative_humidity_2m}%</p>
+                  <p className="text-[11px] text-blue-600/80">Relative</p>
                 </div>
-              )}
 
-              {/* IoT Soil Data */}
-              {iotData && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-amber-50/50 rounded-lg border border-amber-100">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Target className="h-4 w-4 text-amber-600" />
-                      <span className="text-sm font-medium text-amber-900">Soil Temp (0cm)</span>
-                    </div>
-                    <p className="text-2xl font-bold text-amber-700">{iotData.soil_temperature_0cm}°C</p>
-                    <p className="text-xs text-amber-600/80">Surface temp</p>
+                <div className="p-3 bg-emerald-50/70 rounded-lg border border-emerald-100 col-span-2 sm:col-span-1">
+                  <div className="flex items-center space-x-1.5 mb-1">
+                    <Droplets className="h-4 w-4 text-emerald-600" />
+                    <span className="text-xs font-semibold text-emerald-900">Soil Moisture</span>
                   </div>
-
-                  <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-100">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Droplets className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-900">Soil Moisture</span>
-                    </div>
-                    <p className="text-2xl font-bold text-blue-700">{iotData.soil_moisture_0_to_7cm} m³/m³</p>
-                    <p className="text-xs text-blue-600/80">0-7cm depth</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="p-4 bg-gradient-to-r from-success/10 to-primary/10 rounded-lg border border-success/20">
-                <h4 className="font-medium text-success mb-2">Soil Health Status</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Nitrogen</span>
-                    <Badge variant="secondary">{soilNutrients?.nitrogen || 'Good'}</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Phosphorus</span>
-                    <Badge variant="secondary">{soilNutrients?.phosphorus || 'Medium'}</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Potassium</span>
-                    <Badge variant="secondary">{soilNutrients?.potassium || 'High'}</Badge>
-                  </div>
+                  <p className="text-xl font-bold text-emerald-700">{iotData.soil_moisture_0_to_7cm} m³/m³</p>
+                  <p className="text-[11px] text-emerald-600/80">0-7cm depth</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            )}
 
-
-        {/* Error Display */}
-        {error && (
-          <Card className="border-destructive bg-destructive/5">
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <p className="text-sm">{error}</p>
+            <div className="p-4 bg-gradient-to-r from-success/10 to-primary/10 rounded-lg border border-success/20">
+              <h4 className="font-semibold text-success mb-2 text-sm">Soil Health Status ({formData.soilType})</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Nitrogen (N)</span>
+                  <Badge variant="secondary">{soilNutrients?.nitrogen || 'Optimal'}</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Phosphorus (P)</span>
+                  <Badge variant="secondary">{soilNutrients?.phosphorus || 'Medium'}</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Potassium (K)</span>
+                  <Badge variant="secondary">{soilNutrients?.potassium || 'High'}</Badge>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* AI Recommendations */}
+      {/* Error Display */}
+      {error && (
+        <Card className="border-destructive bg-destructive/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 text-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <p className="text-sm">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
+      {/* AI Recommendations Results */}
       {recommendations.length > 0 && (
-        <div className="space-y-6">
-          {/* Header with AI Badge */}
+        <div className="space-y-6 pt-2">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold flex items-center">
                 <Brain className="mr-2 h-5 w-5 text-primary" />
-                AI-Powered Crop Recommendations
+                AI-Powered Crop Recommendations ({recommendations.length} Varieties)
               </h2>
               <p className="text-sm text-muted-foreground">
-                Personalized recommendations based on your farm conditions
+                Personalized recommendations calculated mathematically from live Mandi prices & weather conditions
               </p>
             </div>
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleSubmit}
+                onClick={() => handleSubmit()}
                 disabled={loading}
                 className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
               >
                 <Target className="mr-2 h-4 w-4" />
-                Get New Mix
+                Recalculate
               </Button>
             </div>
           </div>
 
-
-          {/* 6 Crop Recommendations */}
+          {/* 6 Crop Recommendations Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recommendations.map((rec, index) => {
               return (
                 <Card key={index} className="border-2 border-gray-200 bg-white shadow-card-shadow hover:shadow-hover-lift hover:bg-gray-50 transition-all duration-300">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">
-                        <span className="font-semibold">{rec.cropName}</span>
-                      </CardTitle>
+                      <div>
+                        <CardTitle className="text-lg">
+                          <span className="font-semibold">{rec.cropName}</span>
+                        </CardTitle>
+                        {rec.category && (
+                          <span className="text-[11px] text-muted-foreground font-medium">{rec.category}</span>
+                        )}
+                      </div>
                       <Badge
                         className={
                           rec.profitability === "High Profit"
@@ -444,7 +433,7 @@ const CropRecommendation = () => {
                       </div>
                     </div>
 
-                    <div className="p-3 bg-blue-50/50 rounded-lg border border-blue-100 space-y-2">
+                    <div className="p-3 bg-blue-50/50 rounded-lg border border-blue-100 space-y-1">
                       <div className="flex justify-between items-center">
                         <p className="text-xs text-blue-700 font-medium flex items-center">
                           <TrendingUp className="w-3 h-3 mr-1" /> Market Price
@@ -452,13 +441,13 @@ const CropRecommendation = () => {
                         <span className="text-sm font-bold text-blue-900">{rec.marketPrice}</span>
                       </div>
                       {rec.priceTrend && (
-                        <div className="text-xs text-blue-600 border-t border-blue-200 pt-1 mt-1">
+                        <div className="text-[11px] text-blue-600 border-t border-blue-200 pt-1 mt-1">
                           Trend: {rec.priceTrend}
                         </div>
                       )}
                     </div>
 
-                    {/* Enhanced Profit Information */}
+                    {/* Profit Information */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 bg-red-50/50 rounded-lg border border-red-100">
                         <p className="text-xs text-red-700 font-medium">Investment</p>
@@ -470,10 +459,11 @@ const CropRecommendation = () => {
                       </div>
                     </div>
 
+                    {/* Reasons */}
                     <div>
                       <p className="text-sm font-semibold mb-2 text-gray-800">Why this crop?</p>
-                      <ul className="space-y-2">
-                        {rec.reasons.map((reason: string, idx: number) => (
+                      <ul className="space-y-1.5">
+                        {rec.reasons && rec.reasons.map((reason: string, idx: number) => (
                           <li key={idx} className="text-xs text-gray-700 flex items-start">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full mr-2 mt-1.5 flex-shrink-0"></div>
                             <span>{reason}</span>
@@ -498,9 +488,8 @@ const CropRecommendation = () => {
             })}
           </div>
         </div>
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 };
 

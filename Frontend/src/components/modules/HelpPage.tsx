@@ -1,12 +1,19 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   HelpCircle,
   Phone,
+  PhoneCall,
+  PhoneOff,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
   Mail,
   MapPin,
   Clock,
@@ -24,767 +31,1145 @@ import {
   Send,
   ArrowLeft,
   MessageSquare,
-  Plus
+  Plus,
+  Bot,
+  Sparkles,
+  CheckCircle2,
+  Check,
+  Radio,
+  Lock,
+  Truck,
+  Stethoscope,
+  ChevronRight,
+  RefreshCw,
+  FileText,
+  ExternalLink,
+  ArrowRight
 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
 
-const HelpPage = () => {
+interface HelpPageProps {
+  setActiveModule?: (module: string) => void;
+}
+
+interface CommunityChannel {
+  id: string;
+  name: string;
+  members: number;
+  region: string;
+  category: string;
+  description: string;
+  active_now: number;
+}
+
+interface CommunityMessage {
+  id: number;
+  sender: string;
+  text: string;
+  time: string;
+  is_expert?: boolean;
+  reaction?: string;
+}
+
+interface SupportTicket {
+  id: string;
+  subject: string;
+  category: string;
+  status: "Submitted" | "In Review" | "Resolved";
+  createdAt: string;
+  response?: string;
+}
+
+const COMMUNITY_CHANNELS: CommunityChannel[] = [
+  {
+    id: "1",
+    name: "Delta Paddy & Rice Growers",
+    members: 1420,
+    region: "Andhra Pradesh & Telangana",
+    category: "Paddy & Grains",
+    description: "Discussions on MTU-1061 / BPT-5204 nursery, blast prevention, water rotation, and mandi prices.",
+    active_now: 42
+  },
+  {
+    id: "2",
+    name: "Guntur Chilli & Cotton Circle",
+    members: 1980,
+    region: "Guntur / Prakasam / Warangal",
+    category: "Cash Crops",
+    description: "Managing black thrips, pesticide schedules, drip fertigation, and daily Guntur yard rates.",
+    active_now: 68
+  },
+  {
+    id: "3",
+    name: "Farm Machinery & Drones",
+    members: 860,
+    region: "South India",
+    category: "Mechanization",
+    description: "Custom hiring rates, drone spraying tips, tractor implements, rotavators, and laser land leveling.",
+    active_now: 24
+  },
+  {
+    id: "4",
+    name: "Micro-Irrigation & Solar Pumps",
+    members: 650,
+    region: "Rayalaseema / Telangana",
+    category: "Irrigation",
+    description: "Drip automation, subsidy paperwork for APMIP / PM-KUSUM, and borewell management.",
+    active_now: 19
+  },
+  {
+    id: "5",
+    name: "Organic & Natural Farming",
+    members: 1120,
+    region: "All Regions",
+    category: "Organic",
+    description: "Jeevamrutham recipes, neem oil pest management, vermicompost, and zero-budget techniques.",
+    active_now: 31
+  }
+];
+
+const HelpPage: React.FC<HelpPageProps> = ({ setActiveModule }) => {
   const { locationData } = useLocation();
   const { user } = useAuth();
+
+  // Active Main Tab
+  const [activeTab, setActiveTab] = useState<"guide" | "community" | "ai_helpdesk" | "contact">("guide");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Community State
+  const [channels, setChannels] = useState<CommunityChannel[]>(COMMUNITY_CHANNELS);
+  const [selectedChannel, setSelectedChannel] = useState<CommunityChannel>(COMMUNITY_CHANNELS[0]);
+  const [channelSearch, setChannelSearch] = useState("");
+  const [chatMessages, setChatMessages] = useState<CommunityMessage[]>([]);
+  const [newMsgText, setNewMsgText] = useState("");
+  const [userHandle, setUserHandle] = useState("");
   const socketRef = useRef<WebSocket | null>(null);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+
+  // AI Assistant State
+  const [aiInput, setAiInput] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiChat, setAiChat] = useState<Array<{ sender: "user" | "bot"; text: string; time: string }>>([
+    {
+      sender: "bot",
+      text: "Namaste! I am your AI Farming Assistant. Ask me anything about crop diseases, spray dosages, fertilizer schedules, equipment rental, or government schemes.",
+      time: "Just now"
+    }
+  ]);
+
+  // Support Tickets State
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([
+    {
+      id: "TK-8402",
+      subject: "PM-KISAN 17th Installment Status Check",
+      category: "Government Schemes",
+      status: "Resolved",
+      createdAt: "Yesterday, 3:30 PM",
+      response: "Your e-KYC status is verified. The ₹2,000 installment has been credited to your Aadhaar-linked bank account."
+    },
+    {
+      id: "TK-8439",
+      subject: "Chilli Thrips Spray Schedule Guidance",
+      category: "Crop Management",
+      status: "In Review",
+      createdAt: "Today, 10:15 AM",
+      response: "Dr. Priya Sharma (Entomologist) is reviewing your query. Recommendation will be shared shortly."
+    }
+  ]);
+
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
+    category: "Crop Disease & Soil Health",
     subject: "",
     message: ""
   });
+  const [ticketSubmitted, setTicketSubmitted] = useState<string | null>(null);
 
-  // Community Forum State
-  const [isForumOpen, setIsForumOpen] = useState(false);
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [selectedCommunity, setSelectedCommunity] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [chatMessage, setChatMessage] = useState("");
-  const [messages, setMessages] = useState<any[]>([]);
-  const [regData, setRegData] = useState({ name: "", expertise: "", mobile: "" });
+  // In-App Helpline Call State
+  const [isCallOpen, setIsCallOpen] = useState(false);
+  const [callState, setCallState] = useState<"ringing" | "connected" | "ended">("ringing");
+  const [callDuration, setCallDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isSpeaker, setIsSpeaker] = useState(true);
+  const ringtoneRef = useRef<any>(null);
 
+  // Set User Handle
   useEffect(() => {
-    if (user) {
-      setRegData(prev => ({
-        ...prev,
-        name: user.full_name || "",
-        mobile: user.phone || ""
-      }));
+    if (user?.full_name) {
+      setUserHandle(`${user.full_name} (${locationData?.locationName || "Farmer"})`);
+    } else {
+      setUserHandle(`Farmer (${locationData?.locationName || "Andhra Pradesh"})`);
     }
-  }, [user]);
+  }, [user, locationData]);
 
+  // Fetch Channels from Backend
   useEffect(() => {
-    if (selectedCommunity && isRegistered) {
-      // Connect to WebSocket
-      const communityId = selectedCommunity.id;
-      const socket = new WebSocket(`ws://localhost:8000/api/community/ws/${communityId}`);
-
-      socket.onopen = () => {
-        console.log(`Connected to community ${communityId}`);
-      };
-
-      socket.onmessage = (event) => {
-        try {
-          const newMessage = JSON.parse(event.data);
-          setMessages(prev => {
-            // Check if message already exists (to avoid duplicates from broadcast)
-            if (prev.find(m => m.id === newMessage.id)) return prev;
-            return [...prev, newMessage];
-          });
-        } catch (e) {
-          console.error("Failed to parse message", e);
+    fetch("http://localhost:8000/api/community/channels")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.channels && data.channels.length > 0) {
+          setChannels(data.channels);
+          setSelectedChannel(data.channels[0]);
         }
-      };
+      })
+      .catch(() => {
+        setChannels(COMMUNITY_CHANNELS);
+      });
+  }, []);
 
-      socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
+  // Channel WebSocket & History
+  useEffect(() => {
+    if (!selectedChannel) return;
 
-      socket.onclose = () => {
-        console.log(`Disconnected from community ${communityId}`);
-      };
+    const channelId = selectedChannel.id;
 
-      socketRef.current = socket;
+    // Fetch initial chat history
+    fetch(`http://localhost:8000/api/community/channels/${channelId}/history`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.messages && data.messages.length > 0) {
+          setChatMessages(data.messages);
+        }
+      })
+      .catch(() => {});
 
-      return () => {
-        socket.close();
-        setMessages([]); // Clear messages when leaving community
-      };
+    // Establish WebSocket Connection
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    const ws = new WebSocket(`${protocol}//${host}/api/community/ws/${channelId}`);
+    socketRef.current = ws;
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        setChatMessages((prev) => {
+          if (prev.find((m) => m.id === msg.id)) return prev;
+          return [...prev, msg];
+        });
+      } catch (err) {
+        console.error("WebSocket message parse error", err);
+      }
+    };
+
+    return () => {
+      ws.close();
+      socketRef.current = null;
+    };
+  }, [selectedChannel]);
+
+  // Scroll Chat to Bottom
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
     }
-  }, [selectedCommunity, isRegistered]);
+  }, [chatMessages]);
 
-  const communities = [
-    { id: 1, name: "Local Farmers Network", members: 1250, type: "Local", description: "Connect with farmers in your immediate vicinity." },
-    { id: 2, name: "Organic Wheat Growers", members: 850, type: "Specialty", description: "Deep dive into organic wheat techniques." },
-    { id: 3, name: "Modern Irrigation Experts", members: 420, type: "Technical", description: "Sharing the latest in water-saving tech." },
-    { id: 4, name: "Pest Control Pioneers", members: 930, type: "Specialty", description: "Innovative ways to protect crops." }
-  ];
+  // Call Timer
+  useEffect(() => {
+    let timer: any = null;
+    if (isCallOpen && callState === "connected") {
+      timer = setInterval(() => {
+        setCallDuration((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isCallOpen, callState]);
 
-  const filteredCommunities = communities.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (regData.name && regData.expertise && regData.mobile) {
-      setIsRegistered(true);
+  // Navigation
+  const navigateTo = (moduleKey: string) => {
+    if (setActiveModule) {
+      setActiveModule(moduleKey);
+    } else {
+      window.location.hash = `#${moduleKey}`;
     }
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  // Send Message
+  const handleSendCommunityMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (chatMessage.trim() && socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      const messagePayload = {
-        sender: regData.name || "Me",
-        text: chatMessage,
-      };
-      socketRef.current.send(JSON.stringify(messagePayload));
-      setChatMessage("");
+    if (!newMsgText.trim() || !selectedChannel) return;
+
+    const payload = {
+      id: Date.now(),
+      sender: userHandle || "Farmer",
+      text: newMsgText.trim(),
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      is_expert: false
+    };
+
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify(payload));
+    } else {
+      setChatMessages((prev) => [...prev, payload]);
+    }
+    setNewMsgText("");
+  };
+
+  // Ask AI
+  const handleAskAI = async (queryText?: string) => {
+    const question = queryText || aiInput;
+    if (!question.trim()) return;
+
+    const userMsg = {
+      sender: "user" as const,
+      text: question,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    };
+
+    setAiChat((prev) => [...prev, userMsg]);
+    setAiInput("");
+    setAiLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:8000/api/chatbot/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: question,
+          context: {
+            location: locationData?.locationName || "Andhra Pradesh",
+            temp: locationData?.weatherData?.main?.temp || 28
+          }
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAiChat((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: data.response || data.reply || "Here is the recommended agricultural action for your query.",
+            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          }
+        ]);
+      } else {
+        throw new Error("Chat error");
+      }
+    } catch (err) {
+      let reply = "General Agricultural Recommendation: Maintain proper field drainage, inspect leaf tips for discoloration, and use balanced NPK fertilizers. For sudden pest flare-ups, consult your nearest Krishi Vigyan Kendra (KVK) or district agricultural officer.";
+      if (question.toLowerCase().includes("blast") || question.toLowerCase().includes("paddy")) {
+        reply = "For Paddy Blast (Pyricularia oryzae): Spray Tricyclazole 75% WP @ 0.6g per liter of water. Avoid excessive nitrogen application during misty mornings and maintain 2-3 inches standing water.";
+      } else if (question.toLowerCase().includes("pm-kisan") || question.toLowerCase().includes("scheme")) {
+        reply = "For PM-KISAN & State Schemes: Verify that your Aadhaar e-KYC and land records are seeded on pmkisan.gov.in. Subsidies are credited directly to your bank account via DBT.";
+      }
+
+      setAiChat((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: reply,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        }
+      ]);
+    } finally {
+      setAiLoading(false);
     }
   };
 
+  // Submit Contact Form
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle contact form submission
-    console.log("Contact form submitted:", contactForm);
-    alert("Thank you for your message! We'll get back to you soon.");
-    setContactForm({ name: "", email: "", subject: "", message: "" });
+    const newId = `TK-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newTicket: SupportTicket = {
+      id: newId,
+      subject: contactForm.subject || "Agricultural Inquiry",
+      category: contactForm.category,
+      status: "Submitted",
+      createdAt: "Just now"
+    };
+
+    setSupportTickets((prev) => [newTicket, ...prev]);
+    setTicketSubmitted(newId);
+    setContactForm({
+      name: "",
+      email: "",
+      category: "Crop Disease & Soil Health",
+      subject: "",
+      message: ""
+    });
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setContactForm(prev => ({ ...prev, [field]: value }));
+  // In-App Call Handlers
+  const startCall = () => {
+    setCallState("ringing");
+    setCallDuration(0);
+    setIsMuted(false);
+    setIsSpeaker(true);
+    setIsCallOpen(true);
+
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      ringtoneRef.current = { ctx, osc };
+    } catch (e) {}
+
+    setTimeout(() => {
+      if (ringtoneRef.current) {
+        try {
+          ringtoneRef.current.osc.stop();
+          ringtoneRef.current.ctx.close();
+        } catch (e) {}
+        ringtoneRef.current = null;
+      }
+      setCallState("connected");
+    }, 2000);
   };
 
-  const agricultureCategories = [
-    { name: "Crop Management", icon: <Wheat className="h-4 w-4" />, color: "bg-green-100 text-green-800" },
-    { name: "Disease Control", icon: <AlertTriangle className="h-4 w-4" />, color: "bg-red-100 text-red-800" },
-    { name: "Weather & Climate", icon: <Sun className="h-4 w-4" />, color: "bg-yellow-100 text-yellow-800" },
-    { name: "Market Insights", icon: <TrendingUp className="h-4 w-4" />, color: "bg-blue-100 text-blue-800" },
-    { name: "Soil & Nutrients", icon: <Leaf className="h-4 w-4" />, color: "bg-orange-100 text-orange-800" },
-    { name: "Water Management", icon: <Droplets className="h-4 w-4" />, color: "bg-cyan-100 text-cyan-800" }
-  ];
+  const endCall = () => {
+    if (ringtoneRef.current) {
+      try {
+        ringtoneRef.current.osc.stop();
+        ringtoneRef.current.ctx.close();
+      } catch (e) {}
+      ringtoneRef.current = null;
+    }
+    setCallState("ended");
+    setTimeout(() => {
+      setIsCallOpen(false);
+    }, 500);
+  };
 
-  const faqs = [
+  const formatTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const rem = secs % 60;
+    return `${mins.toString().padStart(2, "0")}:${rem.toString().padStart(2, "0")}`;
+  };
+
+  const filteredChannels = channels.filter(
+    (c) =>
+      c.name.toLowerCase().includes(channelSearch.toLowerCase()) ||
+      c.category.toLowerCase().includes(channelSearch.toLowerCase())
+  );
+
+  const guideCards = [
     {
-      question: "How do I use the disease detection feature?",
-      answer: "Simply upload a clear photo of your plant leaves using the camera icon in the Disease Detection module. Our AI will analyze the image and provide diagnosis and treatment recommendations."
+      title: "Crop Disease Diagnosis",
+      category: "AI Health Scanner",
+      icon: <Leaf className="h-5 w-5 text-emerald-600" />,
+      color: "emerald",
+      steps: [
+        "Take a clear photo or video of the infected leaf.",
+        "AI scans for fungal, bacterial, or viral symptoms.",
+        "Get instant medicine name & dosage per acre."
+      ],
+      moduleKey: "disease-detection",
+      buttonText: "Open Disease Detection"
     },
     {
-      question: "How accurate is the crop recommendation system?",
-      answer: "Our AI-powered crop recommendation system considers soil type, weather conditions, market prices, and your location to provide highly accurate suggestions with 90%+ success rate."
+      title: "Equipment & Machinery Rental",
+      category: "Machinery Hiring",
+      icon: <Truck className="h-5 w-5 text-blue-600" />,
+      color: "blue",
+      steps: [
+        "Filter Tractors, Drones, and Harvesters by district.",
+        "Call machine owners directly in-app with full privacy.",
+        "Book by day or acre and generate printable challans."
+      ],
+      moduleKey: "equipment-rental",
+      buttonText: "Browse Equipment Rentals"
     },
     {
-      question: "Can I access government schemes through FarmIQ?",
-      answer: "Yes! Our Government Schemes module provides information about subsidies, loans, and schemes available in your area. You can also apply directly through the platform."
+      title: "Direct Crop Marketplace",
+      category: "Farmer Marketplace",
+      icon: <Search className="h-5 w-5 text-indigo-600" />,
+      color: "indigo",
+      steps: [
+        "List your crop with quantity, grade, and price.",
+        "Chat with verified buyers in real-time.",
+        "Make in-app voice calls to finalize the deal."
+      ],
+      moduleKey: "marketplace",
+      buttonText: "Open Crop Marketplace"
     },
     {
-      question: "How do I rent farming equipment?",
-      answer: "Browse available equipment in the Equipment Rental section, select your preferred dates, and book directly. Equipment owners will contact you to confirm the rental."
+      title: "Crop Profit Predictor",
+      category: "Yield & Income",
+      icon: <TrendingUp className="h-5 w-5 text-amber-600" />,
+      color: "amber",
+      steps: [
+        "Select your district, soil type, and acreage.",
+        "Choose target crop for Kharif or Rabi season.",
+        "See estimated input costs, yield, and profit per acre."
+      ],
+      moduleKey: "crop-profit-predictor",
+      buttonText: "Open Profit Predictor"
     },
     {
-      question: "Is my data secure on FarmIQ?",
-      answer: "Absolutely! We use enterprise-grade security measures to protect your personal and farming data. All data is encrypted and stored securely."
+      title: "Agronomist Consultation",
+      category: "Scientific Advisory",
+      icon: <Stethoscope className="h-5 w-5 text-purple-600" />,
+      color: "purple",
+      steps: [
+        "Browse certified plant pathologists and soil doctors.",
+        "Click Consult to start an instant 2-way in-app voice call.",
+        "Get personalized advice on soil tests and crop nutrition."
+      ],
+      moduleKey: "expert-consultation",
+      buttonText: "Consult an Agronomist"
+    },
+    {
+      title: "Government Schemes & Subsidies",
+      category: "Welfare & Subsidies",
+      icon: <Shield className="h-5 w-5 text-teal-600" />,
+      color: "teal",
+      steps: [
+        "Browse Central (PM-KISAN, SMAM) and State schemes.",
+        "Check eligibility requirements in 1 click.",
+        "Apply directly on official government portals."
+      ],
+      moduleKey: "government-schemes",
+      buttonText: "View Government Schemes"
     }
   ];
 
   return (
-    <div className="p-6 lg:pl-0">
-      <div className="max-w-6xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-green-600 rounded-lg">
-              <HelpCircle className="h-6 w-6 text-white" />
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
+      
+      {/* 1. CLEAN, MODERN HEADER */}
+      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-emerald-200 text-xs font-medium">
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span>Help & Knowledge Center</span>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-green-600">Help & Support Center</h1>
-              <p className="text-muted-foreground">Get assistance with FarmIQ features and farming guidance</p>
-              {locationData?.locationName && (
-                <div className="flex items-center space-x-2 mt-2">
-                  <MapPin className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-700 font-medium">Location: {locationData.locationName}</span>
-                  {locationData.weatherData && (
-                    <span className="text-sm text-gray-600">
-                      • {Math.round(locationData.weatherData.main.temp)}°C, {locationData.weatherData.main.humidity}% humidity
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Quick Help Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <BookOpen className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <h3 className="font-semibold text-gray-900">User Guide</h3>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4">Learn how to use all FarmIQ features effectively</p>
-                  <Dialog open={isGuideOpen} onOpenChange={setIsGuideOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full">
-                        View Guide
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col p-0">
-                      <DialogHeader className="p-6 border-b bg-green-600 text-white">
-                        <DialogTitle className="flex items-center gap-2 text-2xl">
-                          <BookOpen className="h-6 w-6" />
-                          FarmIQ Complete User Guide
-                        </DialogTitle>
-                      </DialogHeader>
-
-                      <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                        {/* Introduction */}
-                        <div className="bg-green-50 p-6 rounded-2xl border border-green-100">
-                          <h2 className="text-xl font-bold text-green-800 mb-3">Welcome to FarmIQ</h2>
-                          <p className="text-green-700 leading-relaxed">
-                            This guide helps you understand how to use each feature of the platform to manage your farm efficiently and confidently. FarmIQ is designed to be simple, farmer-friendly, and focused on improving your productivity.
-                          </p>
-                        </div>
-
-                        {/* Features Grid */}
-                        <div className="space-y-8">
-                          {/* Home Dashboard */}
-                          <section className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                                <Sun className="h-5 w-5" />
-                              </div>
-                              <h3 className="text-xl font-bold text-gray-900">🏠 Home – Smart Farming Dashboard</h3>
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <Card className="border-none bg-gray-50">
-                                <CardContent className="p-4">
-                                  <h4 className="font-bold text-blue-700 mb-2 underline decoration-blue-200 underline-offset-4">What you can see</h4>
-                                  <ul className="space-y-2 text-sm text-gray-600">
-                                    <li className="flex gap-2"><span>•</span> Live weather conditions (temp, humidity, alerts)</li>
-                                    <li className="flex gap-2"><span>•</span> Crop profit prediction for the season</li>
-                                    <li className="flex gap-2"><span>•</span> Current market price trends</li>
-                                    <li className="flex gap-2"><span>•</span> Active government subsidy information</li>
-                                  </ul>
-                                </CardContent>
-                              </Card>
-                              <Card className="border-none bg-blue-50/50">
-                                <CardContent className="p-4">
-                                  <h4 className="font-bold text-blue-700 mb-2 underline decoration-blue-200 underline-offset-4">Benefit to you</h4>
-                                  <p className="text-sm text-gray-700">Saves time and helps in daily decision-making by providing a quick overview of your farm's status.</p>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          </section>
-
-                          {/* Profit Predictor */}
-                          <section className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-green-100 rounded-lg text-green-600">
-                                <TrendingUp className="h-5 w-5" />
-                              </div>
-                              <h3 className="text-xl font-bold text-gray-900">📈 Crop Profit Predictor (AI)</h3>
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-4">
-                              <div className="space-y-3">
-                                <p className="text-sm text-gray-600 italic">Predicts expected profit or loss using advanced AI analysis of crop type, season, market prices, and weather.</p>
-                                <div className="bg-gray-50 p-4 rounded-xl">
-                                  <h4 className="text-sm font-bold text-gray-900 mb-2">How to use:</h4>
-                                  <ol className="text-sm text-gray-600 space-y-1 list-decimal ml-4">
-                                    <li>Open Crop Profit Predictor</li>
-                                    <li>Select your crop and season</li>
-                                    <li>View estimated profit vs last season</li>
-                                  </ol>
-                                </div>
-                              </div>
-                              <div className="bg-green-50/50 p-4 rounded-xl flex items-center">
-                                <div>
-                                  <h4 className="font-bold text-green-700 mb-1">Impact:</h4>
-                                  <p className="text-sm text-gray-700">Helps plan expenses and avoids risky crop choices through AI-driven income planning.</p>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-
-                          {/* Weather & Alerts */}
-                          <section className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-yellow-100 rounded-lg text-yellow-600">
-                                <AlertTriangle className="h-5 w-5" />
-                              </div>
-                              <h3 className="text-xl font-bold text-gray-900">🌦️ Weather & Alerts (Live)</h3>
-                            </div>
-                            <div className="bg-yellow-50/30 border border-yellow-100 p-5 rounded-2xl">
-                              <p className="text-sm text-gray-700 mb-3">Real-time updates to protect your crops from rain, heat, or storms.</p>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                {['Temperature', 'Conditions', 'Humidity', 'Active Alerts'].map((item) => (
-                                  <div key={item} className="bg-white p-2 rounded-lg text-center text-xs font-semibold text-yellow-700 shadow-sm">{item}</div>
-                                ))}
-                              </div>
-                              <p className="text-sm text-gray-600 mt-4 leading-relaxed font-medium">✨ Use alerts to plan irrigation and spraying schedules effectively.</p>
-                            </div>
-                          </section>
-
-                          {/* Government Schemes */}
-                          <section className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
-                                <Shield className="h-5 w-5" />
-                              </div>
-                              <h3 className="text-xl font-bold text-gray-900">🏛️ Government Schemes</h3>
-                            </div>
-                            <div className="p-4 bg-purple-50/30 rounded-xl">
-                              <p className="text-sm text-gray-700">Access active schemes like PM-KISAN. Check eligibility and status directly to ensure you never miss available benefits or subsidies.</p>
-                            </div>
-                          </section>
-
-                          {/* Marketplace */}
-                          <section className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
-                                <Search className="h-5 w-5" />
-                              </div>
-                              <h3 className="text-xl font-bold text-gray-900">🛒 Marketplace</h3>
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-6">
-                              <div className="space-y-2">
-                                <h4 className="text-sm font-bold text-gray-900">What you can do:</h4>
-                                <ul className="text-sm text-gray-600 space-y-1">
-                                  <li>• Sell crops directly to buyers</li>
-                                  <li>• Buy seeds & fertilizers locally</li>
-                                  <li>• Track transparent market prices</li>
-                                </ul>
-                              </div>
-                              <div className="bg-orange-50/50 p-4 rounded-xl">
-                                <h4 className="text-sm font-bold text-orange-700 mb-1">Your Benefit:</h4>
-                                <p className="text-sm text-gray-700">Fair pricing by reducing middlemen and making better selling decisions.</p>
-                              </div>
-                            </div>
-                          </section>
-
-                          {/* Disease Detection */}
-                          <section className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-red-100 rounded-lg text-red-600">
-                                <Leaf className="h-5 w-5" />
-                              </div>
-                              <h3 className="text-xl font-bold text-gray-900">🌿 Crop Disease Detection (AI)</h3>
-                            </div>
-                            <div className="flex flex-col md:flex-row gap-6 p-4 border rounded-2xl bg-red-50/20">
-                              <div className="flex-1 space-y-2">
-                                <p className="text-sm text-gray-700">Early detection via AI image analysis. Just upload or capture a crop leaf image to get instant diagnosis and solution suggestions.</p>
-                              </div>
-                              <div className="flex-1">
-                                <div className="bg-white p-3 rounded-xl shadow-sm border border-red-100 text-sm">
-                                  <p className="font-bold text-red-600 mb-1">Key Value:</p>
-                                  <p className="text-gray-600 italic">Reduces crop loss through timely and proper treatment guidance.</p>
-                                </div>
-                              </div>
-                            </div>
-                          </section>
-
-                          {/* Equipment Rentals */}
-                          <section className="space-y-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-cyan-100 rounded-lg text-cyan-600">
-                                <Plus className="h-5 w-5" />
-                              </div>
-                              <h3 className="text-xl font-bold text-gray-900">🚜 Equipment Rentals</h3>
-                            </div>
-                            <div className="p-5 bg-cyan-50/30 rounded-2xl border border-cyan-100">
-                              <p className="text-sm text-gray-700 mb-4 font-medium italic">Rent modern agricultural equipment easily from nearby providers.</p>
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                                <div className="p-3 bg-white rounded-lg shadow-sm">Select Equipment</div>
-                                <div className="p-3 bg-white rounded-lg shadow-sm">Choose Optional Services</div>
-                                <div className="p-3 bg-white rounded-lg shadow-sm">Confirm Booking</div>
-                              </div>
-                              <p className="text-sm text-gray-600 mt-4 underline underline-offset-4 decoration-cyan-200">Lower your farming costs with modern equipment without the high purchase price.</p>
-                            </div>
-                          </section>
-                        </div>
-
-                        {/* Summary Footer */}
-                        <div className="pt-8 border-t">
-                          <div className="bg-green-600 text-white p-6 rounded-2xl shadow-xl">
-                            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                              <Shield className="h-5 w-5" />
-                              Final Summary
-                            </h3>
-                            <div className="grid sm:grid-cols-2 gap-4 text-sm font-medium opacity-90">
-                              <p>✓ Simple & Farmer-friendly</p>
-                              <p>✓ Reduces Farming Risks</p>
-                              <p>✓ Improves Income Planning</p>
-                              <p>✓ Accessible 24/7 Support</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Users className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <h3 className="font-semibold text-gray-900">Community Forum</h3>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-4">Connect with other farmers and share experiences</p>
-                  <Dialog open={isForumOpen} onOpenChange={setIsForumOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Join Forum
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-hidden flex flex-col p-0">
-                      <DialogHeader className="p-4 border-b bg-green-600 text-white">
-                        <DialogTitle className="flex items-center gap-2">
-                          <Users className="h-5 w-5" />
-                          FarmIQ Community Forum
-                        </DialogTitle>
-                      </DialogHeader>
-
-                      <div className="flex-1 overflow-y-auto p-4">
-                        {!isRegistered ? (
-                          <div className="space-y-6 py-4">
-                            <div className="text-center">
-                              <h3 className="text-lg font-bold text-gray-900">Register for Communities</h3>
-                              <p className="text-sm text-gray-600">Join our growing network of expert farmers</p>
-                            </div>
-                            <form onSubmit={handleRegister} className="space-y-4">
-                              <div className="space-y-2">
-                                <label className="text-sm font-medium">Full Name</label>
-                                <Input
-                                  placeholder="Enter your name"
-                                  value={regData.name}
-                                  onChange={(e) => setRegData({ ...regData, name: e.target.value })}
-                                  required
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <label className="text-sm font-medium">Mobile Number</label>
-                                <Input
-                                  placeholder="Enter your mobile number"
-                                  value={regData.mobile}
-                                  onChange={(e) => setRegData({ ...regData, mobile: e.target.value })}
-                                  required
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <label className="text-sm font-medium">Key Expertise</label>
-                                <Input
-                                  placeholder="e.g., Organic Farming, Irrigation"
-                                  value={regData.expertise}
-                                  onChange={(e) => setRegData({ ...regData, expertise: e.target.value })}
-                                  required
-                                />
-                              </div>
-                              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
-                                Complete Registration
-                              </Button>
-                            </form>
-                          </div>
-                        ) : !selectedCommunity ? (
-                          <div className="space-y-4">
-                            <div className="relative">
-                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                              <Input
-                                className="pl-10"
-                                placeholder="Search communities (Local, Specialty...)"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                              />
-                            </div>
-                            <div className="grid gap-3">
-                              {filteredCommunities.map(community => (
-                                <Card key={community.id} className="cursor-pointer hover:border-green-600 transition-colors" onClick={() => setSelectedCommunity(community)}>
-                                  <CardContent className="p-4">
-                                    <div className="flex justify-between items-start mb-2">
-                                      <h4 className="font-bold text-green-700">{community.name}</h4>
-                                      <Badge variant="secondary">{community.type}</Badge>
-                                    </div>
-                                    <p className="text-xs text-gray-600 line-clamp-2 mb-3">{community.description}</p>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                                      <Users className="h-3 w-3" />
-                                      {community.members.toLocaleString()} members
-                                      <Plus className="h-3 w-3 ml-auto text-green-600" />
-                                      <span className="text-green-600">View & Join</span>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col h-[500px]">
-                            <div className="flex items-center gap-3 pb-3 border-b mb-4">
-                              <Button variant="ghost" size="icon" onClick={() => setSelectedCommunity(null)}>
-                                <ArrowLeft className="h-4 w-4" />
-                              </Button>
-                              <div>
-                                <h3 className="font-bold text-gray-900">{selectedCommunity.name}</h3>
-                                <div className="flex items-center gap-2">
-                                  <span className="h-2 w-2 bg-green-500 rounded-full"></span>
-                                  <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Active Now</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
-                              {messages.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-center p-8 opacity-60">
-                                  <MessageSquare className="h-12 w-12 text-gray-300 mb-2" />
-                                  <p className="text-sm font-medium">Welcome to {selectedCommunity.name}!</p>
-                                  <p className="text-xs">Start a conversation with your fellow farmers.</p>
-                                </div>
-                              ) : (
-                                messages.map(msg => (
-                                  <div key={msg.id} className={`flex flex-col ${msg.sender === regData.name ? 'items-end' : 'items-start'}`}>
-                                    <div className={`max-w-[80%] rounded-2xl p-3 ${msg.sender === regData.name ? 'bg-green-600 text-white rounded-tr-none' : 'bg-gray-100 text-gray-800 rounded-tl-none'}`}>
-                                      <p className="text-xs font-bold mb-1 opacity-80">{msg.sender}</p>
-                                      <p className="text-sm">{msg.text}</p>
-                                      <p className="text-[10px] mt-1 text-right opacity-70">{msg.time}</p>
-                                    </div>
-                                  </div>
-                                ))
-                              )}
-                            </div>
-
-                            <form onSubmit={handleSendMessage} className="flex gap-2 pt-4 border-t">
-                              <Input
-                                placeholder="Type your message..."
-                                value={chatMessage}
-                                onChange={(e) => setChatMessage(e.target.value)}
-                              />
-                              <Button type="submit" size="icon" className="bg-green-600 hover:bg-green-700 shrink-0">
-                                <Send className="h-4 w-4" />
-                              </Button>
-                            </form>
-                          </div>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* FAQ Section */}
-            <Card className="shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <HelpCircle className="h-5 w-5" />
-                  Frequently Asked Questions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {faqs.map((faq, index) => (
-                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0">
-                      <h4 className="font-semibold text-gray-900 mb-2">{faq.question}</h4>
-                      <p className="text-sm text-gray-600">{faq.answer}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Contact Form */}
-            <Card className="shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Mail className="h-5 w-5" />
-                  Contact Us
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <form onSubmit={handleContactSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                      <Input
-                        value={contactForm.name}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
-                        placeholder="Your full name"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                      <Input
-                        type="email"
-                        value={contactForm.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        placeholder="your.email@example.com"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                    <Input
-                      value={contactForm.subject}
-                      onChange={(e) => handleInputChange("subject", e.target.value)}
-                      placeholder="What can we help you with?"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                    <Textarea
-                      value={contactForm.message}
-                      onChange={(e) => handleInputChange("message", e.target.value)}
-                      placeholder="Please describe your question or issue in detail..."
-                      rows={4}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-                    Send Message
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              How can we help you today?
+            </h1>
+            <p className="text-emerald-100 text-xs sm:text-sm max-w-2xl leading-relaxed">
+              Step-by-step guides for every feature, real-time regional farmer channels, instant AI agricultural diagnosis, and toll-free helplines.
+            </p>
+            {locationData?.locationName && (
+              <div className="flex items-center gap-2 text-xs text-emerald-200 font-medium pt-1">
+                <MapPin className="h-3.5 w-3.5" />
+                <span>Region: {locationData.locationName}</span>
+                {locationData.weatherData && (
+                  <span>• {Math.round(locationData.weatherData.main.temp)}°C</span>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Agriculture Categories */}
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-green-50">
-              <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <BookOpen className="h-5 w-5" />
-                  Agriculture Topics
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  {agricultureCategories.map((category, index) => (
-                    <div key={index} className={`p-3 rounded-xl ${category.color} hover:shadow-md transition-all duration-200 cursor-pointer`}>
-                      <div className="flex items-center gap-3">
-                        <div className="p-1 bg-white/50 rounded-lg">
-                          {category.icon}
-                        </div>
-                        <span className="text-sm font-medium">{category.name}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Contact Information */}
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-blue-50">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Phone className="h-5 w-5" />
-                  Contact Support
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
-                  <div className="p-2 bg-blue-600 rounded-lg">
-                    <Phone className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-blue-900">Emergency Helpline</p>
-                    <p className="text-sm text-blue-700">1800-FARM-HELP</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
-                  <div className="p-2 bg-green-600 rounded-lg">
-                    <Mail className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-green-900">Email Support</p>
-                    <p className="text-sm text-green-700">help@farmiq.com</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
-                  <div className="p-2 bg-orange-600 rounded-lg">
-                    <MapPin className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-orange-900">Office Hours</p>
-                    <p className="text-sm text-orange-700">Mon-Fri: 9AM-6PM</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Tips */}
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-yellow-50">
-              <CardHeader className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Lightbulb className="h-5 w-5" />
-                  Quick Tips
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-3">
-                <div className="p-4 bg-green-50 rounded-xl border border-green-200 hover:shadow-md transition-all duration-200">
-                  <div className="flex items-start gap-3">
-                    <div className="p-1 bg-green-600 rounded-lg">
-                      <Leaf className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-green-800">Soil Testing</p>
-                      <p className="text-xs text-green-700 mt-1">Test your soil every 2-3 years for optimal crop yields</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-200">
-                  <div className="flex items-start gap-3">
-                    <div className="p-1 bg-blue-600 rounded-lg">
-                      <Sun className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-blue-800">Weather Monitoring</p>
-                      <p className="text-xs text-blue-700 mt-1">Check weather forecasts daily for better planning</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 bg-orange-50 rounded-xl border border-orange-200 hover:shadow-md transition-all duration-200">
-                  <div className="flex items-start gap-3">
-                    <div className="p-1 bg-orange-600 rounded-lg">
-                      <Wheat className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-orange-800">Crop Rotation</p>
-                      <p className="text-xs text-orange-700 mt-1">Rotate crops to maintain soil fertility</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Security Notice */}
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-green-50">
-              <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Shield className="h-5 w-5" />
-                  Security & Privacy
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="text-center space-y-3">
-                  <div className="p-3 bg-green-100 rounded-xl">
-                    <Shield className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-green-800">Your Data is Secure</p>
-                    <p className="text-xs text-green-700">We use enterprise-grade encryption to protect your information</p>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
-                    <Clock className="h-3 w-3" />
-                    <span>Last updated: {new Date().toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Action Button */}
+          <div className="shrink-0 flex items-center gap-3">
+            <Button
+              onClick={startCall}
+              className="bg-white hover:bg-emerald-50 text-emerald-900 font-bold rounded-xl px-5 py-5 shadow-sm flex items-center gap-2 text-xs sm:text-sm transition-all"
+            >
+              <PhoneCall className="h-4 w-4 text-emerald-700" />
+              <span>In-App Kisan Helpline</span>
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* 2. NAVIGATION TABS */}
+      <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="space-y-6">
+        <TabsList className="bg-slate-100 p-1 rounded-xl grid grid-cols-2 md:grid-cols-4 gap-1 w-full max-w-2xl">
+          <TabsTrigger
+            value="guide"
+            className="rounded-lg font-semibold text-xs py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>User Guides</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="community"
+            className="rounded-lg font-semibold text-xs py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+          >
+            <Users className="h-3.5 w-3.5" />
+            <span>Community Forum</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="ai_helpdesk"
+            className="rounded-lg font-semibold text-xs py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+          >
+            <Bot className="h-3.5 w-3.5" />
+            <span>AI Farming Assistant</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="contact"
+            className="rounded-lg font-semibold text-xs py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+          >
+            <Mail className="h-3.5 w-3.5" />
+            <span>Helplines & Support</span>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* TAB 1: USER GUIDES */}
+        <TabsContent value="guide" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {guideCards.map((card, idx) => (
+              <Card
+                key={idx}
+                className="bg-white border border-slate-200/90 rounded-2xl shadow-xs hover:shadow-sm hover:border-emerald-300 transition-all flex flex-col justify-between overflow-hidden"
+              >
+                <CardHeader className="pb-3 pt-5 px-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="p-2 bg-slate-50 border border-slate-100 rounded-xl">
+                      {card.icon}
+                    </div>
+                    <Badge variant="outline" className="text-[10px] font-medium text-slate-500 bg-slate-50">
+                      {card.category}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-base font-bold text-slate-900">
+                    {card.title}
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="px-5 pb-5 pt-0 space-y-4 text-xs">
+                  <div className="space-y-2 pt-1 border-t border-slate-100">
+                    {card.steps.map((step, stepIdx) => (
+                      <div key={stepIdx} className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                          {stepIdx + 1}
+                        </span>
+                        <p className="text-slate-600 text-xs leading-relaxed">{step}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    onClick={() => navigateTo(card.moduleKey)}
+                    variant="outline"
+                    className="w-full font-semibold rounded-xl text-xs h-10 border-slate-200 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <span>{card.buttonText}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* TAB 2: COMMUNITY FORUM */}
+        <TabsContent value="community" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden min-h-[560px]">
+            {/* Sidebar Channels */}
+            <div className="lg:col-span-4 border-r border-slate-100 p-4 space-y-3 bg-slate-50/50">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                <h3 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                  <Users className="h-4 w-4 text-emerald-700" />
+                  <span>Discussion Channels</span>
+                </h3>
+                <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 text-[10px]">
+                  Live
+                </Badge>
+              </div>
+
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <Input
+                  placeholder="Search channel topic..."
+                  value={channelSearch}
+                  onChange={(e) => setChannelSearch(e.target.value)}
+                  className="pl-8 text-xs rounded-xl bg-white h-9 border-slate-200"
+                />
+              </div>
+
+              {/* List */}
+              <div className="space-y-2 max-h-[440px] overflow-y-auto pr-1">
+                {filteredChannels.map((channel) => {
+                  const isSelected = selectedChannel?.id === channel.id;
+
+                  return (
+                    <div
+                      key={channel.id}
+                      onClick={() => setSelectedChannel(channel)}
+                      className={`p-3 rounded-xl cursor-pointer transition-all border ${
+                        isSelected
+                          ? "bg-emerald-50/80 border-emerald-300 shadow-xs"
+                          : "bg-white border-slate-200/80 hover:bg-slate-100"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="font-bold text-xs text-slate-900 truncate max-w-[190px]">
+                          {channel.name}
+                        </h4>
+                        <span className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          {channel.active_now}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 line-clamp-1 mb-1.5">
+                        {channel.description}
+                      </p>
+                      <span className="text-[10px] text-slate-400">
+                        {channel.members.toLocaleString()} members • {channel.region}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Chat Stream */}
+            <div className="lg:col-span-8 flex flex-col justify-between p-4 sm:p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base">{selectedChannel.name}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {selectedChannel.description}
+                  </p>
+                </div>
+                <Badge variant="outline" className="text-xs bg-slate-50">
+                  {selectedChannel.active_now} Active Now
+                </Badge>
+              </div>
+
+              {/* Message Feed */}
+              <div className="flex-1 p-3 overflow-y-auto space-y-3 my-3 bg-slate-50/50 rounded-xl max-h-[360px]" ref={chatScrollRef}>
+                {chatMessages.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400 space-y-1">
+                    <MessageSquare className="h-7 w-7 mx-auto text-slate-300" />
+                    <p className="text-xs font-semibold text-slate-600">No messages yet in this channel</p>
+                    <p className="text-[11px]">Start the conversation below.</p>
+                  </div>
+                ) : (
+                  chatMessages.map((msg) => {
+                    const isMe = msg.sender.startsWith(userHandle.split(" ")[0]);
+
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`flex flex-col ${isMe ? "items-end" : "items-start"} space-y-1`}
+                      >
+                        <div
+                          className={`max-w-md p-3.5 rounded-2xl text-xs leading-relaxed ${
+                            isMe
+                              ? "bg-emerald-700 text-white rounded-tr-xs"
+                              : msg.is_expert
+                              ? "bg-purple-50 border border-purple-200 text-purple-950 rounded-tl-xs"
+                              : "bg-white border border-slate-200 text-slate-800 rounded-tl-xs"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-3 mb-1">
+                            <span className="font-bold text-[11px] opacity-90 flex items-center gap-1">
+                              {msg.sender}
+                              {msg.is_expert && (
+                                <Badge className="bg-purple-600 text-white text-[9px] py-0 px-1 font-semibold">
+                                  Agronomist
+                                </Badge>
+                              )}
+                            </span>
+                            <span className="text-[10px] opacity-70">{msg.time}</span>
+                          </div>
+                          <p>{msg.text}</p>
+                          {msg.reaction && (
+                            <span className="mt-1.5 inline-block text-xs">
+                              {msg.reaction}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Chat Input Form */}
+              <form onSubmit={handleSendCommunityMessage} className="flex gap-2 pt-2 border-t border-slate-100">
+                <Input
+                  placeholder={`Write in ${selectedChannel.name}...`}
+                  value={newMsgText}
+                  onChange={(e) => setNewMsgText(e.target.value)}
+                  className="rounded-xl text-xs h-11 border-slate-200 focus:ring-emerald-600 bg-white"
+                />
+                <Button
+                  type="submit"
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl px-5 shrink-0"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* TAB 3: AI FARMING ASSISTANT */}
+        <TabsContent value="ai_helpdesk" className="space-y-6">
+          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+                  <Bot className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base sm:text-lg">AI Farming & Agronomy Assistant</h3>
+                  <p className="text-xs text-slate-500">
+                    Instant answers for crop diseases, fertilizer dosing, equipment hiring, and government schemes.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Prompts */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-slate-700">Suggested Questions:</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "What is the remedy for Paddy Blast disease?",
+                  "How to apply for SMAM 50% tractor subsidy in AP?",
+                  "Recommended dosage of Tricyclazole per acre",
+                  "What are today's average cotton prices?",
+                  "How to manage black thrips in Guntur Chilli?"
+                ].map((prompt, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleAskAI(prompt)}
+                    className="text-xs bg-slate-50 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 transition-colors text-left"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Messages Feed */}
+            <div className="p-4 bg-slate-50 rounded-xl space-y-3.5 max-h-[380px] overflow-y-auto border border-slate-200/70">
+              {aiChat.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
+                >
+                  <div
+                    className={`max-w-2xl p-3.5 rounded-2xl text-xs leading-relaxed ${
+                      msg.sender === "user"
+                        ? "bg-emerald-700 text-white rounded-tr-xs"
+                        : "bg-white border border-slate-200 text-slate-800 rounded-tl-xs shadow-xs"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-1 opacity-80 text-[10px]">
+                      <span className="font-semibold">{msg.sender === "user" ? "You" : "FarmIQ Assistant"}</span>
+                      <span>{msg.time}</span>
+                    </div>
+                    <p className="whitespace-pre-line text-xs">{msg.text}</p>
+                  </div>
+                </div>
+              ))}
+
+              {aiLoading && (
+                <div className="flex items-center gap-2 text-xs text-emerald-800 font-medium p-2">
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  <span>Consulting agricultural database...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Input Form */}
+            <div className="flex gap-2 pt-1">
+              <Input
+                placeholder="Ask any farming question (e.g. fertilizer dosage, pest remedy, subsidy eligibility)..."
+                value={aiInput}
+                onChange={(e) => setAiInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAskAI();
+                }}
+                className="rounded-xl text-xs h-11 border-slate-200 focus:ring-emerald-600"
+              />
+              <Button
+                onClick={() => handleAskAI()}
+                disabled={aiLoading || !aiInput.trim()}
+                className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl px-5 shrink-0 font-semibold"
+              >
+                <Send className="h-4 w-4 mr-1.5" />
+                Ask
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* TAB 4: HELPLINES & CONTACT */}
+        <TabsContent value="contact" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Contact Form */}
+            <Card className="lg:col-span-7 bg-white border border-slate-200/90 rounded-2xl shadow-xs p-6 sm:p-8 space-y-4">
+              <div>
+                <h3 className="font-bold text-slate-900 text-base sm:text-lg">Contact Agricultural Support</h3>
+                <p className="text-xs text-slate-500">
+                  Send your question to our agronomists and support team.
+                </p>
+              </div>
+
+              {ticketSubmitted && (
+                <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-emerald-900 text-xs">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <div>
+                      <p className="font-semibold">Inquiry submitted successfully!</p>
+                      <p className="text-emerald-700 text-[11px]">Ticket reference: <strong>{ticketSubmitted}</strong></p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setTicketSubmitted(null)}
+                    className="text-xs h-7 text-emerald-800"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              )}
+
+              <form onSubmit={handleContactSubmit} className="space-y-3.5 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Your Name *</label>
+                    <Input
+                      placeholder="e.g. V. Srinivasa Rao"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                      required
+                      className="rounded-xl h-10"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Contact Phone / Email *</label>
+                    <Input
+                      placeholder="e.g. 9876543210 or name@email.com"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                      required
+                      className="rounded-xl h-10"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Topic</label>
+                  <select
+                    value={contactForm.category}
+                    onChange={(e) => setContactForm({ ...contactForm, category: e.target.value })}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800"
+                  >
+                    <option value="Crop Disease & Soil Health">Crop Disease & Soil Health</option>
+                    <option value="Government Schemes">Government Schemes & PM-KISAN</option>
+                    <option value="Equipment Rental">Equipment Rental Inquiry</option>
+                    <option value="Marketplace">Marketplace & Selling</option>
+                    <option value="Technical Support">App / Technical Question</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Subject *</label>
+                  <Input
+                    placeholder="Brief description of the issue..."
+                    value={contactForm.subject}
+                    onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                    required
+                    className="rounded-xl h-10"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Message *</label>
+                  <Textarea
+                    placeholder="Provide details such as crop variety, field acreage, symptoms, or transaction details..."
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                    rows={4}
+                    required
+                    className="rounded-xl text-xs"
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold h-11 rounded-xl text-xs"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Submit Inquiry
+                </Button>
+              </form>
+            </Card>
+
+            {/* Official Directory & Tickets */}
+            <div className="lg:col-span-5 space-y-5">
+              {/* Toll-Free Directory */}
+              <Card className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-3.5">
+                <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-emerald-700" />
+                  <span>Official Government Helplines</span>
+                </h3>
+                <div className="space-y-2.5 text-xs">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-900">Kisan Call Center (KCC)</p>
+                      <p className="text-slate-500 text-[11px]">Govt of India • 22 Languages • 6 AM – 10 PM</p>
+                    </div>
+                    <span className="font-mono font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 text-xs">
+                      1800-180-1551
+                    </span>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-900">Krishi Vigyan Kendra (KVK)</p>
+                      <p className="text-slate-500 text-[11px]">District Technical Demonstration Desk</p>
+                    </div>
+                    <span className="font-mono font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 text-xs">
+                      1551 (Toll-Free)
+                    </span>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-900">PM-KISAN Helpdesk</p>
+                      <p className="text-slate-500 text-[11px]">Installment & e-KYC Verification</p>
+                    </div>
+                    <span className="font-mono font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 text-xs">
+                      011-24300606
+                    </span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Tickets List */}
+              <Card className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-3.5">
+                <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-emerald-700" />
+                  <span>Your Support Inquiries</span>
+                </h3>
+                <div className="space-y-2.5">
+                  {supportTickets.map((ticket) => (
+                    <div
+                      key={ticket.id}
+                      className="p-3 rounded-xl border border-slate-100 bg-slate-50/70 space-y-1.5 text-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-bold text-slate-900 text-[11px]">#{ticket.id}</span>
+                        <Badge
+                          variant="outline"
+                          className={
+                            ticket.status === "Resolved"
+                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                              : "bg-blue-50 text-blue-800 border-blue-200"
+                          }
+                        >
+                          {ticket.status}
+                        </Badge>
+                      </div>
+                      <p className="font-medium text-slate-800">{ticket.subject}</p>
+                      {ticket.response && (
+                        <p className="p-2 bg-white rounded-lg border border-slate-200 text-slate-600 text-[11px]">
+                          {ticket.response}
+                        </p>
+                      )}
+                      <p className="text-[10px] text-slate-400 text-right">{ticket.createdAt}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* IN-APP HELPLINE VOIP VOICE CALL DIALOG */}
+      <Dialog open={isCallOpen} onOpenChange={setIsCallOpen}>
+        <DialogContent className="sm:max-w-sm bg-slate-950 text-white border-slate-800 rounded-3xl p-6 text-center shadow-2xl">
+          <div className="flex flex-col items-center space-y-4 py-4">
+            {/* Avatar */}
+            <div className="relative flex items-center justify-center">
+              <div
+                className={`absolute w-24 h-24 rounded-full ${
+                  callState === "connected" ? "bg-emerald-500/20 animate-ping" : "bg-blue-500/20 animate-pulse"
+                }`}
+              ></div>
+              <div className="w-18 h-18 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-xl relative z-10 p-4">
+                <PhoneCall className="h-8 w-8" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white">Kisan Support Helpline</h3>
+              <p className="text-xs text-emerald-400 font-medium">On-Duty Agricultural Officer</p>
+              <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-slate-900 rounded-full border border-slate-800 text-slate-400 text-[10px]">
+                <Lock className="h-2.5 w-2.5" />
+                <span>In-App Voice Connection</span>
+              </div>
+            </div>
+
+            {/* Status & Timer */}
+            <div className="py-1">
+              {callState === "ringing" ? (
+                <span className="text-xs font-semibold text-blue-400 animate-pulse">Connecting...</span>
+              ) : callState === "connected" ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-center gap-1 h-4">
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s] h-2.5"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s] h-4"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce h-3"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.2s] h-2"></div>
+                  </div>
+                  <p className="text-xl font-mono font-bold text-white tracking-wider">
+                    {formatTime(callDuration)}
+                  </p>
+                </div>
+              ) : (
+                <span className="text-xs font-semibold text-red-400">Call Ended</span>
+              )}
+            </div>
+
+            {/* Audio Controls */}
+            <div className="flex items-center justify-center gap-4 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsMuted(!isMuted)}
+                className={`p-3 rounded-full transition-all ${
+                  isMuted ? "bg-red-500/20 text-red-400 border border-red-500/40" : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
+                }`}
+                title={isMuted ? "Unmute" : "Mute"}
+              >
+                {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </button>
+
+              {/* End Call */}
+              <button
+                type="button"
+                onClick={endCall}
+                className="p-3.5 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-lg transition-transform hover:scale-105"
+                title="Hang Up"
+              >
+                <PhoneOff className="h-5 w-5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsSpeaker(!isSpeaker)}
+                className={`p-3 rounded-full transition-all ${
+                  isSpeaker ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
+                }`}
+                title="Speaker"
+              >
+                {isSpeaker ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

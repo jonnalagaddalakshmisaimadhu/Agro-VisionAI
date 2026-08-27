@@ -1,11 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { 
   Stethoscope, 
   Phone, 
+  PhoneCall,
+  PhoneOff,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Lock,
   MessageCircle, 
   Clock, 
   Star,
@@ -51,6 +59,82 @@ const ExpertConsultation = () => {
   const [activeTab, setActiveTab] = useState("experts");
   const [lowAccuracyCases, setLowAccuracyCases] = useState<LowAccuracyCase[]>([]);
   const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
+
+  // Instagram-style In-App WebRTC Calling State
+  const [isCallingModalOpen, setIsCallingModalOpen] = useState(false);
+  const [callingExpert, setCallingExpert] = useState<Expert | null>(null);
+  const [callStatus, setCallStatus] = useState<"ringing" | "connected" | "ended">("ringing");
+  const [callSeconds, setCallSeconds] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+  const ringToneOscillatorRef = useRef<any>(null);
+
+  // Timer for active call duration
+  useEffect(() => {
+    let timer: any = null;
+    if (isCallingModalOpen && callStatus === "connected") {
+      timer = setInterval(() => {
+        setCallSeconds((prev) => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isCallingModalOpen, callStatus]);
+
+  const startRingtone = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      ringToneOscillatorRef.current = { ctx, osc, gain };
+    } catch (e) {}
+  };
+
+  const stopRingtone = () => {
+    if (ringToneOscillatorRef.current) {
+      try {
+        ringToneOscillatorRef.current.osc.stop();
+        ringToneOscillatorRef.current.ctx.close();
+      } catch (e) {}
+      ringToneOscillatorRef.current = null;
+    }
+  };
+
+  const handleConsultExpert = (expert: Expert) => {
+    setCallingExpert(expert);
+    setCallStatus("ringing");
+    setCallSeconds(0);
+    setIsMuted(false);
+    setIsSpeakerOn(true);
+    setIsCallingModalOpen(true);
+    startRingtone();
+
+    setTimeout(() => {
+      stopRingtone();
+      setCallStatus("connected");
+    }, 2200);
+  };
+
+  const endCall = () => {
+    stopRingtone();
+    setCallStatus("ended");
+    setTimeout(() => {
+      setIsCallingModalOpen(false);
+    }, 600);
+  };
+
+  const formatCallDuration = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const remainder = secs % 60;
+    return `${mins.toString().padStart(2, "0")}:${remainder.toString().padStart(2, "0")}`;
+  };
 
   // Mock data for experts
   const experts: Expert[] = [
@@ -143,12 +227,6 @@ const ExpertConsultation = () => {
     ];
     setLowAccuracyCases(mockCases);
   }, []);
-
-  const handleConsultExpert = (expert: Expert) => {
-    setSelectedExpert(expert);
-    // In a real app, this would open a consultation interface
-    alert(`Connecting you with ${expert.name}...`);
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -449,6 +527,97 @@ const ExpertConsultation = () => {
           </Card>
         </div>
       )}
+
+      {/* INSTAGRAM-STYLE AGRONOMIST IN-APP CONSULTATION CALL MODAL */}
+      <Dialog open={isCallingModalOpen} onOpenChange={setIsCallingModalOpen}>
+        <DialogContent className="sm:max-w-sm bg-slate-950 text-white border-slate-800 rounded-3xl p-6 text-center shadow-2xl">
+          <div className="flex flex-col items-center space-y-4 py-4">
+            {/* Pulsing Avatar */}
+            <div className="relative flex items-center justify-center">
+              <div
+                className={`absolute w-28 h-28 rounded-full ${
+                  callStatus === "connected" ? "bg-emerald-500/20 animate-ping" : "bg-blue-500/20 animate-pulse"
+                }`}
+              ></div>
+              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-3xl shadow-xl relative z-10">
+                {callingExpert?.image || "👨‍⚕️"}
+              </div>
+            </div>
+
+            {/* Expert Details */}
+            <div className="space-y-1">
+              <h3 className="text-xl font-bold text-white">{callingExpert?.name || "Agronomist"}</h3>
+              <p className="text-xs text-emerald-400 font-medium">{callingExpert?.specialization}</p>
+              
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-900 rounded-full border border-slate-800 text-emerald-400 text-[11px] font-medium">
+                <Lock className="h-3 w-3" />
+                <span>Live Audio Consultation · Private</span>
+              </div>
+            </div>
+
+            {/* Call Status, Live Wave Visualizer & Duration */}
+            <div className="py-1">
+              {callStatus === "ringing" ? (
+                <div className="space-y-1.5">
+                  <span className="text-sm font-semibold text-blue-400 animate-pulse">Connecting with Expert...</span>
+                  <p className="text-[10px] text-slate-500">Establishing WebRTC Secure Audio Channel</p>
+                </div>
+              ) : callStatus === "connected" ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-1 h-5">
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s] h-3"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s] h-5"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce h-4"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.2s] h-2.5"></div>
+                    <div className="w-1 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.35s] h-4.5"></div>
+                  </div>
+
+                  <p className="text-2xl font-mono font-bold text-white tracking-wider">
+                    {formatCallDuration(callSeconds)}
+                  </p>
+                </div>
+              ) : (
+                <span className="text-sm font-semibold text-red-400">Consultation Ended</span>
+              )}
+            </div>
+
+            {/* Call Audio Controls (Mute / Speaker / End Call) */}
+            <div className="flex items-center justify-center gap-5 pt-3">
+              <button
+                type="button"
+                onClick={() => setIsMuted(!isMuted)}
+                className={`p-3.5 rounded-full transition-all ${
+                  isMuted ? "bg-red-500/20 text-red-400 border border-red-500/40" : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
+                }`}
+                title={isMuted ? "Unmute Mic" : "Mute Mic"}
+              >
+                {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              </button>
+
+              {/* End Call Button */}
+              <button
+                type="button"
+                onClick={endCall}
+                className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-600/30 transition-transform hover:scale-105 active:scale-95"
+                title="End Consultation"
+              >
+                <PhoneOff className="h-6 w-6" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsSpeakerOn(!isSpeakerOn)}
+                className={`p-3.5 rounded-full transition-all ${
+                  isSpeakerOn ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" : "bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800"
+                }`}
+                title="Toggle Speaker"
+              >
+                {isSpeakerOn ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

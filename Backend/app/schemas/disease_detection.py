@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 class DiseaseDetectionRequest(BaseModel):
@@ -29,18 +29,21 @@ class CropRecommendationRequest(BaseModel):
     budget: Optional[float] = None
     season: Optional[str] = None
     previous_crop: Optional[str] = None
+    category: Optional[str] = None  # All, Vegetables, Fruits, Grains & Millets, Pulses, Oilseeds & Spices, Cash Crops
+    desired_crops: Optional[List[str]] = None
 
 class CropRecommendationResponse(BaseModel):
-    id: int
+    id: Optional[int] = 1
     location: str
     soil_type: Optional[str] = None
     farm_size: Optional[float] = None
     budget: Optional[float] = None
     season: Optional[str] = None
     previous_crop: Optional[str] = None
-    recommended_crops: Optional[List[dict]] = None
-    weather_data: Optional[dict] = None
-    created_at: datetime
+    category: Optional[str] = None
+    recommended_crops: Optional[List[Dict[str, Any]]] = None
+    weather_data: Optional[Dict[str, Any]] = None
+    created_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True

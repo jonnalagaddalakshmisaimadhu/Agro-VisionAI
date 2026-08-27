@@ -20,7 +20,6 @@ import ExpertConsultation from "./components/modules/ExpertConsultation";
 import AccuracyTest from "./components/modules/AccuracyTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginDemo from "./components/LoginDemo";
-import AquaSession from "./pages/AquaSession";
 import DiseaseDetection from "./components/modules/DiseaseDetection";
 import { FarmIQAssistance } from "./components/chatbot/FarmIQAssistance";
 
@@ -47,7 +46,6 @@ const App = () => (
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                 <Route path="/expert-consultation" element={<ProtectedRoute><ExpertConsultation /></ProtectedRoute>} />
                 <Route path="/accuracy-test" element={<ProtectedRoute><AccuracyTest /></ProtectedRoute>} />
-                <Route path="/aquasession" element={<ProtectedRoute><AquaSession /></ProtectedRoute>} />
                 <Route path="/disease-detection" element={<ProtectedRoute><DiseaseDetection /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

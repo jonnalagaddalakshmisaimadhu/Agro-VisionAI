@@ -22,7 +22,8 @@ from app.routers import (
     soil_district,
     soil_knn,
     chatbot,
-    community_chat
+    community_chat,
+    marketplace_chat
 )
 from app.database import engine, Base
 from app.core.config import settings
@@ -102,6 +103,8 @@ app.include_router(soil_district.router, prefix="/api", tags=["Soil District Loo
 app.include_router(soil_knn.router, prefix="/api", tags=["Soil KNN Prediction"])
 app.include_router(chatbot.router, prefix="/api", tags=["Chatbot"])
 app.include_router(community_chat.router, prefix="/api/community", tags=["Community Chat"])
+app.include_router(marketplace_chat.router, prefix="/api/marketplace", tags=["Marketplace Chat & Voice"])
+
 
 @app.get("/")
 async def root():

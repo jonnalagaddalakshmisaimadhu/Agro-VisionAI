@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,20 +15,38 @@ import {
   ShieldCheck,
   CheckCircle2,
   Brain,
-  Sparkles,
   Users,
   Snowflake,
   Leaf,
   BarChart3,
   CheckCircle,
-  MessageSquare
+  Volume2,
+  VolumeX,
+  Printer,
+  RefreshCw,
+  Video,
+  VideoOff,
+  ExternalLink,
+  Activity,
+  Layers
 } from "lucide-react";
 import EmbeddedAIChat from "./EmbeddedAIChat";
 import { detectPlantDisease } from "@/services/geminiService";
 import { DiseaseDetectionResult } from "@/types/cropPrediction";
 
-// Using the imported type instead of local interface
 type AnalysisResult = DiseaseDetectionResult;
+
+const LANGUAGE_VOICE_MAP: Record<string, string> = {
+  english: "en-IN",
+  hindi: "hi-IN",
+  telugu: "te-IN",
+  tamil: "ta-IN",
+  punjabi: "pa-IN",
+  gujarati: "gu-IN",
+  marathi: "mr-IN",
+  bengali: "bn-IN",
+  kannada: "kn-IN"
+};
 
 const DiseaseDetection = () => {
   const navigate = useNavigate();
@@ -38,33 +56,152 @@ const DiseaseDetection = () => {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [lowAccuracyResult, setLowAccuracyResult] = useState<AnalysisResult | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState("english");
+  const [viewMode, setViewMode] = useState<"original" | "heatmap" | "split">("split");
+  
+  // Real-time Live Camera State
+  const [isLiveCameraActive, setIsLiveCameraActive] = useState(false);
+  const [isAutoScanning, setIsAutoScanning] = useState(false);
+  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  
+  // Audio Speech synthesis state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  
   const [scanHistory, setScanHistory] = useState([
-    { id: 1, crop: "Blueberry", issue: "Blueberry : healthy", date: "2024-01-15", treatment: "Maintain health" },
-    { id: 2, crop: "Tomato", issue: "Late Blight", date: "2024-01-12", treatment: "Copper Fungicide" },
-    { id: 3, crop: "Apple", issue: "Apple : healthy", date: "2024-01-10", treatment: "Maintain health" },
+    { id: 1, crop: "Blueberry", issue: "Blueberry : healthy", date: "2026-08-27", treatment: "Maintain health", confidence: 99 },
+    { id: 2, crop: "Tomato", issue: "Tomato: Early blight", date: "2026-08-26", treatment: "Neem Oil & Copper Oxychloride", confidence: 95 },
+    { id: 3, crop: "Apple", issue: "Apple: Cedar apple rust", date: "2026-08-25", treatment: "Mancozeb 75% WP", confidence: 92 },
   ]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const autoScanTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Stop camera stream on unmount
+  useEffect(() => {
+    return () => {
+      stopLiveCamera();
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  // Handle live camera stream attachment
+  useEffect(() => {
+    if (isLiveCameraActive && videoRef.current && cameraStream) {
+      videoRef.current.srcObject = cameraStream;
+      videoRef.current.play().catch((err) => console.error("Video play error:", err));
+    }
+  }, [isLiveCameraActive, cameraStream]);
+
+  const startLiveCamera = async () => {
+    try {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      });
+      setCameraStream(stream);
+      setIsLiveCameraActive(true);
+      setSelectedImage(null);
+      setAnalysisError(null);
+    } catch (err: any) {
+      console.error("Camera access denied or unavailable:", err);
+      setAnalysisError("Camera access denied. Please allow camera permissions in your browser or upload an image.");
+      setIsLiveCameraActive(false);
+    }
+  };
+
+  const stopLiveCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+    if (autoScanTimerRef.current) {
+      clearInterval(autoScanTimerRef.current);
+      autoScanTimerRef.current = null;
+    }
+    setIsLiveCameraActive(false);
+    setIsAutoScanning(false);
+  };
+
+  const toggleCameraFacing = () => {
+    const nextMode = facingMode === "environment" ? "user" : "environment";
+    setFacingMode(nextMode);
+    if (isLiveCameraActive) {
+      stopLiveCamera();
+      setTimeout(() => {
+        setFacingMode(nextMode);
+        startLiveCamera();
+      }, 200);
+    }
+  };
+
+  const captureFrameFromVideo = (): string | null => {
+    if (!videoRef.current || !canvasRef.current) return null;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (video.videoWidth === 0 || video.videoHeight === 0) return null;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/jpeg", 0.9);
+  };
+
+  const handleCaptureAndAnalyze = async () => {
+    const capturedDataUrl = captureFrameFromVideo();
+    if (!capturedDataUrl) return;
+
+    setSelectedImage(capturedDataUrl);
+    stopLiveCamera();
+    await performAnalysis(capturedDataUrl);
+  };
+
+  const toggleAutoScan = () => {
+    if (isAutoScanning) {
+      if (autoScanTimerRef.current) {
+        clearInterval(autoScanTimerRef.current);
+        autoScanTimerRef.current = null;
+      }
+      setIsAutoScanning(false);
+    } else {
+      setIsAutoScanning(true);
+      autoScanTimerRef.current = setInterval(async () => {
+        if (!isAnalyzing && videoRef.current) {
+          const frame = captureFrameFromVideo();
+          if (frame) {
+            await performAnalysis(frame, true);
+          }
+        }
+      }, 3000);
+    }
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string);
+        const dataUrl = e.target?.result as string;
+        setSelectedImage(dataUrl);
         setAnalysisResult(null);
         setAnalysisError(null);
+        stopLiveCamera();
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleScanCrop = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleOpenCamera = () => {
-    cameraInputRef.current?.click();
   };
 
   const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -74,187 +211,322 @@ const DiseaseDetection = () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-      setSelectedImage(e.target?.result as string);
+      const dataUrl = e.target?.result as string;
+      setSelectedImage(dataUrl);
       setAnalysisResult(null);
       setAnalysisError(null);
+      stopLiveCamera();
     };
     reader.readAsDataURL(file);
   }, []);
 
-  const handleAnalyze = async () => {
-    if (!selectedImage) return;
+  const performAnalysis = async (imageDataUrl: string, isLiveScan = false) => {
     setIsAnalyzing(true);
-    setAnalysisResult(null);
-    setAnalysisError(null);
-    setLowAccuracyResult(null);
+    if (!isLiveScan) {
+      setAnalysisResult(null);
+      setAnalysisError(null);
+      setLowAccuracyResult(null);
+    }
 
     try {
-      console.log('🔬 Starting AI-powered disease detection...');
+      const base64Image = imageDataUrl.split(",")[1] ?? imageDataUrl;
+      const mimeType = imageDataUrl.split(",")[0]?.split(":")[1]?.split(";")[0] || "image/jpeg";
 
-      // Extract base64 data from the image
-      const base64Image = selectedImage.split(',')[1] ?? selectedImage;
-      const mimeType = selectedImage.split(',')[0].split(':')[1].split(';')[0];
+      const result: AnalysisResult = await detectPlantDisease(base64Image, mimeType, selectedLanguage);
 
-      console.log('📸 Analyzing image with Gemini AI...');
+      if (result.isPlantDetected === false) {
+        setAnalysisResult(result);
+        return;
+      }
 
-      // Use Gemini AI for disease detection
-      const result: AnalysisResult = await detectPlantDisease(base64Image, mimeType);
-
-      console.log('✅ Disease detection completed:', result);
-
-      if (result.confidence < 75) {
-        console.log('⚠️ Low confidence detected, showing low accuracy message...');
+      if (result.confidence < 60) {
         setLowAccuracyResult(result);
         return;
       }
 
       setAnalysisResult(result);
-      setScanHistory((prev) => [
-        {
-          id: Date.now(),
-          crop: result.diseaseName.includes(':') ? result.diseaseName.split(':')[0].trim() :
-            result.diseaseName.toLowerCase().includes('background without leaves') ? "Background" : "Plant",
-          issue: result.diseaseName,
-          date: new Date().toISOString().slice(0, 10),
-          treatment: result.treatment[0] ||
-            (result.diseaseName.toLowerCase().includes('healthy') ? 'Maintain health' :
-              result.diseaseName.toLowerCase().includes('background without leaves') ? 'Re-upload image' : 'Consult expert')
-        },
-        ...prev,
-      ]);
-    } catch (error) {
+
+      if (!isLiveScan) {
+        setScanHistory((prev) => [
+          {
+            id: Date.now(),
+            crop: result.cropType || "Plant",
+            issue: result.diseaseName,
+            date: new Date().toISOString().slice(0, 10),
+            treatment: result.organicTreatment?.[0] || result.treatment?.[0] || "Maintain health",
+            confidence: result.confidence
+          },
+          ...prev
+        ]);
+      }
+    } catch (error: any) {
       console.error("Disease analysis failed:", error);
-      setAnalysisError(error instanceof Error ? error.message : "Analysis failed. Please try again.");
+      setAnalysisError(error instanceof Error ? error.message : "Analysis failed. Please check connection.");
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const handleConsultExpert = () => {
-    if (!lowAccuracyResult) return;
+  const handleAnalyze = () => {
+    if (selectedImage) {
+      performAnalysis(selectedImage);
+    }
+  };
 
-    // Store the low accuracy case data
+  // Text-To-Speech Audio Readout
+  const handleToggleSpeech = () => {
+    if (!window.speechSynthesis) {
+      alert("Text-to-speech is not supported in your browser.");
+      return;
+    }
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    if (!analysisResult) return;
+
+    const speechText = `${analysisResult.diseaseName}. Severity is ${analysisResult.severityLevel}. ${analysisResult.description}. Key organic remedy: ${analysisResult.organicTreatment?.slice(0, 2).join(". ") || analysisResult.treatment?.slice(0, 2).join(". ")}. Key prevention: ${analysisResult.prevention?.slice(0, 2).join(". ")}`;
+
+    const utterance = new SpeechSynthesisUtterance(speechText);
+    const langCode = LANGUAGE_VOICE_MAP[selectedLanguage] || "en-IN";
+    utterance.lang = langCode;
+    utterance.rate = 0.95;
+
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Print Treatment Prescription Card
+  const handlePrintPrescription = () => {
+    window.print();
+  };
+
+  const handleConsultAgronomist = () => {
+    if (!lowAccuracyResult) return;
     const lowAccuracyCase = {
-      plantType: lowAccuracyResult.diseaseName || 'Unknown Plant',
+      plantType: lowAccuracyResult.diseaseName || "Unknown Plant",
       confidence: lowAccuracyResult.confidence,
       symptoms: lowAccuracyResult.symptoms || [],
       imageUrl: selectedImage,
       timestamp: new Date().toISOString(),
-      status: 'pending' as const
+      status: "pending" as const
     };
-
-    // Store in localStorage for the expert consultation page
-    const existingCases = JSON.parse(localStorage.getItem('lowAccuracyCases') || '[]');
+    const existingCases = JSON.parse(localStorage.getItem("lowAccuracyCases") || "[]");
     existingCases.unshift(lowAccuracyCase);
-    localStorage.setItem('lowAccuracyCases', JSON.stringify(existingCases));
-
-    // Redirect to expert consultation page
-    navigate('/expert-consultation');
+    localStorage.setItem("lowAccuracyCases", JSON.stringify(existingCases));
+    navigate("/expert-consultation");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6 space-y-6">
+      {/* Header Bar */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white p-4 md:p-6 rounded-2xl border border-slate-200/80 shadow-xs">
         <div className="flex items-center space-x-3">
-          <div className="p-2 bg-green-600 rounded-lg">
-            <Camera className="h-6 w-6 text-white" />
+          <div className="p-3 bg-emerald-600 rounded-xl text-white shadow-md shadow-emerald-500/20">
+            <Leaf className="h-7 w-7" />
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-bold text-gray-900">AI Disease Detection</h1>
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                <Sparkles className="h-3 w-3 mr-1" />
-                Powered by Gemini AI
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">AI Crop Disease Detection</h1>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                <Brain className="h-3 w-3 mr-1" />
+                PyTorch CNN + Groq AI
               </Badge>
             </div>
-            <p className="text-sm text-gray-600">Upload plant images for AI-powered disease identification</p>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Upload or scan plant images for instant AI-powered disease identification & remedies
+            </p>
           </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="px-3 py-1 rounded-md border border-gray-300 bg-white text-sm"
-          >
-            <option value="english">English</option>
-            <option value="hindi">हिंदी</option>
-            <option value="punjabi">ਪੰਜਾਬੀ</option>
-            <option value="gujarati">ગુજરાતી</option>
-            <option value="marathi">मराठी</option>
-          </select>
         </div>
       </div>
 
-      <Alert className="border-orange-200 bg-orange-50">
-        <AlertTriangle className="h-4 w-4 text-orange-600" />
-        <AlertDescription className="text-orange-800">
-          Late blight outbreak reported in Northern regions. Early detection recommended.
-        </AlertDescription>
-      </Alert>
+      {/* Main Tabs - Centered Position */}
+      <Tabs defaultValue="analyze" className="w-full">
+        <div className="flex justify-center w-full mb-6">
+          <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs inline-flex">
+            <TabsTrigger value="analyze" className="rounded-lg font-medium px-5">Analyze</TabsTrigger>
+            <TabsTrigger value="history" className="rounded-lg font-medium px-5">Recent Scans ({scanHistory.length})</TabsTrigger>
+            <TabsTrigger value="agronomists" className="rounded-lg font-medium px-5">Agronomists</TabsTrigger>
+            <TabsTrigger value="low-accuracy" className="rounded-lg font-medium px-5">Low Accuracy Cases</TabsTrigger>
+          </TabsList>
+        </div>
 
-      <Tabs defaultValue="analyze">
-        <TabsList>
-          <TabsTrigger value="analyze">Analyze</TabsTrigger>
-          <TabsTrigger value="history">Recent Scans</TabsTrigger>
-          <TabsTrigger value="experts">Experts</TabsTrigger>
-          <TabsTrigger value="low-accuracy">Low Accuracy Cases</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="analyze">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Upload className="h-5 w-5" />
-                  <span>Upload Plant Image</span>
-                </CardTitle>
+        {/* SCAN & DIAGNOSE TAB */}
+        <TabsContent value="analyze" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* SCANNER CONTROLS CARD */}
+            <Card className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+              <CardHeader className="border-b border-slate-100 pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-slate-900">
+                    <Camera className="h-5 w-5 text-emerald-600" />
+                    <span>Upload Plant Image</span>
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    {isLiveCameraActive && (
+                      <Badge className="bg-red-500 text-white animate-pulse text-xs">LIVE CAMERA</Badge>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-6">
 
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onDrop={handleDrop}
-                  className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 text-center"
-                >
-                  {!selectedImage ? (
-                    <>
-                      <div className="flex items-center justify-center h-20 w-20 rounded-full bg-gray-100 mb-4">
-                        <Upload className="h-8 w-8 text-gray-500" />
-                      </div>
-                      <p className="text-lg font-medium text-gray-800 mb-1">Upload Plant Image</p>
-                      <p className="text-sm text-gray-500 mb-4">Click here or drag and drop an image of the affected plant</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">JPG</span>
-                        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">PNG</span>
-                        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">Max 5MB</span>
-                      </div>
+              <CardContent className="p-6 space-y-4">
+                {/* LIVE CAMERA VIEW */}
+                {isLiveCameraActive ? (
+                  <div className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-4/3 flex items-center justify-center border-2 border-emerald-500 shadow-inner">
+                    <video
+                      ref={videoRef}
+                      playsInline
+                      muted
+                      autoPlay
+                      className="w-full h-full object-cover"
+                    />
 
-                      <div className="mt-6 flex flex-col sm:flex-row items-center gap-3 w-full">
-                        <Button onClick={handleScanCrop} className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto py-6 text-lg rounded-xl">
-                          <Upload className="h-5 w-5 mr-2" />
-                          Choose Image
-                        </Button>
-                        <Button variant="secondary" onClick={handleOpenCamera} className="w-full sm:w-auto py-6 text-lg rounded-xl">
-                          <Camera className="h-5 w-5 mr-2" />
-                          Use Camera
-                        </Button>
+                    {/* HUD TARGETING RETICLE */}
+                    <div className="absolute inset-8 border-2 border-dashed border-emerald-400/80 rounded-2xl pointer-events-none flex flex-col justify-between p-3">
+                      <div className="flex justify-between items-center text-xs font-mono text-emerald-300 bg-black/40 px-2 py-1 rounded-md backdrop-blur-xs w-max">
+                        <span>[AIM AT LEAF]</span>
                       </div>
-                    </>
-                  ) : (
-                    <div className="w-full max-w-2xl">
-                      <img src={selectedImage} alt="Uploaded" className="w-64 h-64 object-cover rounded-lg border mx-auto" />
-                      <div className="mt-4 flex items-center justify-center gap-3">
-                        <Button variant="outline" onClick={handleScanCrop}>Re-upload</Button>
-                        <Button onClick={handleAnalyze} disabled={isAnalyzing} className="bg-green-600 hover:bg-green-700 text-white">
-                          {isAnalyzing ? "Analyzing..." : "Analyze"}
-                        </Button>
+                      <div className="text-center text-xs text-white/90 bg-black/50 py-1 px-3 rounded-full backdrop-blur-xs mx-auto">
+                        Hold steady 15–20cm from affected foliage
+                      </div>
+                      <div className="flex justify-between items-center text-xs font-mono text-emerald-300 bg-black/40 px-2 py-1 rounded-md backdrop-blur-xs w-max">
+                        <span>{isAutoScanning ? "● AUTO-SCANNING 3s" : "READY"}</span>
                       </div>
                     </div>
-                  )}
-                </div>
+
+                    {/* LIVE CAMERA CONTROLS OVERLAY */}
+                    <div className="absolute bottom-4 left-0 right-0 px-4 flex items-center justify-center gap-3">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={toggleCameraFacing}
+                        className="bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md rounded-xl"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-1.5" />
+                        Flip
+                      </Button>
+
+                      <Button
+                        onClick={handleCaptureAndAnalyze}
+                        disabled={isAnalyzing}
+                        className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-5 rounded-2xl shadow-lg shadow-emerald-500/30 flex items-center gap-2"
+                      >
+                        <Camera className="h-5 w-5" />
+                        Capture & Diagnose
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant={isAutoScanning ? "destructive" : "secondary"}
+                        onClick={toggleAutoScan}
+                        className="bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md rounded-xl"
+                      >
+                        <Activity className="h-4 w-4 mr-1.5" />
+                        {isAutoScanning ? "Stop Auto" : "Auto-Scan"}
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={stopLiveCamera}
+                        className="bg-black/60 hover:bg-black/80 text-white rounded-xl"
+                      >
+                        <VideoOff className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  /* UPLOAD / DROP ZONE */
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onDrop={handleDrop}
+                    className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-2xl p-8 bg-slate-50/70 hover:bg-slate-100/60 transition-colors text-center"
+                  >
+                    {!selectedImage ? (
+                      <>
+                        <div className="h-16 w-16 rounded-2xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center mb-3 shadow-inner">
+                          <Upload className="h-8 w-8" />
+                        </div>
+                        <p className="text-base font-semibold text-slate-800">Upload Plant Image</p>
+                        <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
+                          Click here or drag and drop an image of the affected plant (JPG, PNG, max 5MB)
+                        </p>
+
+                        <div className="flex flex-wrap items-center justify-center gap-3 w-full">
+                          <Button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-5 rounded-xl font-medium shadow-xs"
+                          >
+                            <Upload className="h-4 w-4 mr-2" />
+                            Choose Image
+                          </Button>
+                          <Button
+                            onClick={startLiveCamera}
+                            variant="secondary"
+                            className="border-slate-300 hover:bg-slate-200 text-slate-800 px-5 py-5 rounded-xl font-medium shadow-xs"
+                          >
+                            <Camera className="h-4 w-4 mr-2 text-emerald-600" />
+                            Use Camera
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      /* SELECTED IMAGE PREVIEW & ACTION */
+                      <div className="w-full space-y-4">
+                        <div className="relative mx-auto w-64 h-64 rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-md">
+                          <img
+                            src={selectedImage}
+                            alt="Selected leaf"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex items-center justify-center gap-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedImage(null);
+                              setAnalysisResult(null);
+                            }}
+                            className="rounded-xl"
+                          >
+                            Re-upload
+                          </Button>
+                          <Button
+                            onClick={handleAnalyze}
+                            disabled={isAnalyzing}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6"
+                          >
+                            {isAnalyzing ? (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                Analyzing...
+                              </>
+                            ) : (
+                              <>
+                                <Brain className="h-4 w-4 mr-2" />
+                                Analyze
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <canvas ref={canvasRef} className="hidden" />
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -262,457 +534,457 @@ const DiseaseDetection = () => {
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
               </CardContent>
             </Card>
 
-            <Card className="bg-white shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Eye className="h-5 w-5" />
+            {/* PHOTOGRAPHY TIPS CARD */}
+            <Card className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl shadow-xs">
+              <CardHeader className="border-b border-slate-100 pb-4">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2 text-slate-900">
+                  <Eye className="h-5 w-5 text-emerald-600" />
                   <span>Photography Tips</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-sm text-gray-700">
-                  <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" /> <span>Clear Focus: Ensure the affected area is in sharp focus</span></li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" /> <span>Good Lighting: Use natural daylight for best results</span></li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" /> <span>Close-up View: Capture symptoms clearly with close-up shots</span></li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" /> <span>Multiple Angles: Take photos from different angles if possible</span></li>
+              <CardContent className="p-6 space-y-4">
+                <ul className="space-y-3 text-sm text-slate-700">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                    <span><strong>Clear Focus:</strong> Ensure the affected area is in sharp focus</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                    <span><strong>Good Lighting:</strong> Use natural daylight for best results</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                    <span><strong>Close-up View:</strong> Capture symptoms clearly with close-up shots</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                    <span><strong>Multiple Angles:</strong> Take photos from different angles if possible</span>
+                  </li>
                 </ul>
-                <div className="mt-6 rounded-lg border border-green-200 bg-green-50 p-4 text-green-900 text-sm">
-                  <p className="font-medium">AI Accuracy: 96%</p>
-                  <p className="text-green-800">Our AI model has been trained on over 200,000 plant disease images and can identify 11+ common crop diseases with high accuracy.</p>
+
+                <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 text-emerald-900 text-sm">
+                  <p className="font-bold text-emerald-950">AI Accuracy: 96%</p>
+                  <p className="text-emerald-800 mt-1">
+                    Our AI model has been trained on over 200,000 plant disease images and can identify 38+ common crop diseases with high accuracy.
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {isAnalyzing && (
-            <div className="mt-6 text-center text-sm text-gray-600">Analyzing image…</div>
-          )}
-
+          {/* ERROR ALERT */}
           {analysisError && (
-            <Alert className="mt-6 bg-red-50 border-red-200 text-red-800">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              <AlertDescription>
+            <Alert className="bg-red-50 border-red-200 text-red-800 rounded-xl">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <AlertDescription className="font-medium">
                 {analysisError}
               </AlertDescription>
             </Alert>
           )}
 
+          {/* LOW ACCURACY / UNCLEAR CASE */}
           {lowAccuracyResult && (
-            <div className="space-y-6">
-              <Alert className="mt-6 bg-orange-50 border-orange-200 text-orange-800">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                <AlertDescription>
-                  <strong>Low Detection Accuracy:</strong> The scanned image was not detected clearly.
-                  Our AI model has low confidence in this diagnosis. For accurate results, we recommend
-                  consulting with our agricultural experts.
-                </AlertDescription>
-              </Alert>
+            <Card className="bg-amber-50/60 border-amber-200 rounded-2xl p-6 space-y-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <Badge className="bg-amber-100 text-amber-900 border-amber-300 mb-2">Low Confidence (&lt;60%)</Badge>
+                  <h2 className="text-xl font-bold text-amber-950">Inconclusive Detection</h2>
+                  <p className="text-sm text-amber-800 mt-1 max-w-2xl">
+                    The leaf features are partially ambiguous. We recommend retaking a sharper close-up or consulting with our agronomists.
+                  </p>
+                </div>
+                <Button
+                  onClick={handleConsultAgronomist}
+                  className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-xs"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Consult Agronomist
+                </Button>
+              </div>
+            </Card>
+          )}
 
-              <Card className="bg-white">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
+          {/* NON-LEAF BACKGROUND REJECTION */}
+          {analysisResult && analysisResult.isPlantDetected === false && (
+            <Card className="bg-slate-100 border-slate-300 rounded-2xl p-6 text-center space-y-3">
+              <Eye className="h-10 w-10 text-slate-400 mx-auto" />
+              <h3 className="text-xl font-bold text-slate-800">No Plant Leaves Detected</h3>
+              <p className="text-sm text-slate-600 max-w-md mx-auto">
+                The image appears to show background only with no visible crop or plant material. Please hold the camera 15-20cm from an affected crop leaf and retake the photo.
+              </p>
+              <Button
+                onClick={() => {
+                  setSelectedImage(null);
+                  setAnalysisResult(null);
+                  startLiveCamera();
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
+              >
+                Scan Leaf Again
+              </Button>
+            </Card>
+          )}
+
+          {/* FULL DIAGNOSIS RESULT CARD */}
+          {analysisResult && analysisResult.isPlantDetected !== false && (
+            <div className="space-y-6">
+              <Card className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div className={`p-6 border-b ${
+                  analysisResult.diseaseName.toLowerCase().includes("healthy")
+                    ? "bg-emerald-50/80 border-emerald-100"
+                    : analysisResult.severityLevel === "high"
+                    ? "bg-red-50/80 border-red-100"
+                    : "bg-amber-50/80 border-amber-100"
+                }`}>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                      <h2 className="text-xl font-semibold text-gray-900">Unclear Detection</h2>
-                      <p className="mt-2 text-lg text-gray-700">
-                        Possible: {lowAccuracyResult.diseaseName}
-                      </p>
-                      Confidence: <span className="font-semibold text-orange-600">
-                        {lowAccuracyResult.confidence}%
-                      </span>
-                      <p className="mt-2 text-gray-700 max-w-3xl">
-                        {lowAccuracyResult.description}
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                          Target Crop: {analysisResult.cropType || "Plant"}
+                        </span>
+                        <Badge className={`${
+                          analysisResult.diseaseName.toLowerCase().includes("healthy")
+                            ? "bg-emerald-600 text-white"
+                            : analysisResult.severityLevel === "high"
+                            ? "bg-red-600 text-white"
+                            : "bg-amber-600 text-white"
+                        }`}>
+                          {analysisResult.severityLevel ? `${analysisResult.severityLevel.toUpperCase()} SEVERITY` : "ACTIVE"}
+                        </Badge>
+                        <Badge variant="outline" className="bg-white/80 text-slate-700 border-slate-300">
+                          {analysisResult.confidence}% Confidence
+                        </Badge>
+                      </div>
+
+                      <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                        {analysisResult.diseaseName}
+                      </h2>
+                      <p className="text-sm text-slate-700 mt-2 max-w-3xl leading-relaxed">
+                        {analysisResult.description}
                       </p>
                     </div>
-                    <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-                      Low Confidence
-                    </Badge>
+
+                    {/* ACTION BUTTONS (VOICE & PRINT) */}
+                    <div className="flex items-center gap-2 self-start md:self-center shrink-0">
+                      <Button
+                        variant="outline"
+                        onClick={handleToggleSpeech}
+                        className={`rounded-xl border-slate-300 ${isSpeaking ? "bg-emerald-100 text-emerald-800 border-emerald-400" : "bg-white text-slate-700"}`}
+                      >
+                        {isSpeaking ? (
+                          <>
+                            <VolumeX className="h-4 w-4 mr-1.5 text-emerald-600" />
+                            Stop Voice
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="h-4 w-4 mr-1.5 text-emerald-600" />
+                            Listen Diagnosis
+                          </>
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        onClick={handlePrintPrescription}
+                        className="rounded-xl border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                      >
+                        <Printer className="h-4 w-4 mr-1.5 text-slate-600" />
+                        Print Prescription
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <CardContent className="p-6 space-y-6">
+                  {/* VISUAL INSPECTION (ORIGINAL VS HEATMAP) */}
+                  {analysisResult.heatmapImage && selectedImage && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Layers className="h-5 w-5 text-emerald-600" />
+                          <h3 className="font-bold text-slate-900 text-base">Visual Pathogen Localization</h3>
+                        </div>
+                        <div className="flex items-center bg-slate-100 p-1 rounded-xl gap-1 text-xs font-semibold">
+                          <button
+                            onClick={() => setViewMode("original")}
+                            className={`px-3 py-1 rounded-lg transition-all ${viewMode === "original" ? "bg-white shadow-xs text-slate-900" : "text-slate-600"}`}
+                          >
+                            Original
+                          </button>
+                          <button
+                            onClick={() => setViewMode("heatmap")}
+                            className={`px-3 py-1 rounded-lg transition-all ${viewMode === "heatmap" ? "bg-white shadow-xs text-purple-700" : "text-slate-600"}`}
+                          >
+                            AI Heatmap
+                          </button>
+                          <button
+                            onClick={() => setViewMode("split")}
+                            className={`px-3 py-1 rounded-lg transition-all ${viewMode === "split" ? "bg-white shadow-xs text-emerald-700" : "text-slate-600"}`}
+                          >
+                            Side-by-Side
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* VISUAL CONTAINERS */}
+                      {viewMode === "split" ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-900">
+                            <div className="bg-slate-800 text-white text-xs px-3 py-1 font-mono font-medium">
+                              Original Leaf Photo
+                            </div>
+                            <img
+                              src={selectedImage}
+                              alt="Original leaf"
+                              className="w-full h-64 object-cover"
+                            />
+                          </div>
+                          <div className="rounded-2xl overflow-hidden border border-purple-200 bg-slate-900">
+                            <div className="bg-purple-900 text-white text-xs px-3 py-1 font-mono font-medium flex justify-between">
+                              <span>Grad-CAM Attention Map</span>
+                              <span className="text-purple-300">● Warm colors indicate lesions</span>
+                            </div>
+                            <img
+                              src={analysisResult.heatmapImage}
+                              alt="AI Heatmap"
+                              className="w-full h-64 object-cover"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 max-w-lg mx-auto">
+                          <img
+                            src={viewMode === "original" ? selectedImage : analysisResult.heatmapImage}
+                            alt="Leaf visual"
+                            className="w-full h-72 object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 3-COLUMN STRUCTURED TREATMENT GRID */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* SYMPTOMS / ORGANIC REMEDIES */}
+                    <Card className="bg-emerald-50/40 border-emerald-200/80 rounded-2xl shadow-xs">
+                      <CardHeader className="pb-3 border-b border-emerald-100">
+                        <CardTitle className="text-base font-bold flex items-center gap-2 text-emerald-900">
+                          <Leaf className="h-5 w-5 text-emerald-600" />
+                          <span>Organic & Bio-Control</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <ul className="space-y-2.5 text-sm text-emerald-950">
+                          {(analysisResult.organicTreatment && analysisResult.organicTreatment.length > 0
+                            ? analysisResult.organicTreatment
+                            : analysisResult.treatment
+                          ).map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                              <span className="leading-snug">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+
+                    {/* CHEMICAL & ACTIVE INGREDIENTS */}
+                    <Card className="bg-blue-50/40 border-blue-200/80 rounded-2xl shadow-xs">
+                      <CardHeader className="pb-3 border-b border-blue-100">
+                        <CardTitle className="text-base font-bold flex items-center gap-2 text-blue-900">
+                          <Stethoscope className="h-5 w-5 text-blue-600" />
+                          <span>Chemical & Targeted Spray</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <ul className="space-y-2.5 text-sm text-blue-950">
+                          {(analysisResult.chemicalTreatment && analysisResult.chemicalTreatment.length > 0
+                            ? analysisResult.chemicalTreatment
+                            : ["Apply targeted fungicide/bactericide as per agronomist dosage"]
+                          ).map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                              <span className="leading-snug">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+
+                    {/* 5-STEP PREVENTION */}
+                    <Card className="bg-amber-50/40 border-amber-200/80 rounded-2xl shadow-xs">
+                      <CardHeader className="pb-3 border-b border-amber-100">
+                        <CardTitle className="text-base font-bold flex items-center gap-2 text-amber-900">
+                          <ShieldCheck className="h-5 w-5 text-amber-600" />
+                          <span>Preventive Protocol</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <ul className="space-y-2.5 text-sm text-amber-950">
+                          {analysisResult.prevention.map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                              <span className="leading-snug">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
                   </div>
 
-                  <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                    <h3 className="font-semibold text-orange-900 mb-2">Why is the detection unclear?</h3>
-                    <ul className="text-sm text-orange-800 space-y-1">
-                      <li>• Image quality may be insufficient for accurate analysis</li>
-                      <li>• Plant symptoms may be in early stages or not clearly visible</li>
-                      <li>• Multiple diseases or conditions may be present</li>
-                      <li>• Lighting conditions may affect image clarity</li>
-                    </ul>
-                  </div>
+                  {/* RECOMMENDED STORE SUPPLEMENT BANNER (IF AVAILABLE) */}
+                  {analysisResult.supplementName && (
+                    <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        {analysisResult.supplementImage ? (
+                          <img
+                            src={analysisResult.supplementImage}
+                            alt="Supplement"
+                            className="w-14 h-14 rounded-xl object-contain bg-white border border-emerald-100 p-1"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-emerald-200/70 flex items-center justify-center text-emerald-800 font-bold">
+                            Rx
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-xs uppercase font-bold text-emerald-700 tracking-wider">Recommended Crop Remedy</p>
+                          <p className="text-base font-bold text-emerald-950">{analysisResult.supplementName}</p>
+                          <p className="text-xs text-emerald-800">Verified agricultural input for {analysisResult.diseaseName}</p>
+                        </div>
+                      </div>
 
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <Button
-                      onClick={handleConsultExpert}
-                      className="bg-orange-600 hover:bg-orange-700 text-white"
-                    >
-                      <Users className="h-4 w-4 mr-2" />
-                      Consult Expert
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setLowAccuracyResult(null);
-                        setSelectedImage(null);
-                      }}
-                    >
-                      Try Another Image
-                    </Button>
-                  </div>
+                      {analysisResult.buyLink ? (
+                        <a
+                          href={analysisResult.buyLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-xs"
+                        >
+                          <span>Buy Remedy Online</span>
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                          Available at Regional Mandis & Fertilizer Dealers
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  {/* EMBEDDED CONTEXT CHATBOT */}
+                  <EmbeddedAIChat
+                    diseaseName={analysisResult.diseaseName}
+                    contextData={`Crop: ${analysisResult.cropType}. Condition: ${analysisResult.diseaseName}. Description: ${analysisResult.description}. Organic Remedy: ${analysisResult.organicTreatment?.join(", ")}. Chemical Remedy: ${analysisResult.chemicalTreatment?.join(", ")}. Prevention: ${analysisResult.prevention?.join(", ")}.`}
+                  />
                 </CardContent>
               </Card>
             </div>
           )}
-
-          {analysisResult && (
-            <div className="space-y-6">
-              {analysisResult.diseaseName.toLowerCase().includes('background without leaves') ? (
-                // Background without leaves display - simplified with suitable content
-                <div className="space-y-6">
-                  <Card className="bg-white">
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-gray-900">{analysisResult.diseaseName}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900"><Eye className="h-5 w-5 text-yellow-600" /> Image Analysis</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                          <li>No plant leaves detected in the image</li>
-                          <li>Image appears to show background only</li>
-                          <li>No visible crop or plant material</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900"><Stethoscope className="h-5 w-5 text-red-600" /> Recommended Action</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                          <li>Upload a clear image of plant leaves</li>
-                          <li>Ensure good lighting and focus</li>
-                          <li>Capture affected areas clearly</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900"><ShieldCheck className="h-5 w-5 text-green-600" /> Photography Tips</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                          <li>Use natural daylight for best results</li>
-                          <li>Focus on individual leaves or affected areas</li>
-                          <li>Avoid shadows and blurry images</li>
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              ) : analysisResult.diseaseName.toLowerCase().includes('healthy') ? (
-                // Healthy crop display
-                <div className="space-y-6">
-                  <Card className="bg-white">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h2 className="text-xl font-semibold text-gray-900">Crop Health Status</h2>
-                          <p className="mt-2 text-2xl font-bold text-green-600">{analysisResult.diseaseName}</p>
-                          <p className="mt-2 text-gray-700 max-w-3xl">{analysisResult.description}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <Badge className="bg-green-100 text-green-800 border-green-200">{analysisResult.confidence}% Confidence</Badge>
-                          <Badge className="bg-green-100 text-green-800 border-green-200">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Treatment recommended within 1-2 weeks
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="bg-white shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900">
-                          <Snowflake className="h-5 w-5 text-blue-600" />
-                          Optimal Environment Management
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2 text-gray-700">
-                          {analysisResult.symptoms.map((item: string, idx: number) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-green-600 mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-white shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900">
-                          <Leaf className="h-5 w-5 text-green-600" />
-                          Soil and Nutrient Optimization
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2 text-gray-700">
-                          {analysisResult.prevention.map((item: string, idx: number) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-green-600 mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    <Card className="bg-white shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900">
-                          <BarChart3 className="h-5 w-5 text-purple-600" />
-                          Growth and Development Monitoring
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2 text-gray-700">
-                          {analysisResult.treatment.map((item: string, idx: number) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-green-600 mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              ) : (
-                // Disease display (existing code)
-                <div className="space-y-6">
-                  <Card className="bg-white">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h2 className="text-xl font-semibold text-gray-900">Disease Detected</h2>
-                          <p className="mt-2 text-2xl font-bold text-gray-900">{analysisResult.diseaseName}</p>
-                          <p className="mt-2 text-gray-700 max-w-3xl">{analysisResult.description}</p>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800 border-green-200">{analysisResult.confidence}% Confidence</Badge>
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-3">
-                        <Badge variant="outline" className="text-yellow-700 border-yellow-300">Severity: {analysisResult.severityLevel}</Badge>
-                        <Badge variant="outline" className="text-red-700 border-red-300">Action Required: {analysisResult.actionRequired}</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900"><Eye className="h-5 w-5 text-yellow-600" /> Symptoms</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                          {analysisResult.symptoms.map((item: string, idx: number) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900"><Stethoscope className="h-5 w-5 text-red-600" /> Treatment</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                          {analysisResult.treatment.map((item: string, idx: number) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gray-900"><ShieldCheck className="h-5 w-5 text-green-600" /> Prevention</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                          {analysisResult.prevention.map((item: string, idx: number) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Embedded Context-Aware Chat */}
-                  <EmbeddedAIChat
-                    diseaseName={analysisResult.diseaseName}
-                    contextData={`Disease: ${analysisResult.diseaseName}. Description: ${analysisResult.description}. Symptoms: ${analysisResult.symptoms.join(', ')}. Treatment: ${analysisResult.treatment.join(', ')}. Prevention: ${analysisResult.prevention.join(', ')}.`}
-                  />
-
-                </div>
-              )}
-            </div>
-          )}
         </TabsContent>
 
+        {/* HISTORY TAB */}
         <TabsContent value="history">
-          <Card className="bg-white shadow-sm">
+          <Card className="bg-white border border-slate-200 rounded-2xl shadow-xs">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Clock className="h-5 w-5" />
-                <span>Recent Scans</span>
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <Clock className="h-5 w-5 text-emerald-600" />
+                <span>Field Scan History</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {scanHistory.length === 0 && (
-                  <div className="text-sm text-gray-600">No scans yet. Analyze an image to see it here.</div>
-                )}
-                {scanHistory.map((scan) => (
-                  <div key={scan.id} className={`flex items-center justify-between p-4 rounded-lg border ${scan.issue.toLowerCase().includes('healthy')
-                    ? 'bg-green-50 border-green-100'
-                    : scan.issue.toLowerCase().includes('background without leaves')
-                      ? 'bg-gray-50 border-gray-100'
-                      : 'bg-blue-50 border-blue-100'
-                    }`}>
-                    <div>
-                      <p className="font-medium text-gray-900">{scan.crop}</p>
-                      <p className={`text-sm ${scan.issue.toLowerCase().includes('healthy')
-                        ? 'text-green-700'
-                        : scan.issue.toLowerCase().includes('background without leaves')
-                          ? 'text-gray-600'
-                          : 'text-gray-600'
-                        }`}>{scan.issue}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">{scan.date}</p>
-                      <Badge variant="outline" className={`text-xs ${scan.issue.toLowerCase().includes('healthy')
-                        ? 'bg-green-100 text-green-800 border-green-200'
-                        : scan.issue.toLowerCase().includes('background without leaves')
-                          ? 'bg-gray-100 text-gray-800 border-gray-200'
-                          : 'bg-blue-100 text-blue-800 border-blue-200'
-                        }`}>
-                        {scan.treatment}
+            <CardContent className="space-y-3">
+              {scanHistory.map((scan) => (
+                <div
+                  key={scan.id}
+                  className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between transition-colors"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-slate-900">{scan.crop}</p>
+                      <Badge variant="outline" className="text-xs bg-white">
+                        {scan.confidence}% Conf.
                       </Badge>
                     </div>
+                    <p className="text-sm text-slate-600">{scan.issue}</p>
+                    <p className="text-xs text-emerald-700 font-medium">Tx: {scan.treatment}</p>
                   </div>
-                ))}
-              </div>
+                  <div className="text-right">
+                    <p className="text-xs font-mono text-slate-400">{scan.date}</p>
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="experts">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-white shadow-sm">
+        {/* AGRONOMISTS TAB */}
+        <TabsContent value="agronomists">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-white border border-slate-200 rounded-2xl shadow-xs">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Stethoscope className="h-5 w-5" />
-                  <span>Available Experts</span>
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <Users className="h-5 w-5 text-emerald-600" />
+                  <span>On-Duty Agronomists</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 rounded-lg border bg-purple-50 border-purple-100 flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-purple-900">Dr. Raj Kumar</p>
-                      <p className="text-sm text-purple-800">Plant Pathologist · 20+ years experience</p>
-                    </div>
-                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">Call</Button>
+              <CardContent className="space-y-4">
+                <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-100 flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-purple-950">Dr. Raj Kumar (ICAR Certified)</p>
+                    <p className="text-xs text-purple-800">Specialist in Plant Pathology & Fungal Blights</p>
                   </div>
-                  <div className="p-4 rounded-lg border bg-green-50 border-green-100 flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-green-900">Dr. Priya Sharma</p>
-                      <p className="text-sm text-green-800">Crop Protection Specialist · 15+ years experience</p>
-                    </div>
-                    <Button className="bg-green-600 hover:bg-green-700 text-white">Chat</Button>
+                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl">
+                    Call Direct
+                  </Button>
+                </div>
+                <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-center justify-between">
+                  <div>
+                    <p className="font-bold text-emerald-950">Dr. Priya Sharma</p>
+                    <p className="text-xs text-emerald-800">Organic Pest & Disease Management Agronomist</p>
                   </div>
+                  <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
+                    Live Chat
+                  </Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white shadow-sm">
+            <Card className="bg-white border border-slate-200 rounded-2xl shadow-xs">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-red-600" />
-                  <span>Emergency Helpline</span>
+                  <span>Toll-Free Kisan Call Centers</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-6 rounded-lg border bg-red-50 border-red-100 text-center">
-                  <p className="text-2xl font-bold text-red-800">1800-FARM-HELP</p>
-                  <p className="text-sm text-red-700">24/7 Emergency Support</p>
-                  <div className="mt-3">
-                    <Button className="bg-red-600 hover:bg-red-700 text-white">Call Now</Button>
-                  </div>
-                </div>
-                <div className="p-6 rounded-lg border bg-blue-50 border-blue-100 text-center">
-                  <p className="font-semibold text-blue-900">WhatsApp Support</p>
-                  <p className="text-sm text-blue-800">Get instant help via WhatsApp</p>
+                <div className="p-6 rounded-xl bg-red-50/80 border border-red-100 text-center space-y-2">
+                  <p className="text-xs uppercase font-bold text-red-600 tracking-wider">Government of India Helpline</p>
+                  <p className="text-3xl font-extrabold text-red-950">1800-180-1551</p>
+                  <p className="text-xs text-red-700">Available 6:00 AM – 10:00 PM in 22 regional languages</p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
+        {/* REVIEW QUEUE / LOW ACCURACY TAB */}
         <TabsContent value="low-accuracy">
-          <Card className="bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
-                <span>Low Accuracy Cases</span>
-              </CardTitle>
-              <p className="text-sm text-gray-600">
-                Cases where AI confidence was below 75% - requiring expert consultation
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Alert className="border-orange-200 bg-orange-50">
-                  <AlertTriangle className="h-4 w-4 text-orange-600" />
-                  <AlertDescription className="text-orange-800">
-                    <strong>Low Accuracy Detected:</strong> When our AI model has low confidence in disease detection,
-                    we automatically redirect you to expert consultation for more accurate diagnosis.
-                  </AlertDescription>
-                </Alert>
-
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">Recent Low Accuracy Cases</h3>
-                  <Button
-                    onClick={() => navigate('/expert-consultation')}
-                    className="bg-orange-600 hover:bg-orange-700 text-white"
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    View All Cases
-                  </Button>
-                </div>
-
-                <div className="text-center py-8 text-gray-500">
-                  <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-orange-400" />
-                  <p className="text-lg font-medium">No low accuracy cases yet</p>
-                  <p className="text-sm">When AI confidence drops below 75%, cases will appear here for expert review.</p>
-                </div>
-              </div>
-            </CardContent>
+          <Card className="bg-white border border-slate-200 rounded-2xl shadow-xs p-6 text-center space-y-4">
+            <ShieldCheck className="h-12 w-12 text-emerald-600 mx-auto" />
+            <h3 className="text-lg font-bold text-slate-900">Review & Community Verification Queue</h3>
+            <p className="text-sm text-slate-600 max-w-md mx-auto">
+              Images with borderline confidence scores are automatically aggregated here for review by certified agronomists to continuously improve the open-source dataset.
+            </p>
+            <Button
+              onClick={() => navigate("/expert-consultation")}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
+            >
+              Open Agronomist Portal
+            </Button>
           </Card>
         </TabsContent>
       </Tabs>
