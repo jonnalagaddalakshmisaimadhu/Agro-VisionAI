@@ -23,7 +23,8 @@ from app.routers import (
     soil_knn,
     chatbot,
     community_chat,
-    marketplace_chat
+    marketplace_chat,
+    app_update
 )
 from app.database import engine, Base
 from app.core.config import settings
@@ -104,6 +105,8 @@ app.include_router(soil_knn.router, prefix="/api", tags=["Soil KNN Prediction"])
 app.include_router(chatbot.router, prefix="/api", tags=["Chatbot"])
 app.include_router(community_chat.router, prefix="/api/community", tags=["Community Chat"])
 app.include_router(marketplace_chat.router, prefix="/api/marketplace", tags=["Marketplace Chat & Voice"])
+app.include_router(app_update.router, prefix="/api/app", tags=["App Updates"])
+
 
 
 @app.get("/")

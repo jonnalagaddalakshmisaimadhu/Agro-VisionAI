@@ -21,6 +21,7 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import LoginDemo from "./components/LoginDemo";
 import DiseaseDetection from "./components/modules/DiseaseDetection";
 import { FarmIQAssistance } from "./components/chatbot/FarmIQAssistance";
+import { AppUpdateChecker } from "./components/common/AppUpdateChecker";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <FarmIQAssistance />
+              <AppUpdateChecker />
             </BrowserRouter>
           </LocationProvider>
         </WeatherProvider>
@@ -57,6 +59,5 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
 
 export default App;
