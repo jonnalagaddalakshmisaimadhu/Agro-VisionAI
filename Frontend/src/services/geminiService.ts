@@ -1,11 +1,40 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 import { CropPrediction, CropRecommendation, MarketInsight, DiseaseDetectionResult } from '../types/cropPrediction';
 
+// Initialize Groq AI with environment variable
+const siteGroqApiKey = import.meta.env.VITE_GROQ_API_KEY || '';
+const siteGroqModel = import.meta.env.VITE_GROQ_MODEL || 'openai/gpt-oss-120b';
+
 // Initialize Gemini AI with production verified key and gemini-2.5-flash model
 const siteApiKey = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyB6DWFZyOCxlViVAe3zcFODF9ZDzwFe-Yw';
 const siteModelName = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
 const genAI = new GoogleGenerativeAI(siteApiKey);
 const model: GenerativeModel = genAI.getGenerativeModel({ model: siteModelName as any });
+
+/**
+ * Ultra-Fast Direct Groq LLM caller (openai/gpt-oss-120b & qwen/qwen3.8-27b)
+ */
+async function callGroqChat(messages: Array<{ role: string; content: string }>): Promise<string> {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${siteGroqApiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: siteGroqModel,
+            messages: messages,
+            temperature: 0.3,
+            max_tokens: 1200
+        })
+    });
+    if (res.ok) {
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (content) return content;
+    }
+    throw new Error(`Groq status: ${res.status}`);
+}
 
 /**
  * Robust Direct REST + SDK caller for Google Gemini 2.5 Flash
@@ -38,7 +67,57 @@ export const askFarmIQAI = async (
     language: string = "en",
     context?: string
 ): Promise<string> => {
-    // 1. Try Backend chat API if online
+    const systemPrompt = `You are FarmIQ AI, an empathetic, highly knowledgeable agricultural expert and farming advisor in India.
+You provide clear, practical, actionable advice on:
+- Crop selection, sowing dates, seed varieties, and seasonal schedules.
+- Soil nutrition, NPK fertilizer dosages, organic manures, vermicompost, and micronutrients.
+- Plant disease diagnosis, pest management, bio-pesticides, and chemical treatments with exact dosages.
+- Government agricultural schemes (PM-KISAN, PMFBY, YSR Rythu Bharosa, Rythu Bandhu, KCC, Solar Pumps).
+- Market mandi prices, harvest timing, storage, and maximizing profits.
+- Weather precautions (monsoon, heatwaves, pest outbreaks).
+
+Language Requirement:
+- If user language is 'te' (Telugu) or query contains Telugu, reply entirely in fluent, natural Telugu (తెలుగు).
+- If user language is 'hi' (Hindi) or query contains Hindi, reply in clear Hindi (हिंदी).
+- If user language is 'ta' (Tamil), reply in Tamil (தமிழ்).
+- If user language is 'kn' (Kannada), reply in Kannada (ಕನ್ನಡ).
+- If English or other, reply in friendly, simple English.
+
+Formatting: Use bullet points, bold keywords, and concise structured steps.`;
+
+    // 1. Try Groq (openai/gpt-oss-120b) for ultra-fast live generation
+    try {
+        const groqMessages = [
+            { role: "system", content: systemPrompt + (context ? `\nContext: ${context}` : '') },
+            ...history.slice(-6).map(h => ({
+                role: h.role === "assistant" ? "assistant" : "user",
+                content: h.content
+            })),
+            { role: "user", content: message }
+        ];
+
+        const groqAnswer = await callGroqChat(groqMessages);
+        if (groqAnswer && groqAnswer.trim().length > 0) {
+            return groqAnswer;
+        }
+    } catch (groqErr) {
+        console.warn("Groq chat error, falling back to Gemini 2.5 Flash:", groqErr);
+    }
+
+    // 2. Try Gemini 2.5 Flash AI
+    try {
+        const chatContext = history.slice(-6).map(h => `${h.role === 'user' ? 'Farmer' : 'FarmIQ'}: ${h.content}`).join('\n');
+        const fullPrompt = `${systemPrompt}\n\nConversation History:\n${chatContext}\n\nFarmer's Question: ${message}\n${context ? `Context Info: ${context}\n` : ''}\nFarmIQ Advice:`;
+
+        const geminiAnswer = await callGeminiGenerate([{ parts: [{ text: fullPrompt }] }]);
+        if (geminiAnswer && geminiAnswer.trim().length > 0) {
+            return geminiAnswer;
+        }
+    } catch (geminiErr: any) {
+        console.error("Gemini AI Chat Error:", geminiErr);
+    }
+
+    // 3. Try Backend API
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -56,54 +135,18 @@ export const askFarmIQAI = async (
             if (data.response) return data.response;
         }
     } catch (backendErr) {
-        console.warn("Backend chat unavailable, using Gemini AI client-side:", backendErr);
+        console.warn("Backend chat unavailable:", backendErr);
     }
 
-    // 2. Client-side Gemini 2.5 Flash AI
-    try {
-        const systemPrompt = `You are FarmIQ AI, an empathetic, highly knowledgeable agricultural expert and farming advisor in India.
-You provide clear, practical, actionable advice on:
-- Crop selection, sowing dates, seed varieties, and seasonal schedules.
-- Soil nutrition, NPK fertilizer dosages, organic manures, vermicompost, and micronutrients.
-- Plant disease diagnosis, pest management, bio-pesticides, and chemical treatments with exact dosages.
-- Government agricultural schemes (PM-KISAN, PMFBY, YSR Rythu Bharosa, Rythu Bandhu, KCC, Solar Pumps).
-- Market mandi prices, harvest timing, storage, and maximizing profits.
-- Weather precautions (monsoon, heatwaves, pest outbreaks).
-
-Language Requirement:
-- If user language is 'te' (Telugu) or query is in Telugu, answer thoroughly in clear, natural Telugu (తెలుగు).
-- If user language is 'hi' (Hindi) or query is in Hindi, answer in clear Hindi (हिंदी).
-- If user language is 'ta' (Tamil), answer in Tamil (தமிழ்).
-- If user language is 'kn' (Kannada), answer in Kannada (ಕನ್ನಡ).
-- If English or other, answer in friendly, simple English.
-
-Formatting: Use bullet points, bold keywords, and concise structured steps.`;
-
-        const chatContext = history.slice(-6).map(h => `${h.role === 'user' ? 'Farmer' : 'FarmIQ'}: ${h.content}`).join('\n');
-        const fullPrompt = `${systemPrompt}\n\nConversation History:\n${chatContext}\n\nFarmer's Question: ${message}\n${context ? `Context Info: ${context}\n` : ''}\nFarmIQ Advice:`;
-
-        const text = await callGeminiGenerate([{ parts: [{ text: fullPrompt }] }]);
-        return text;
-    } catch (geminiErr: any) {
-        console.error("Gemini AI Chat Error:", geminiErr);
-        if (language === 'te') {
-            return `నమస్కారం! మీ ప్రశ్నను పరిశీలించాను. వ్యవసాయ నిపుణుల సలహా ప్రకారం:
-• పంట ఆరోగ్యానికి తగినంత నీటి పారుదల మరియు సమతుల్య ఎరువులు (NPK) వాడండి.
-• చీడపీడల నివారణకు వేపనూనె (5ml/లీటరు) లేదా సిఫార్సు చేసిన పురుగుమందును పిచికారీ చేయండి.
-• స్థానిక రైతు భరోసా కేంద్రం (RBK) లేదా వ్యవసాయ అధికారిని సంప్రదించండి.
-మీకు ఏ పంట గురించి మరింత సమాచారం కావాలో తెలియజేయండి!`;
-        } else if (language === 'hi') {
-            return `नमस्ते किसान भाई! आपकी समस्या के समाधान हेतु:
-• उचित सिंचाई और संतुलित उर्वरक प्रबंधन (NPK) अपनाएं।
-• कीट व रोग नियंत्रण के लिए नीम का तेल (5ml/लीटर) या अनुशंसित कीटनाशक का छिड़काव करें।
-• नजदीकी कृषि विज्ञान केंद्र (KVK) या कृषि अधिकारी से संपर्क करें।`;
-        } else {
-            return `Hello Farmer! Here is the expert agricultural advisory for your query:
+    if (language === 'te') {
+        return `నమస్కారం! వ్యవసాయ నిపుణుల సలహా:
+• పంట ఆరోగ్యానికి సమతుల్య ఎరువులు (NPK) మరియు క్రమబద్ధమైన నీటి పారుదల అందించండి.
+• చీడపీడల నివారణకు వేపనూనె (5ml/లీటరు) పిచికారీ చేయండి.
+• రైతు భరోసా కేంద్రం (RBK) నిపుణులను సంప్రదించండి.`;
+    }
+    return `Hello Farmer! Recommended agricultural advisory:
 • Ensure balanced nutrition (NPK) and timely irrigation suited for your soil.
-• For pest and disease control, spray Neem oil (5ml/L) as organic preventive care or contact your local Agri extension officer for certified fungicides.
-• Check your soil health card and monitor weather forecast before spraying chemicals.`;
-        }
-    }
+• For pest control, apply certified organic bio-pesticides or Neem oil (5ml/L).`;
 };
 
 export const getCropRecommendations = async (details: {
