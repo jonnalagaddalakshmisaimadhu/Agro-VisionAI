@@ -1,0 +1,537 @@
+====================================================================================================
+                        AGRO-VISIONAI (FARMIQ AI AGRO) - END-TO-END PROJECT GUIDE
+                 COMPLETE TECHNICAL ARCHITECTURE, TECH STACK & MODULE SPECIFICATION
+====================================================================================================
+Platform Name    : Agro-VisionAI (Branded in-app as "FarmIQ AI Agro")
+Project Type     : Full-Stack AI & IoT Smart Agriculture and Aquaculture Management Platform
+Target Platforms : Web (React 18 + Vite SPA) & Native Mobile (Capacitor for Android / iOS)
+Target Users     : Smallholder & Commercial Farmers, Agronomists, Aquaculture Cultivators,
+                   Machinery Owners, Agri-Businesses, Government Subsidy Beneficiaries
+====================================================================================================
+
+
+====================================================================================================
+                                       TABLE OF CONTENTS
+====================================================================================================
+1. EXECUTIVE PROJECT OVERVIEW & VALUE PROPOSITION
+2. HIGH-LEVEL END-TO-END SYSTEM ARCHITECTURE DIAGRAM
+3. FRONTEND DEEP DIVE (TECHNOLOGY STACK, LIBRARIES & ARCHITECTURE)
+   3.1 Frontend Core Stack & Frameworks
+   3.2 UI/UX Design System & Component Library (shadcn/ui + Tailwind)
+   3.3 Data Visualization & Graphing (Recharts)
+   3.4 Voice & Multilingual Localization (Web Speech API + Google Translate)
+   3.5 Cross-Platform Mobile Layer (Ionic Capacitor 8)
+   3.6 Client-Side Application Lifecycle, Contexts & Routing
+4. BACKEND DEEP DIVE (TECHNOLOGY STACK, FRAMEWORKS & ARCHITECTURE)
+   4.1 Backend Core Stack & Frameworks (FastAPI + Python 3.10+)
+   4.2 ASGI Server & Asynchronous Execution (Uvicorn + AsyncIO)
+   4.3 Data Validation & DTOs (Pydantic v2)
+   4.4 Authentication, Security & Cryptography (JWT + Passlib Bcrypt)
+   4.5 Automated Background Schedulers (2h Mandi Ingestion, 24h Scheme Sync)
+   4.6 REST & WebSocket API Routers Breakdown (15+ Controllers)
+5. ARTIFICIAL INTELLIGENCE, DEEP LEARNING & MACHINE LEARNING
+   5.1 PyTorch 39-Class Plant Leaf Disease CNN (210 MB Local Model)
+   5.2 Cloud Multimodal Vision Fallback (Google Gemini 1.5 Flash)
+   5.3 Deep Botanical Diagnostic Reasoning (Groq LLaMA-3.3-70B)
+   5.4 Sub-Second Conversational Agronomist (Groq LLaMA-3.1-8B-Instant)
+   5.5 Geospatial Soil KNN Classifier & Coordinate Geocoding (Scikit-Learn)
+   5.6 Rule-Based Natural Language Processing & NER Pipeline
+6. DATABASE ARCHITECTURE & PERSISTENCE LAYER
+   6.1 Relational Layer (SQLAlchemy ORM - SQLite / PostgreSQL)
+   6.2 Complete Relational Schema & Tables Definition
+   6.3 NoSQL Document Layer (Motor Async MongoDB)
+   6.4 File System Storage & Asset Management
+7. EXTERNAL APIS, CLOUD SERVICES & INTEGRATIONS
+   7.1 Agmarknet / eNAM (Data.gov.in)
+   7.2 OpenWeatherMap API
+   7.3 Open-Meteo IoT & Soil Telemetry API
+   7.4 Firebase Authentication
+8. END-TO-END WORKFLOW OF ALL 12 CORE MODULES
+   8.1 AI Plant Disease Detection & In-App Consultation
+   8.2 Intelligent Crop & Soil Recommendation
+   8.3 Real-Time Mandi Prices & Price Alert Subsystem
+   8.4 Peer-to-Peer Farm Equipment Rental Marketplace
+   8.5 Farmer Direct Produce Marketplace (B2C & B2B)
+   8.6 Government Subsidy & Scheme Aggregator
+   8.7 Hyper-Local Weather Forecasts & Agro-Advisories
+   8.8 Aquaculture & Fisheries Management Suite (AquaSession)
+   8.9 Voice-Enabled Multilingual AI Agronomist Chatbot
+   8.10 Tele-Agronomy & Video Expert Consultation
+   8.11 Real-Time Farmer Community Broadcast Network (WebSockets)
+   8.12 Profit & Yield ROI Calculator
+9. MASTER TECHNOLOGY STACK MATRIX (FRONTEND, BACKEND, AI, DB, MOBILE)
+10. DIRECTORY & REPOSITORY STRUCTURE REFERENCE
+11. STEP-BY-STEP INSTALLATION & RUNNING GUIDE
+====================================================================================================
+
+
+====================================================================================================
+1. EXECUTIVE PROJECT OVERVIEW & VALUE PROPOSITION
+====================================================================================================
+Agro-VisionAI (FarmIQ AI Agro) is an integrated, full-stack agritech enterprise platform engineered to
+solve the core bottlenecks faced by traditional farmers, extension workers, and aquaculture operators.
+
+THE PROBLEM WE SOLVE:
+- 20% to 40% of agricultural yields are destroyed annually due to unaddressed or misdiagnosed crop diseases.
+- Farmers lack real-time market price visibility and suffer severe margin loss to middlemen.
+- Soil health degrades and capital is wasted due to arbitrary, non-scientific fertilizer application.
+- Smallholder farmers cannot afford ₹5 Lakh to ₹15 Lakh tractors, harvesters, and solar pumps.
+- Opaque, fragmented government subsidies go unclaimed due to complex bureaucratic procedures.
+- Inland aquaculture farmers lack digital water telemetry tools, feed conversion calculators, and seed markets.
+
+OUR SOLUTION:
+Agro-VisionAI unifies localized deep learning computer vision, geo-spatial soil classification, live IoT
+meteorological telemetry, automated government mandi scraping, a peer-to-peer equipment sharing economy,
+and a specialized aquaculture management hub into a single, high-performance responsive web and native
+mobile application.
+
+
+====================================================================================================
+2. HIGH-LEVEL END-TO-END SYSTEM ARCHITECTURE DIAGRAM
+====================================================================================================
+
++--------------------------------------------------------------------------------------------------+
+|                                     CLIENT APPLICATION (FRONTEND)                                |
+|                                                                                                  |
+|   React 18.3 (TypeScript 5.8) | Vite 5.4 SPA | Tailwind CSS 3.4 + Radix UI (shadcn/ui)           |
+|   Interactive Recharts (Area, Line, Bar) | Web Speech API (Voice Recognition)                    |
+|   Capacitor 8 Container (Native Android Camera & GPS Access)                                     |
++-------------------------------------------------+------------------------------------------------+
+                                                  |
+                                (HTTP / REST APIs & WebSockets WS)
+                                                  |
++-------------------------------------------------v------------------------------------------------+
+|                                     BACKEND ENGINE (FASTAPI)                                     |
+|                                                                                                  |
+|   FastAPI 0.110+ | Uvicorn ASGI Server | Pydantic v2 Validation | JWT (HS256) Security           |
+|   15+ Modular Route Controllers | Background Task Schedulers (2h Mandi Sync, 24h Scheme Sync)    |
++-------------------------------------------------+------------------------------------------------+
+                                                  |
+        +-----------------------------------------+-----------------------------------------+
+        |                                         |                                         |
++-------v-------------------------+   +-----------v---------------------+   +---------------v--------------+
+|     LOCAL AI / ML ENGINES       |   |       CLOUD LLM & VISION        |   |    EXTERNAL SERVICES / APIS  |
+|                                 |   |                                 |   |                              |
+| • PyTorch 2.5 4-Stage CNN       |   | • Groq LLaMA-3.3-70B            |   | • OpenWeatherMap API         |
+|   (39 Plant Disease Classes)    |   |   (5-Point Diagnostic Engine)   |   | • Open-Meteo IoT & Soil      |
+| • Scikit-Learn Geospatial KNN   |   | • Groq LLaMA-3.1-8B-Instant     |   | • Agmarknet (Data.gov.in)    |
+|   (Radian District Soil Model)  |   |   (Conversational Bot)          |   | • Web Speech API             |
+| • Haversine Nearest-Neighbor    |   | • Google Gemini 1.5 Flash Vision|   | • Firebase Google Auth       |
++---------------------------------+   +---------------------------------+   +------------------------------+
+        |                                         |                                         |
+        +-----------------------------------------+-----------------------------------------+
+                                                  |
++-------------------------------------------------v------------------------------------------------+
+|                                     DATA PERSISTENCE LAYER                                       |
+|                                                                                                  |
+|  1. Relational Database (SQLAlchemy ORM): SQLite (`farmiq.db`) / PostgreSQL                      |
+|     - Tables: Users, DiseaseDetections, CropRecommendations, Products, Equipment, Rentals,       |
+|       GovernmentSchemes, MarketPrices, PriceAlerts, SchemeApplications.                          |
+|                                                                                                  |
+|  2. Document Database (Motor Async MongoDB): `farmiq`                                            |
+|     - Collections: Aquaculture water telemetry logs, IoT sensor feeds, multi-turn chat history.  |
+|                                                                                                  |
+|  3. File System Storage: `/uploads` (User leaf scans, equipment photos, receipts).               |
++--------------------------------------------------------------------------------------------------+
+
+
+====================================================================================================
+3. FRONTEND DEEP DIVE (TECHNOLOGY STACK, LIBRARIES & ARCHITECTURE)
+====================================================================================================
+
+3.1 FRONTEND CORE STACK:
+- Framework: React 18.3.1 (Single Page Application architecture with functional components and hooks).
+- Language: TypeScript 5.8.3 (Strict type definitions for all API models, states, and props).
+- Build Tool: Vite 5.4.19 with `@vitejs/plugin-react-swc` (Lightning-fast HMR and optimized production bundling).
+- Client-Side Routing: `react-router-dom` v6.30.1.
+- State Management & Async Querying: `@tanstack/react-query` v5.83.0 for background caching, revalidation,
+  and query deduplication.
+
+3.2 UI/UX DESIGN SYSTEM & COMPONENT LIBRARY:
+- Styling Engine: Tailwind CSS 3.4.17 + `@tailwindcss/typography` + `tailwindcss-animate`.
+- Headless Primitives: Radix UI (`@radix-ui/react-*` covering Dialog, Tabs, DropdownMenu, Accordion,
+  Select, Slider, Switch, Popover, Progress, Tooltip, Avatar, Checkbox).
+- Design Architecture: shadcn/ui component system customized with an agricultural emerald/slate color palette.
+- Iconography: `lucide-react` (0.462.0) with 200+ specialized vector icons.
+- Notification Feedback: `sonner` (1.7.4) and Radix Toast for rich feedback alerts.
+- Utilities: `clsx` and `tailwind-merge` (`cn()` helper) for dynamic class composition.
+
+3.3 DATA VISUALIZATION & GRAPHING:
+- Graphing Engine: `recharts` v3.1.2.
+- Charts Used:
+  * ResponsiveContainer + AreaChart: 6-month historical mandi crop price fluctuations with gradient fills.
+  * BarChart: Crop Profit vs Capital Investment comparisons.
+  * LineChart: Real-time aquaculture water telemetry (pH, Dissolved Oxygen, Temperature over time).
+
+3.4 VOICE & MULTILINGUAL LOCALIZATION:
+- Voice Input: Native Web Speech API (`webkitSpeechRecognition` / `SpeechRecognition`) supporting
+  voice commands in regional accents.
+- Translation: Integrated Google Translate widget dynamically translating the entire UI into regional
+  Indian languages (Hindi, Telugu, Tamil, Marathi, Bengali, Kannada, Punjabi, Gujarati, Malayalam).
+
+3.5 CROSS-PLATFORM MOBILE CONTAINER (CAPACITOR):
+- Core: `@capacitor/core` 8.0.1, `@capacitor/cli` 8.0.1, `@capacitor/android` 8.0.1.
+- Native Hardware Plugins:
+  * `@capacitor/camera` 8.0.0: Native mobile camera access for clicking leaf photographs on field.
+  * `@capacitor/geolocation` 8.0.0: GPS location capture for automatic district and weather lookup.
+  * `@capacitor/preferences` 8.0.0: Persistent native key-value storage.
+
+3.6 CLIENT-SIDE LIFECYCLE & CONTEXT PROVIDERS (`App.tsx`):
+1. `QueryClientProvider`: Manages server-state caching across all views.
+2. `AuthProvider`: Handles JWT authentication tokens, login/logout states, and Google OAuth via Firebase.
+3. `LocationProvider`: Synchronizes GPS coordinates, district names, and manual location overrides.
+4. `WeatherProvider`: Pulls real-time meteorological metrics for the current location.
+5. `TooltipProvider` & `Toaster`: Global UI overlays.
+6. `FarmIQAssistance`: Global floating AI agronomist widget available across all routes.
+
+
+====================================================================================================
+4. BACKEND DEEP DIVE (TECHNOLOGY STACK, FRAMEWORKS & ARCHITECTURE)
+====================================================================================================
+
+4.1 BACKEND CORE STACK:
+- Framework: FastAPI 0.110+ (Asynchronous Python web framework with auto-generated OpenAPI / Swagger docs).
+- Language: Python 3.10+ / 3.11+.
+- Web Server: Uvicorn (ASGI) with standard cython-based uvloop dependencies.
+- CORS Middleware: Configured for localhost development, Vite ports, and Firebase production domains.
+
+4.2 DATA VALIDATION & SCHEMAS (PYDANTIC V2):
+- Strict Pydantic models for request parsing, data validation, and serialization.
+- Separate schemas for UserCreate, UserResponse, DiseasePredictRequest, CropRecommendRequest,
+  MarketPriceResponse, EquipmentCreate, RentalCreate, SchemeResponse.
+
+4.3 AUTHENTICATION, SECURITY & CRYPTOGRAPHY:
+- Algorithm: HMAC-SHA256 (HS256) JSON Web Tokens (`python-jose[cryptography]`).
+- Password Hashing: `passlib[bcrypt]` with automated salt generation.
+- Security Headers: OAuth2PasswordBearer / HTTPBearer authorization header token validation.
+
+4.4 AUTOMATED BACKGROUND SCHEDULERS (`app/services/scheduler.py`):
+- `_run_market_prices_scheduler`: Async loop executing every 2 hours to fetch and ingest fresh
+  mandi price records from Agmarknet API.
+- `_run_schemes_scheduler`: Async loop executing every 1 hour to check and refresh national
+  government subsidy repositories every 24 hours.
+
+4.5 REST & WEBSOCKET ROUTERS BREAKDOWN:
+1. `app/routers/auth.py`: `/api/auth` (Register, Login, Me profile, Edit profile).
+2. `app/routers/disease_detection.py`: `/api/disease` (Predict, Scan history, Image verification).
+3. `app/routers/crop_recommendation.py`: `/api/crops` (LLaMA 3 + Open-Meteo crop advisory).
+4. `app/routers/weather.py`: `/api/weather` (Current conditions, 5-day forecast, Spraying index).
+5. `app/routers/market_prices.py`: `/api/market-prices` (Live mandi prices, Trends, Custom alerts).
+6. `app/routers/farm_market.py`: `/api/farm-market` (Direct farmer crop selling).
+7. `app/routers/marketplace.py`: `/api/marketplace` (B2C & B2B produce catalog, CRUD).
+8. `app/routers/equipment.py`: `/api/equipment` (Machinery rental catalog, Booking engine).
+9. `app/routers/government_schemes.py`: `/api/schemes` (Central & State subsidies, Applications).
+10. `app/routers/profit.py`: `/api/profit` (Crop ROI, input cost vs gross yield calculation).
+11. `app/routers/soil_knn.py`: `/api/predict-soil` (KNN geospatial soil classification).
+12. `app/routers/soil_district.py`: `/api/soil` (District-level soil CSV lookup).
+13. `app/routers/chatbot.py`: `/api/chat` (Groq LLaMA 3.1 8B instant conversational agronomist).
+14. `app/routers/community_chat.py`: `/api/community/ws/{id}` (WebSocket real-time broadcast room).
+15. `app/routers/recommendations.py`: `/api/recommendations` (General agronomic recommendations).
+
+
+====================================================================================================
+5. ARTIFICIAL INTELLIGENCE, DEEP LEARNING & MACHINE LEARNING
+====================================================================================================
+
+5.1 PYTORCH 39-CLASS PLANT DISEASE CNN (`Backend/models/CNN.py`):
+- Model File: `Backend/models/Final ML Model/plant_disease_model_1_latest.pt` (210 MB weights).
+- Framework: PyTorch 2.5.0 + Torchvision 0.20.0.
+- Model Architecture:
+  * 4 Convolutional Stages with Batch Normalization & ReLU activations:
+    - Stage 1: Conv2D(3->32, k=3, p=1) -> ReLU -> BatchNorm2D(32) -> Conv2D(32->32) -> MaxPool(2)
+    - Stage 2: Conv2D(32->64, k=3, p=1) -> ReLU -> BatchNorm2D(64) -> Conv2D(64->64) -> MaxPool(2)
+    - Stage 3: Conv2D(64->128, k=3, p=1) -> ReLU -> BatchNorm2D(128) -> Conv2D(128->128) -> MaxPool(2)
+    - Stage 4: Conv2D(128->256, k=3, p=1) -> ReLU -> BatchNorm2D(256) -> Conv2D(256->256) -> MaxPool(2)
+  * Fully Connected Classifier:
+    - Flatten to 50,176 features -> Dropout(0.4) -> Linear(50176, 1024) -> ReLU -> Dropout(0.4) -> Linear(1024, 39)
+- Preprocessing: Resize to 224x224 RGB, ToTensor(), Normalization with mean/std.
+- 39 Supported Plant Disease Classes:
+  Apple (Scab, Black rot, Cedar apple rust, Healthy), Blueberry (Healthy), Cherry (Powdery mildew, Healthy),
+  Corn (Cercospora leaf spot, Common rust, Northern Leaf Blight, Healthy), Grape (Black rot, Esca, Leaf blight,
+  Healthy), Orange (Citrus greening), Peach (Bacterial spot, Healthy), Pepper Bell (Bacterial spot, Healthy),
+  Potato (Early blight, Late blight, Healthy), Raspberry (Healthy), Soybean (Healthy), Squash (Powdery mildew),
+  Strawberry (Leaf scorch, Healthy), Tomato (Bacterial spot, Early blight, Late blight, Leaf Mold, Septoria,
+  Spider mites, Target Spot, Yellow Leaf Curl Virus, Mosaic virus, Healthy), Background without leaves.
+
+5.2 GOOGLE GEMINI 1.5 FLASH MULTIMODAL VISION:
+- Model: `gemini-1.5-flash-latest` / `gemini-pro-vision` via `@google/generative-ai` and `google-generativeai`.
+- Purpose: Automated fallback when local PyTorch model encounters an unlisted or novel crop species.
+
+5.3 GROQ LLAMA-3.3-70B 5-POINT BOTANICAL REASONING (`groq_service.py`):
+- Model: `llama-3.3-70b-versatile` via Groq Cloud API in JSON mode.
+- Output Format: Strictly formats diagnostic outputs into:
+  * Exactly 5 Observable Symptoms (chlorosis, spots, wilting, curling, fungal growth).
+  * Exactly 5 Curative Treatments (chemical fungicides, bactericides, bio-pesticides, dosages).
+  * Exactly 5 Preventive Measures (soil aeration, resistant hybrids, drip irrigation, crop rotation).
+
+5.4 GROQ LLAMA-3.1-8B-INSTANT CONVERSATIONAL AGENT (`chatbot.py`):
+- Model: `llama-3.1-8b-instant`.
+- Purpose: Sub-second latency agronomic conversational Q&A with system prompts prioritizing practical,
+  organic, and cost-effective farming techniques.
+
+5.5 GEOSPATIAL SOIL KNN CLASSIFIER (`soil_knn.py`):
+- Dataset: `Backend/data/all_india_csv/india_district_soil_with_npk.csv` (700+ Indian districts).
+- Model Binary: `soil_knn_model.pkl` (Scikit-Learn K-Nearest Neighbors Classifier).
+- Algorithm: Converts latitude and longitude to spherical radians. Finds nearest district centroid to
+  determine dominant Soil Type (Alluvial, Black, Red, Laterite, Desert) and estimated NPK ratios.
+- Fallback: Mathematical Haversine distance nearest-neighbor algorithm.
+
+5.6 RULE-BASED NLP & ENTITY RECOGNITION (`nlp_service.py`):
+- 12 Intent Classifiers (CROP_RECOMMENDATION, DISEASE_DIAGNOSIS, PEST_MANAGEMENT, MARKET_INQUIRY, etc.).
+- Entity extraction for crops, seasons, locations, pests, and price limits.
+
+
+====================================================================================================
+6. DATABASE ARCHITECTURE & PERSISTENCE LAYER
+====================================================================================================
+
+6.1 DUAL DATABASE STRATEGY:
+Agro-VisionAI uses a hybrid database setup:
+- Relational Layer: SQLAlchemy 2.0 ORM over SQLite (`farmiq.db`) for development, seamlessly switchable
+  to PostgreSQL in production via `DATABASE_URL`.
+- NoSQL Document Layer: Motor Async MongoDB (`farmiq` database) for high-frequency IoT telemetry and chat.
+
+6.2 RELATIONAL DATABASE SCHEMAS (TABLES & COLUMNS):
+- `users`:
+  * `id` (PK, Int), `username` (Str), `email` (Str, Unique), `password_hash` (Str), `full_name` (Str),
+    `phone` (Str), `location` (Str), `farm_size` (Float), `is_active` (Bool), `is_verified` (Bool),
+    `bio` (Text), `profile_image` (Str), `preferred_language` (Str), `created_at` (DateTime).
+- `disease_detections`:
+  * `id` (PK, Int), `user_id` (FK -> users.id), `crop_type` (Str), `image_path` (Str),
+    `disease_name` (Str), `confidence_score` (Float), `severity` (Str), `symptoms` (JSON),
+    `treatment` (JSON), `prevention` (JSON), `is_verified` (Bool), `expert_comment` (Text), `created_at`.
+- `crop_recommendations`:
+  * `id` (PK, Int), `user_id` (FK -> users.id), `location` (Str), `soil_type` (Str), `farm_size` (Float),
+    `budget` (Float), `season` (Str), `previous_crop` (Str), `recommended_crops` (JSON),
+    `weather_data` (JSON), `created_at` (DateTime).
+- `products` (Produce Marketplace):
+  * `id` (PK, Int), `name` (Str), `description` (Text), `category` (Str), `price_per_unit` (Float),
+    `unit` (Str), `stock_quantity` (Float), `seller_id` (FK -> users.id), `location` (Str),
+    `is_organic` (Bool), `is_verified` (Bool), `rating` (Float), `image_url` (Str).
+- `equipment` (Machinery Hub):
+  * `id` (PK, Int), `name` (Str), `description` (Text), `type` (Str), `price_per_day` (Float),
+    `price_per_hour` (Float), `owner_id` (FK -> users.id), `location` (Str), `specifications` (JSON),
+    `features` (JSON), `is_available` (Bool), `rating` (Float), `image_url` (Str).
+- `rentals` (Machinery Bookings):
+  * `id` (PK, Int), `equipment_id` (FK -> equipment.id), `renter_id` (FK -> users.id),
+    `start_date` (DateTime), `end_date` (DateTime), `total_amount` (Float), `status` (Str),
+    `payment_status` (Str), `created_at` (DateTime).
+- `government_schemes`:
+  * `id` (PK, Int), `name` (Str), `description` (Text), `eligibility_criteria` (Text),
+    `benefits` (Text), `subsidy_percentage` (Float), `category` (Str), `sector` (Str),
+    `applicable_states` (JSON), `applicable_crops` (JSON), `application_process` (Text),
+    `required_documents` (JSON), `website_url` (Str), `official_apply_url` (Str), `is_active` (Bool),
+    `is_new` (Bool), `expiry_date` (DateTime), `last_refreshed` (DateTime).
+- `scheme_applications`:
+  * `id` (PK, Int), `user_id` (FK -> users.id), `scheme_id` (FK -> government_schemes.id),
+    `application_data` (JSON), `status` (Str), `application_date` (DateTime), `review_date`, `comments`.
+- `market_prices`:
+  * `id` (PK, Int), `crop_name` (Str), `category` (Str), `current_price` (Float), `previous_price`,
+    `price_change` (Float), `price_change_amount` (Float), `unit` (Str), `market_location` (Str),
+    `market_type` (Str), `quality_grade` (Str), `trend` (Str), `status` (Str), `min_price`, `max_price`,
+    `avg_price`, `demand_level`, `supply_level`.
+- `price_alerts`:
+  * `id` (PK, Int), `user_id` (FK -> users.id), `crop_name` (Str), `alert_type` (Str),
+    `target_price` (Float), `is_active` (Bool), `created_at` (DateTime).
+
+6.3 NOSQL DOCUMENT COLLECTIONS (MONGODB):
+- `telemetry_logs`: Time-series sensor logs (pond pH, DO, temperature, soil moisture).
+- `chat_sessions`: Multi-turn dialogue context and session states for AI conversation.
+
+6.4 FILE SYSTEM STORAGE:
+- Static storage under `Backend/uploads/` partitioned into `uploads/detections/` and `uploads/equipment/`.
+
+
+====================================================================================================
+7. EXTERNAL APIS, CLOUD SERVICES & INTEGRATIONS
+====================================================================================================
+1. Agmarknet (Data.gov.in) API:
+   - Resource ID: `9ef84268-d588-465a-a308-a864a43d0070`.
+   - Fetches official daily wholesale mandi commodity prices across 28+ Indian states.
+2. OpenWeatherMap API:
+   - `https://api.openweathermap.org/data/2.5/weather` & `/forecast`.
+   - Current temperature, humidity, atmospheric pressure, wind speed, and 5-day forecasts.
+3. Open-Meteo API:
+   - Precision agricultural weather API delivering soil temperature and volumetric soil moisture at depth.
+4. Groq Cloud API:
+   - `https://api.groq.com/openai/v1/chat/completions`.
+   - Ultra-fast LPUs powering LLaMA 3.3 70B (diagnostics) and LLaMA 3.1 8B (chatbot).
+5. Google Generative AI (Gemini):
+   - `gemini-1.5-flash-latest` for multimodal vision fallback.
+6. Firebase Authentication:
+   - Google OAuth2 social login integration.
+
+
+====================================================================================================
+8. END-TO-END WORKFLOW OF ALL 12 CORE MODULES
+====================================================================================================
+
+8.1 AI PLANT DISEASE DETECTION & IN-APP CONSULTATION:
+- User clicks photo of affected leaf using mobile camera or uploads image.
+- Image is converted to a base64 tensor and sent to `POST /api/disease/predict`.
+- PyTorch CNN evaluates the image against 39 classes.
+- If confidence score is high, the label is passed to Groq LLaMA 3.3 70B to generate the 5-point report.
+- The UI renders severity badge, confidence bar, symptoms, treatments, and preventions.
+- An embedded AI chat box (`EmbeddedAIChat.tsx`) opens directly with pre-loaded diagnostic context.
+
+8.2 INTELLIGENT CROP & SOIL RECOMMENDATION:
+- Farmer inputs land area, budget, season, and previous crop.
+- The system resolves geo-coordinates via browser GPS, queries `soil_knn_model.pkl` to determine soil
+  type and NPK values, and queries Open-Meteo for live soil moisture.
+- Generates 6 ranked crop suggestions with duration, input investment, and calculated net profit.
+
+8.3 REAL-TIME MANDI PRICES & PRICE ALERT SUBSYSTEM:
+- Ingests prices from Agmarknet API every 2 hours.
+- Farmers filter by state, district, or crop.
+- Displays 6-month historical Recharts price charts with trend indicators (Bullish/Bearish).
+- Farmers create custom price alerts that trigger notifications when target prices are reached.
+
+8.4 PEER-TO-PEER FARM EQUIPMENT RENTAL MARKETPLACE:
+- Machinery owners list tractors, harvesters, tillers, and sprayers with hourly/daily pricing.
+- Renters select equipment, pick dates on an interactive calendar, review automatic cost calculations,
+  and submit booking requests.
+- Tracks booking status from Pending to Approved, Active, and Completed.
+
+8.5 FARMER DIRECT PRODUCE MARKETPLACE:
+- Farmers list harvested produce with photos, pricing per kg/quintal, and organic certification badges.
+- Direct buyers and wholesalers search produce by location and price.
+- In-app chat modal (`MarketplaceChatModal.tsx`) enables direct negotiation and order finalization.
+
+8.6 GOVERNMENT SUBSIDY & SCHEME AGGREGATOR:
+- Displays curated Central and State schemes (PM-KISAN, PMFBY, SMAM, PMKSY).
+- Farmers filter by subsidy type and state, review eligibility criteria and required documents, and
+  click direct links to official government application portals.
+
+8.7 HYPER-LOCAL WEATHER FORECASTS & AGRO-ADVISORIES:
+- Displays real-time temperature, humidity, wind, and 5-day / 3-hour forecasts.
+- Evaluates real-time parameters to provide an Operational Suitability Score for spraying, sowing,
+  irrigation, and harvesting.
+
+8.8 AQUACULTURE & FISHERIES MANAGEMENT SUITE (AQUASESSION):
+- `AquaFarmersView`: Live water telemetry monitor (pH, Dissolved Oxygen, Salinity, Temperature).
+- `AquaToolsView`: Automated calculators for Feed Conversion Ratio (FCR), Pond Biomass, Stocking Density,
+  and chemical treatment dosing.
+- `AquaMarketplaceView`: Trading platform for fish fingerlings, shrimp PL-10 larvae, and aqua feed.
+- `AquaMarketBuyersView`: Direct exporter and wholesale buyer portal for seafood contracts.
+
+8.9 VOICE-ENABLED MULTILINGUAL AI AGRONOMIST CHATBOT:
+- Floating chatbot widget (`FarmIQAssistance.tsx`) available across all screens.
+- Supports voice queries via Web Speech API and text queries.
+- Instant LLaMA 3.1 8B responses with Google Translate localization into 9+ Indian languages.
+
+8.10 TELE-AGRONOMY & VIDEO EXPERT CONSULTATION:
+- Directory of certified agricultural scientists and plant pathologists.
+- Calendar slot appointment booking and integrated peer-to-peer video session interface (`VideoSession.tsx`).
+
+8.11 REAL-TIME FARMER COMMUNITY BROADCAST NETWORK:
+- WebSocket gateway (`/api/community/ws/{id}`) connecting farmers in real-time.
+- Multi-channel rooms for local pest alerts, weather discussions, and peer machinery sharing.
+
+8.12 PROFIT & YIELD ROI CALCULATOR:
+- Interactive financial modeling tool calculating gross revenue, input expenses (seeds, fertilizers,
+  machinery, labor), break-even price, and net profit margins.
+
+
+====================================================================================================
+9. MASTER TECHNOLOGY STACK MATRIX
+====================================================================================================
+
++-----------------------+----------------------------------------------------+---------------------+
+| LAYER                 | TECHNOLOGIES / LIBRARIES                           | VERSION             |
++-----------------------+----------------------------------------------------+---------------------+
+| Frontend Core         | React, TypeScript, Vite, React Router, React Query | 18.3 / 5.8 / 5.4    |
+| Frontend UI & Styling | Tailwind CSS, Radix UI Primitives, Lucide Icons    | 3.4 / 1.2+ / 0.462  |
+| Data Visualization    | Recharts (AreaChart, BarChart, LineChart)          | 3.1.2               |
+| Voice & Translation   | Web Speech API, Google Translate Widget            | Native / Web        |
+| Mobile Container      | Ionic Capacitor (Android, Camera, Geolocation)     | 8.0.1               |
+| Backend Framework     | FastAPI, Starlette, Uvicorn ASGI Server            | 0.110+ / 0.29+      |
+| Data Validation       | Pydantic, Pydantic-Settings                        | v2.x                |
+| Relational Database   | SQLAlchemy ORM, SQLite (`farmiq.db`), PostgreSQL   | 2.0+                |
+| NoSQL Database        | Motor (Async MongoDB Driver)                       | 3.3+                |
+| Deep Learning (CNN)   | PyTorch, Torchvision, NumPy, Pillow, Pandas        | 2.5.0 / 0.20.0      |
+| Machine Learning (KNN)| Scikit-Learn (K-Nearest Neighbors Radian Model)    | 1.4.0+              |
+| Large Language Models | Groq Cloud (LLaMA-3.3-70B, LLaMA-3.1-8B-Instant)   | Latest API          |
+| Multimodal Vision API | Google Gemini 1.5 Flash Vision                     | 0.24.1              |
+| External APIs         | Agmarknet, OpenWeatherMap, Open-Meteo, Firebase    | REST / JSON         |
+| Authentication        | Python-Jose (JWT HS256), Passlib (Bcrypt)          | Latest              |
++-----------------------+----------------------------------------------------+---------------------+
+
+
+====================================================================================================
+10. DIRECTORY & REPOSITORY STRUCTURE REFERENCE
+====================================================================================================
+
+Agro-VisionAI/
+├── Frontend/                 # React 18 + TypeScript + Vite SPA Client
+│   ├── src/
+│   │   ├── assets/           # UI badges, logos, SVG graphics
+│   │   ├── components/       # 12 Feature modules, Dashboard, Chatbot, shadcn/ui
+│   │   ├── context/          # AuthContext, LocationContext, WeatherContext
+│   │   ├── hooks/            # use-toast, use-mobile
+│   │   ├── pages/            # Page routing components (Index, Auth, AquaSession)
+│   │   ├── services/         # Typed API clients for backend communication
+│   │   ├── types/            # TypeScript interfaces & models
+│   │   └── App.tsx           # Master App Router & Provider wrapper
+│   ├── public/               # Static media & equipment images
+│   ├── capacitor.config.ts   # Mobile native container settings
+│   └── vite.config.ts        # Vite configuration & proxy
+│
+├── Backend/                  # FastAPI Python Application
+│   ├── app/
+│   │   ├── core/             # Configuration, CORS & JWT security
+│   │   ├── models/           # SQLAlchemy database entities
+│   │   ├── schemas/          # Pydantic request/response schemas
+│   │   ├── routers/          # 15+ REST and WebSocket API controllers
+│   │   ├── services/         # PyTorch CNN, Groq LLM, KNN, OpenWeather services
+│   │   └── database.py       # SQLAlchemy engine & session setup
+│   ├── data/                 # All-India district soil database & KNN pickle model
+│   ├── models/               # PyTorch CNN model weights (210 MB)
+│   ├── uploads/              # Leaf image uploads & equipment assets
+│   ├── main.py               # FastAPI server entrypoint
+│   ├── requirements.txt      # Python dependencies
+│   └── farmiq.db             # Local SQLite database
+│
+├── docs/                     # Documentation & Presentation Guides
+│   ├── ARCHITECTURE.md       # System Architecture & Flowchart
+│   ├── PRESENTATION_GUIDE.md # Live Presentation & Demonstration Guide
+│   ├── QUICKSTART.md         # Quick Developer Onboarding
+│   ├── Developer_Report.txt  # Full Developer Audit Report
+│   └── FOSS_Solutions_Guide.txt
+│
+├── start-project.bat         # 1-Click Automated Startup Script (Windows)
+├── package.json              # Root build & start scripts
+├── README.md                 # Master Project Overview
+└── PROJECT_END_TO_END_EXPLANATION.txt # This Document
+
+
+====================================================================================================
+11. STEP-BY-STEP INSTALLATION & RUNNING GUIDE
+====================================================================================================
+
+OPTION 1: 1-CLICK AUTOMATED STARTUP (WINDOWS)
+Execute:
+  start-project.bat
+(Launches Backend on http://127.0.0.1:8000 and Frontend on http://localhost:8080)
+
+OPTION 2: MANUAL STARTUP
+1. Start Backend:
+   cd Backend
+   python -m venv venv
+   .\venv\Scripts\activate      # Windows (or source venv/bin/activate on Linux/Mac)
+   pip install -r requirements.txt
+   python main.py
+
+2. Start Frontend:
+   cd Frontend
+   npm install
+   npm run dev
+
+ACCESS URLS:
+- Frontend Application : http://localhost:8080
+- Backend REST API     : http://localhost:8000
+- Swagger API Docs     : http://localhost:8000/docs
+- ReDoc API Docs       : http://localhost:8000/redoc
+
+====================================================================================================
+                                    END OF PROJECT EXPLANATION
+====================================================================================================
