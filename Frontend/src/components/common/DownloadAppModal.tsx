@@ -25,7 +25,7 @@ interface DownloadAppModalProps {
   onClose: () => void;
 }
 
-const APK_DOWNLOAD_URL = "https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/raw/main/Frontend/android/release/FarmIQ.apk";
+const APK_DOWNLOAD_URL = "https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/raw/refs/heads/main/Frontend/android/release/FarmIQ.apk";
 
 export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
   isOpen,
@@ -36,22 +36,25 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
 
   const startDownload = () => {
     setDownloadStarted(true);
-    setProgress(20);
+    setProgress(30);
 
-    // Direct browser file download of real compiled APK
+    // Direct browser file download of real compiled APK binary
     const link = document.createElement("a");
     link.href = APK_DOWNLOAD_URL;
     link.setAttribute("download", "FarmIQ.apk");
-    link.setAttribute("target", "_blank");
-    link.rel = "noopener noreferrer";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
+    // Also trigger direct navigation fallback for mobile Chrome
+    try {
+      window.location.assign(APK_DOWNLOAD_URL);
+    } catch (e) {}
+
     // Visual progress indicator
-    const t1 = setTimeout(() => setProgress(55), 400);
-    const t2 = setTimeout(() => setProgress(90), 800);
-    const t3 = setTimeout(() => setProgress(100), 1200);
+    const t1 = setTimeout(() => setProgress(65), 300);
+    const t2 = setTimeout(() => setProgress(95), 700);
+    const t3 = setTimeout(() => setProgress(100), 1100);
 
     return () => {
       clearTimeout(t1);
