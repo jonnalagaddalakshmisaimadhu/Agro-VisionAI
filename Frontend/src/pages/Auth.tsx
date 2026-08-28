@@ -132,16 +132,43 @@ const AuthPage = () => {
       <div className="relative z-10 w-full max-w-[420px]">
         <Card className="bg-white/95 backdrop-blur-md shadow-2xl border border-white/60 rounded-3xl overflow-hidden p-6 sm:p-8">
           <CardContent className="p-0">
-            {/* FarmIQ Brand Logo Header */}
+            {/* FarmIQ Brand Logo Header matching Splash Screen */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <Sprout className="w-8 h-8 text-green-600 stroke-[2.5]" />
-                <span className="text-3xl font-extrabold tracking-tight text-gray-900">
-                  Farm<span className="text-green-600">IQ</span>
+              <div className="flex items-center justify-center gap-2.5 mb-1.5">
+                <svg
+                  viewBox="0 0 120 120"
+                  className="w-10 h-10 drop-shadow-[0_4px_10px_rgba(22,163,74,0.25)]"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <defs>
+                    <linearGradient id="authCenterLeaf" x1="60" y1="10" x2="60" y2="70" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#4ade80" />
+                      <stop offset="100%" stopColor="#16a34a" />
+                    </linearGradient>
+                    <linearGradient id="authLeftLeaf" x1="20" y1="35" x2="60" y2="75" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#22c55e" />
+                      <stop offset="100%" stopColor="#15803d" />
+                    </linearGradient>
+                    <linearGradient id="authRightLeaf" x1="100" y1="35" x2="60" y2="75" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#34d399" />
+                      <stop offset="100%" stopColor="#16a34a" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M 58 74 C 34 70 18 52 26 34 C 42 30 54 48 58 74 Z" fill="url(#authLeftLeaf)" />
+                  <path d="M 62 74 C 86 70 102 52 94 34 C 78 30 66 48 62 74 Z" fill="url(#authRightLeaf)" />
+                  <path d="M 60 14 C 46 32 50 56 60 76 C 70 56 74 32 60 14 Z" fill="url(#authCenterLeaf)" />
+                  <path d="M 60 22 L 60 74" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" opacity="0.9" />
+                  <path d="M 60 74 L 60 84" stroke="#15803d" strokeWidth="2.8" strokeLinecap="round" />
+                </svg>
+                <span className="text-3xl font-black tracking-tight flex items-center">
+                  <span className="text-[#1e293b]">Farm</span>
+                  <span className="text-[#16a34a] ml-0.5">IQ</span>
                 </span>
               </div>
-              <p className="text-xs sm:text-sm font-medium text-gray-600">
-                Smart Farming, <span className="text-green-600 font-semibold">Better Future</span>
+              <p className="text-xs sm:text-sm font-semibold tracking-wide text-gray-500">
+                <span className="text-[#475569]">Smart Farming, </span>
+                <span className="text-[#16a34a]">Better Future</span>
               </p>
             </div>
 
