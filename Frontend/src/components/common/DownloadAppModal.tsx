@@ -55,8 +55,8 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
       }
       setDeferredPrompt(null);
     } else {
-      // Fallback instructions for Chrome/Safari mobile
-      alert("To install on your phone:\n1. Tap the 3 dots (⋮) in Chrome or Share button in Safari\n2. Select 'Add to Home screen' or 'Install App'\n3. FarmIQ will appear as a native app on your phone!");
+      // Chrome Android instructions
+      alert("To install FarmIQ using Google Chrome on your phone:\n1. Tap the 3 dots (⋮) in the top-right corner of Chrome\n2. Select 'Install app' or 'Add to Home screen'\n3. FarmIQ will be added directly to your mobile home screen!");
     }
   };
 
@@ -93,10 +93,10 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
           </div>
 
           <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-1.5">
-            Install FarmIQ on Mobile
+            Install FarmIQ on Mobile (Google Chrome)
           </DialogTitle>
           <DialogDescription className="text-xs text-gray-500 font-medium">
-            Smart Farming AI • Fast & Free
+            Google Chrome for Android • Instant 1-Tap Install
           </DialogDescription>
         </DialogHeader>
 
@@ -104,7 +104,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
           {/* Quick 1-Tap Install Button */}
           <div className="bg-gradient-to-br from-green-50 to-emerald-50/80 border border-green-200/80 rounded-2xl p-4 text-center space-y-3">
             <p className="text-xs text-green-900 font-medium leading-relaxed">
-              Install FarmIQ directly onto your phone's Home Screen for instant 1-tap access with full offline support.
+              Open in <strong>Google Chrome</strong> and tap below to install FarmIQ directly onto your phone home screen with full offline access.
             </p>
             
             <Button
@@ -112,32 +112,41 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
               onClick={handleInstallPWA}
             >
               <Download className="w-4 h-4" />
-              {deferredPrompt ? "Install App on Phone" : "Add to Home Screen (1-Tap Install)"}
+              {deferredPrompt ? "Install FarmIQ App via Chrome" : "Install via Google Chrome (1-Tap)"}
             </Button>
           </div>
 
-          {/* Quick 3-Step Install Guide */}
+          {/* Quick Chrome Step-by-Step */}
           <div className="space-y-2.5 pt-1">
             <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-              2 Easy Ways to Use on Mobile:
+              Google Chrome Installation Steps:
             </p>
 
             <div className="grid gap-2">
               <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-gray-50 border border-gray-100">
                 <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 font-bold text-[11px] flex items-center justify-center shrink-0">
-                  A
+                  1
                 </span>
                 <p className="text-xs text-gray-600 leading-tight">
-                  <strong>Instant App (Recommended):</strong> Tap the <strong>Install / Add to Home Screen</strong> button above. FarmIQ installs immediately on your mobile without needing an APK file!
+                  Open <strong>https://farmiq-agrovisionai.web.app</strong> in <strong>Google Chrome</strong> on your Android phone.
                 </p>
               </div>
 
               <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-gray-50 border border-gray-100">
                 <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 font-bold text-[11px] flex items-center justify-center shrink-0">
-                  B
+                  2
                 </span>
                 <p className="text-xs text-gray-600 leading-tight">
-                  <strong>Android APK Sideload:</strong> You can also copy the pre-built <code>app-debug.apk</code> from your project folder directly to your Android device.
+                  Tap the <strong>Install via Google Chrome</strong> button above (or tap Chrome's <strong>3 dots ⋮</strong> menu and select <strong>"Install app"</strong> / <strong>"Add to Home screen"</strong>).
+                </p>
+              </div>
+
+              <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                <span className="w-5 h-5 rounded-full bg-green-100 text-green-700 font-bold text-[11px] flex items-center justify-center shrink-0">
+                  3
+                </span>
+                <p className="text-xs text-gray-600 leading-tight">
+                  FarmIQ will be installed immediately with the FarmIQ App icon on your mobile screen!
                 </p>
               </div>
             </div>
@@ -146,7 +155,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
           {/* Safety note */}
           <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500 pt-1">
             <ShieldCheck className="w-3.5 h-3.5 text-green-600" />
-            <span>100% Virus-Free & Safe Official Build</span>
+            <span>100% Virus-Free & Safe Official Google Chrome Build</span>
           </div>
 
           {/* Action Buttons */}
