@@ -34,7 +34,7 @@ async def test_mongodb():
         print(f" Ping response: {res}")
         print(" [OK] Successfully connected to MongoDB Atlas Cloud Cluster!")
         
-        # Test creating a sample document in farmiq database
+        # Test creating sample documents in farmiq database
         db = client[mongo_db_name]
         sample_doc = {
             "sensor": "Water_pH_Sensor",
@@ -46,12 +46,36 @@ async def test_mongodb():
             "status": "optimal",
             "created_at": "2026-08-28T22:00:00Z"
         }
-        result = await db.telemetry_logs.insert_one(sample_doc)
-        print(f" [OK] Inserted telemetry sample doc into '{mongo_db_name}.telemetry_logs' (ID: {result.inserted_id})")
+        await db.telemetry_logs.insert_one(sample_doc)
+        
+        # Also seed sample chat_sessions
+        if await db.chat_sessions.count_documents({}) == 0:
+            sample_chats = [
+                {
+                    "session_id": "session_farmer_01",
+                    "user_name": "Lakshmi Sai Madhu",
+                    "query": "What is the best pesticide for tomato early blight in Guntur district?",
+                    "response": "For Tomato Early Blight, recommended foliar spray is Mancozeb 75% WP @ 2.5g/L or Chlorothalonil with drip irrigation.",
+                    "intent": "DISEASE_DIAGNOSIS",
+                    "timestamp": "2026-08-28T22:15:00Z"
+                },
+                {
+                    "session_id": "session_farmer_02",
+                    "user_name": "Ram Charan",
+                    "query": "What is the current mandi market price of Guntur Teja dried red chilli?",
+                    "response": "Current wholesale price of Guntur Teja Red Chilli at Guntur Mirchi Yard is Rs 220/kg (Trend: Bullish +4.7%).",
+                    "intent": "MARKET_INQUIRY",
+                    "timestamp": "2026-08-28T22:20:00Z"
+                }
+            ]
+            await db.chat_sessions.insert_many(sample_chats)
+            print(" [OK] Seeded 'chat_sessions' collection in MongoDB Atlas!")
         
         # Count documents
-        count = await db.telemetry_logs.count_documents({})
-        print(f" [OK] Total documents in 'telemetry_logs': {count}")
+        count_telemetry = await db.telemetry_logs.count_documents({})
+        count_chats = await db.chat_sessions.count_documents({})
+        print(f" [OK] 'telemetry_logs' count: {count_telemetry}")
+        print(f" [OK] 'chat_sessions' count: {count_chats}")
         
         client.close()
         print("\n MongoDB Atlas is 100% active and connected to FarmIQ!")
