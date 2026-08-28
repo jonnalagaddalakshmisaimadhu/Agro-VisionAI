@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Home, 
   TrendingUp, 
@@ -12,7 +13,7 @@ import {
   Video,
   Package,
   Settings,
-  ShieldCheck,
+  Stethoscope,
   Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,10 +32,12 @@ interface RemainingFeature {
   badgeColor?: string;
   color: string;
   bgColor: string;
+  route?: string;
 }
 
 const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   // 4 Primary Navigation Items displayed on the bottom bar
   const leftNavItems = [
@@ -108,13 +111,19 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
       label: "Settings",
       icon: Settings,
       color: "text-slate-600 dark:text-slate-300",
-      bgColor: "bg-slate-100 dark:bg-slate-800"
+      bgColor: "bg-slate-100 dark:bg-slate-800",
+      route: "/settings"
     }
   ];
 
-  const handleSelect = (id: string) => {
-    setActiveModule(id);
+  const handleSelect = (feat: RemainingFeature | { id: string }) => {
     setIsOpen(false);
+    if ('route' in feat && feat.route) {
+      navigate(feat.route);
+    } else {
+      setActiveModule(feat.id);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -122,14 +131,14 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
       {/* 🌑 Dim Backdrop when Menu is Open */}
       {isOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 transition-opacity duration-200 animate-in fade-in"
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-[60] transition-opacity duration-200 animate-in fade-in"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* 🪟 COMPACT POPUP - SMALL LOGOS WITH NAMES */}
       {isOpen && (
-        <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-[310px] z-55 animate-in fade-in zoom-in-95 duration-200">
+        <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-[310px] z-[70] animate-in fade-in zoom-in-95 duration-200 pointer-events-auto">
           <div className="bg-card border border-border/90 shadow-2xl rounded-2xl p-3">
             
             {/* Header */}
@@ -146,8 +155,9 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
                 <span className="text-xs font-bold text-foreground">More Services</span>
               </div>
               <button 
-                onClick={() => setIsOpen(false)}
-                className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+                className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                 aria-label="Close"
               >
                 <X className="h-3.5 w-3.5" />
@@ -161,9 +171,14 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
                 return (
                   <button
                     key={feat.id}
-                    onClick={() => handleSelect(feat.id)}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleSelect(feat);
+                    }}
                     className={cn(
-                      "relative flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all duration-150 active:scale-90 group",
+                      "relative flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all duration-150 active:scale-90 group cursor-pointer pointer-events-auto select-none",
                       isSelected 
                         ? "bg-primary/10 border-primary shadow-xs ring-1 ring-primary" 
                         : "bg-background hover:bg-muted/60 border-border/50"
@@ -198,7 +213,7 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
       )}
 
       {/* 📱 Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border z-50 px-2 pb-safe shadow-lg">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border z-[65] px-2 pb-safe shadow-lg">
         <div className="flex justify-between items-center h-16 max-w-md mx-auto relative">
           
           {/* Left Nav Items */}
@@ -206,9 +221,10 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
             {leftNavItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => handleSelect(item.id)}
+                type="button"
+                onClick={() => handleSelect(item)}
                 className={cn(
-                  "flex flex-col items-center justify-center flex-1 h-full space-y-0.5 transition-all",
+                  "flex flex-col items-center justify-center flex-1 h-full space-y-0.5 transition-all cursor-pointer",
                   activeModule === item.id ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -221,9 +237,13 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
           {/* 🪟 CENTER WINDOWS-STYLE FLOATING HUB BUTTON */}
           <div className="relative -top-4 flex flex-col items-center px-1">
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(!isOpen);
+              }}
               className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all duration-200 transform active:scale-95 border-3 border-card ring-2",
+                "w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all duration-200 transform active:scale-95 border-3 border-card ring-2 cursor-pointer",
                 isOpen 
                   ? "bg-destructive text-white ring-destructive/30 rotate-90 scale-105" 
                   : "bg-gradient-to-tr from-emerald-600 via-teal-600 to-green-500 text-white ring-primary/30 hover:scale-105 shadow-emerald-600/30"
@@ -234,7 +254,7 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
                 <X className="h-5 w-5 text-white" />
               ) : (
                 /* Windows 4-Square Style Grid Logo */
-                <div className="grid grid-cols-2 gap-0.5 p-0.5">
+                <div className="grid grid-cols-2 gap-0.5 p-0.5 pointer-events-none">
                   <div className="w-2 h-2 bg-white rounded-xs opacity-95" />
                   <div className="w-2 h-2 bg-white/90 rounded-xs opacity-95" />
                   <div className="w-2 h-2 bg-white/90 rounded-xs opacity-95" />
@@ -255,9 +275,10 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
             {rightNavItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => handleSelect(item.id)}
+                type="button"
+                onClick={() => handleSelect(item)}
                 className={cn(
-                  "flex flex-col items-center justify-center flex-1 h-full space-y-0.5 transition-all",
+                  "flex flex-col items-center justify-center flex-1 h-full space-y-0.5 transition-all cursor-pointer",
                   activeModule === item.id ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
                 )}
               >
