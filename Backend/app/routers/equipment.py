@@ -175,8 +175,13 @@ SEED_EQUIPMENT = [
     }
 ]
 
+_is_equipment_seeded = False
+
 def ensure_seed_data(db: Session):
     """Seed initial equipment if table is empty."""
+    global _is_equipment_seeded
+    if _is_equipment_seeded:
+        return
     try:
         count = db.query(Equipment).count()
         if count < 3:
@@ -209,6 +214,7 @@ def ensure_seed_data(db: Session):
                 )
                 db.add(new_eq)
             db.commit()
+        _is_equipment_seeded = True
     except Exception as e:
         print(f"Error seeding equipment: {e}")
         db.rollback()

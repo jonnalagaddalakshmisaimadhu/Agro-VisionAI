@@ -17,15 +17,17 @@ def load_model():
     global _model
     if _model is None:
         if not MODEL_PATH.exists():
+            _model = False
             return None
         try:
             with open(MODEL_PATH, "rb") as f:
                 _model = pickle.load(f)
         except Exception as e:
             import logging
-            logging.error(f"Error loading soil KNN model: {e}")
+            logging.warning(f"Soil KNN model pickle notice: {e}. Using District CSV geospatial engine.")
+            _model = False
             return None
-    return _model
+    return _model if _model is not False else None
 
 def load_district_csv():
     global _district_rows

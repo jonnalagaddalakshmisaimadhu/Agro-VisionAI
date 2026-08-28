@@ -261,8 +261,12 @@ class GovernmentSchemeService:
             }
         ]
 
+    _is_seeded = False
+
     def seed_default_schemes(self, db: Session):
         """Auto-seed schemes into database if empty."""
+        if self._is_seeded:
+            return
         try:
             count = db.query(GovernmentScheme).count()
             if count == 0:
@@ -291,6 +295,7 @@ class GovernmentSchemeService:
                     db.add(new_scheme)
                 db.commit()
                 logger.info(f"Successfully seeded {len(self.master_schemes)} government schemes.")
+            self._is_seeded = True
         except Exception as e:
             logger.error(f"Error seeding government schemes: {e}")
             db.rollback()

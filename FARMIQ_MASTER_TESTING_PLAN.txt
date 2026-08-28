@@ -75,9 +75,10 @@ PART 2: 🧪 AUTOMATION TESTING STRATEGY (Pytest, Playwright, Selenium)
 +-----------------------+-----------------------------+------------------------------------------------------+
 
 Automated Test Execution Commands:
-- Run Backend Tests : cd Backend && pytest tests/ -v
-- Run Playwright E2E: cd Frontend && npx playwright test
-- Run Frontend Build: cd Frontend && npm run build
+- Run Comprehensive Backend Tests : cd Backend && pytest tests/test_comprehensive_modules.py -v
+- Run High-Concurrency Load Test : cd Backend && python scripts/load_test.py
+- Run 100% Comprehensive E2E Test : cd Frontend && npm test (or node e2e_comprehensive_suite.mjs)
+- Run Frontend Type-Check & Build : cd Frontend && npm run type-check && npm run build
 
 ====================================================================================================
 PART 3: 🚜 DETAILED MODULE-BY-MODULE TEST SCENARIOS

@@ -1,0 +1,78 @@
+name: FarmIQ CI/CD Automated Test & Build Suite
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  backend-tests:
+    name: 🐍 Backend API & Load Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Backend
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 📦 Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: 🧪 Run Comprehensive Pytest Suite (All 11 Modules)
+        run: |
+          pytest tests/test_comprehensive_modules.py -v
+
+      - name: ⚡ Run High-Concurrency Load & Stress Test
+        run: |
+          python scripts/load_test.py
+
+  frontend-tests:
+    name: ⚛️ Frontend Build & Playwright E2E Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Frontend
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: Frontend/package-lock.json
+
+      - name: 📦 Install Node Dependencies
+        run: |
+          npm ci || npm install
+
+      - name: 🔍 TypeScript Type-Check
+        run: |
+          npm run type-check
+
+      - name: 🏗️ Vite Production Build
+        run: |
+          npm run build
+
+      - name: 🎭 Install Playwright Chromium Browser
+        run: |
+          npx playwright install --with-deps chromium
+
+      - name: 🚀 Run 100% Comprehensive Playwright E2E Suite
+        run: |
+          npm test
