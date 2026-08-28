@@ -1,6 +1,17 @@
+import os
 import sqlite3
 
-conn = sqlite3.connect("c:/Users/jlaks/Downloads/Agro-VisionAI-main/Agro-VisionAI-main/Backend/farmiq.db")
+# Resolve relative path to farmiq.db in Backend directory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "farmiq.db")
+
+print(f"Connecting to database at: {DB_PATH}")
+
+if not os.path.exists(DB_PATH):
+    print(f"Warning: Database file {DB_PATH} does not exist yet. Run backend first to initialize DB.")
+    exit(1)
+
+conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
 # Update equipment with authentic owner profiles & mobile numbers
@@ -29,3 +40,4 @@ for row in cursor.fetchall():
     print(row)
 
 conn.close()
+print("Equipment owners updated successfully!")

@@ -19,7 +19,15 @@ import { WeatherProvider } from "@/components/dashboard/WeatherContext";
 import { Suspense } from "react";
 
 const Dashboard = () => {
-  const [activeModule, setActiveModule] = useState("home");
+  const [activeModule, setActiveModuleState] = useState(() => {
+    return localStorage.getItem("farmiq_active_module") || "home";
+  });
+
+  const setActiveModule = (module: string) => {
+    localStorage.setItem("farmiq_active_module", module);
+    setActiveModuleState(module);
+  };
+
   // Initialize sidebar based on screen size (collapsed on mobile by default)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
 

@@ -31,7 +31,75 @@ const GovernmentSchemes = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Types");
   const [landAcres, setLandAcres] = useState("2.5");
   const [farmerType, setFarmerType] = useState("Small Farmer");
-  const [language, setLanguage] = useState<"en" | "te" | "hi">("en");
+  const [language, setLanguage] = useState<string>(() => {
+    return localStorage.getItem("farmiq_language") || "en";
+  });
+
+  // Sync with global language changes
+  useEffect(() => {
+    const getActiveLang = () => {
+      const stored = localStorage.getItem("farmiq_language");
+      if (stored) return stored;
+      const match = document.cookie.match(/googtrans=\/(?:[a-zA-Z]+)\/([a-zA-Z]+)/);
+      return match ? match[1] : "en";
+    };
+    setLanguage(getActiveLang());
+  }, []);
+
+  const handleSpeakScheme = async (scheme: GovernmentScheme) => {
+    try {
+      if (speakingSchemeId === scheme.id) {
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+        setSpeakingSchemeId(null);
+        return;
+      }
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      const activeLang = language || localStorage.getItem("farmiq_language") || "en";
+      const res = await fetch(`/api/schemes/${scheme.id}/voice-summary?lang=${activeLang}`);
+      let textToSpeak = `${scheme.name}. Benefits: ${scheme.benefits}. Eligibility: ${scheme.eligibility_criteria}`;
+      if (res.ok) {
+        const d = await res.json();
+        if (d.voice_script) textToSpeak = d.voice_script;
+      }
+
+      if ("speechSynthesis" in window) {
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        const BCP47_LANG_MAP: Record<string, string> = {
+          te: "te-IN",
+          hi: "hi-IN",
+          ta: "ta-IN",
+          bn: "bn-IN",
+          mr: "mr-IN",
+          kn: "kn-IN",
+          ml: "ml-IN",
+          gu: "gu-IN",
+          pa: "pa-IN",
+          ur: "ur-IN",
+          or: "or-IN",
+          as: "as-IN",
+          en: "en-IN"
+        };
+        utterance.lang = BCP47_LANG_MAP[activeLang] || "en-IN";
+
+        utterance.onend = () => setSpeakingSchemeId(null);
+        utterance.onerror = () => setSpeakingSchemeId(null);
+
+        setSpeakingSchemeId(scheme.id);
+        window.speechSynthesis.speak(utterance);
+      } else {
+        alert(textToSpeak);
+      }
+    } catch (e) {
+      console.error("Speech error:", e);
+      setSpeakingSchemeId(null);
+    }
+  };
 
   const [schemes, setSchemes] = useState<GovernmentScheme[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,46 +193,7 @@ const GovernmentSchemes = () => {
     setEligibilityResult(null);
   };
 
-  const handleSpeakScheme = async (scheme: GovernmentScheme) => {
-    try {
-      if (speakingSchemeId === scheme.id) {
-        if ("speechSynthesis" in window) {
-          window.speechSynthesis.cancel();
-        }
-        setSpeakingSchemeId(null);
-        return;
-      }
 
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-
-      const res = await fetch(`/api/schemes/${scheme.id}/voice-summary?lang=${language}`);
-      let textToSpeak = `${scheme.name}. Benefits: ${scheme.benefits}. Eligibility: ${scheme.eligibility_criteria}`;
-      if (res.ok) {
-        const d = await res.json();
-        if (d.voice_script) textToSpeak = d.voice_script;
-      }
-
-      if ("speechSynthesis" in window) {
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        if (language === "te") utterance.lang = "te-IN";
-        else if (language === "hi") utterance.lang = "hi-IN";
-        else utterance.lang = "en-IN";
-
-        utterance.onend = () => setSpeakingSchemeId(null);
-        utterance.onerror = () => setSpeakingSchemeId(null);
-
-        setSpeakingSchemeId(scheme.id);
-        window.speechSynthesis.speak(utterance);
-      } else {
-        alert(textToSpeak);
-      }
-    } catch (e) {
-      console.error("Speech error:", e);
-      setSpeakingSchemeId(null);
-    }
-  };
 
   // Real-time scheme filtering based on active selections
   const filteredSchemes = schemes.filter(scheme => {

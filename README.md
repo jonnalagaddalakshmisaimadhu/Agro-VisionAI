@@ -1,167 +1,122 @@
-# FarmIQ AI Agro - Smart Farming Platform
+# FarmIQ AI Agro - Smart Farming Platform 🌾🤖
 
-A comprehensive AI-powered smart farming platform with disease detection, crop recommendations, market prices, weather forecasts, and government scheme information.
+A comprehensive AI-powered smart agriculture and aquaculture platform featuring crop disease detection, localized soil & crop recommendations, live mandi market prices, weather forecasting, equipment rental, and farmer community networks.
 
-## 🚀 Features
+---
 
-- **Disease Detection**: AI-powered crop disease detection using machine learning models
-- **Crop Recommendations**: Get personalized crop recommendations based on location and soil data
-- **Market Prices**: Real-time market price information for agricultural products
-- **Weather Forecasts**: Accurate weather predictions for farming planning
-- **Government Schemes**: Information about available government agricultural schemes
-- **Marketplace**: Buy and sell agricultural products
-- **Equipment Rental**: Rent farming equipment
+## 🚀 Key Features
 
-## 🛠️ Tech Stack
+- 🌿 **AI Plant Disease Detection**: Convolutional Neural Network (PyTorch) for fast disease diagnosis and treatment remedies.
+- 🌱 **Crop & Soil Recommendation**: Location, climate, and soil NPK-driven crop recommendations with profit estimates.
+- 📈 **Real-Time Mandi Market Prices**: Automated live price tracker integrating Agmarknet and eNAM feeds.
+- 🌦️ **Weather Forecasts & Agro-Alerts**: Hyper-local weather forecasting with agricultural risk advisories.
+- 🚜 **Equipment Rental Marketplace**: P2P tractor, harvester, and farming machinery booking platform.
+- 🛒 **Farmer Marketplace**: Direct buyer-to-seller marketplace with in-app chat.
+- 🏛️ **Government Schemes**: Curated directory of Central & State government agricultural subsidies and loan schemes.
+- 💬 **Multilingual AI Assistant**: Context-aware AI agronomist chatbot supporting English and regional languages.
+- 👥 **Community Hub**: Real-time WebSocket discussion forum for local farmers.
 
-### Frontend
-- React 18 with TypeScript
-- Vite for build tooling
-- Tailwind CSS + shadcn/ui for UI components
-- React Router for navigation
-- React Query for data fetching
-- Recharts for data visualization
+---
 
-### Backend
-- FastAPI (Python)
-- SQLite database (can be upgraded to PostgreSQL)
-- PyTorch for ML models
-- JWT authentication
-- CORS enabled for frontend integration
+## 🛠️ Technology Stack
 
-## 📋 Prerequisites
+| Layer | Technologies |
+|-------|--------------|
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, Recharts, Lucide Icons |
+| **Backend** | FastAPI (Python 3.10+), SQLAlchemy, Uvicorn, WebSockets, Pydantic |
+| **AI / ML** | PyTorch (CNN Disease Model), Scikit-Learn (Soil KNN), Groq / Google Gemini APIs |
+| **Database** | SQLite (`farmiq.db`) / Optional PostgreSQL / MongoDB |
 
-- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
-- **Python** (v3.8 or higher) - [Download](https://www.python.org/downloads/)
-- **npm** or **yarn** package manager
+---
 
-## 🔧 Installation & Setup
+## 📁 Clean Repository Structure
 
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd farm-iq-ai-agro-main
+```
+Agro-VisionAI/
+├── Frontend/                 # React 18 + TypeScript + Vite Client Application
+│   ├── src/
+│   │   ├── assets/           # UI images & illustrations
+│   │   ├── components/       # Reusable components & feature modules
+│   │   │   ├── chatbot/      # AI Agronomist Chatbot widget
+│   │   │   ├── common/       # Shared UI (Translation, ProtectedRoute)
+│   │   │   ├── dashboard/    # Shell header, sidebar, navigation & footer
+│   │   │   ├── modules/      # Feature screens (Disease, Crop, Market, Equipment, etc.)
+│   │   │   └── ui/           # shadcn/ui Tailwind components
+│   │   ├── context/          # React Contexts (AuthContext, LocationContext)
+│   │   ├── hooks/            # Custom hooks (use-toast, use-mobile)
+│   │   ├── pages/            # Top-level pages (Index, Auth, Profile, Settings)
+│   │   ├── services/         # Typed API clients for backend integration
+│   │   ├── types/            # TypeScript interfaces & models
+│   │   └── App.tsx           # Route mapping & provider setup
+│   └── public/               # Static media & equipment images
+│
+├── Backend/                  # FastAPI Application & AI Services
+│   ├── app/
+│   │   ├── core/             # Configuration, CORS & JWT security
+│   │   ├── models/           # SQLAlchemy database entities
+│   │   ├── schemas/          # Pydantic validation schemas
+│   │   ├── routers/          # Modular API endpoints
+│   │   ├── services/         # AI services, scrapers & ML inference engines
+│   │   └── utils/            # Profiling and performance utilities
+│   ├── data/                 # Soil NPK datasets & regional soil data
+│   ├── models/               # PyTorch weights & Whisper models
+│   ├── scripts/              # Database seeders & API diagnostic tools
+│   ├── uploads/              # Uploaded user images (disease scanner, equipment)
+│   ├── main.py               # FastAPI entrypoint
+│   └── requirements.txt      # Python dependencies
+│
+├── docs/                     # Project Documentation & Presentation Assets
+│   ├── ARCHITECTURE.md       # System Architecture & Flowchart
+│   ├── PRESENTATION_GUIDE.md # Live Presentation & Demonstration Guide
+│   ├── QUICKSTART.md         # Quick Developer Onboarding
+│   ├── FOSS_Solutions_Guide.md
+│   └── Developer_Report.md
+│
+├── start-project.bat         # 1-Click Startup for Windows
+├── package.json              # Root build & start scripts
+└── README.md                 # Master Project Overview
 ```
 
-### 2. Backend Setup
+---
 
-```bash
-# Navigate to Backend directory
-cd Backend
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows (PowerShell):
-.\venv\Scripts\activate
-# Windows (CMD):
-venv\Scripts\activate.bat
-# Linux/macOS:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 3. Frontend Setup
-
-```bash
-# Navigate to Frontend directory
-cd ../Frontend
-
-# Install dependencies
-npm install
-```
-
-### 4. Environment Configuration
-
-Create a `.env.local` file in the `Frontend/` directory:
-
-```env
-# Google Gemini API Key (for AI features)
-VITE_GEMINI_API_KEY=your-gemini-api-key-here
-
-# Backend API URL (default: http://localhost:8000)
-VITE_API_URL=http://localhost:8000
-```
-
-### 5. Database Setup
-
-The database will be automatically created on first run. The SQLite database file (`farmiq.db`) will be created in the `Backend/` directory.
-
-## 🚀 Running the Application
+## ⚡ Quickstart & Running Locally
 
 ### Option 1: 1-Click Startup (Windows)
-
-Simply double-click or run:
+Double-click or run:
 ```cmd
 start-project.bat
 ```
 
-### Option 2: Manual Start
+### Option 2: Manual Startup
 
-**Terminal 1 - Start Backend:**
+**1. Start Backend:**
 ```bash
 cd Backend
-.\venv\Scripts\activate  # Windows
+python -m venv venv
+.\venv\Scripts\activate       # Windows
+# source venv/bin/activate    # Linux / macOS
+pip install -r requirements.txt
 python main.py
 ```
 
-**Terminal 2 - Start Frontend:**
+**2. Start Frontend:**
 ```bash
 cd Frontend
+npm install
 npm run dev
 ```
 
-The application will be available at:
-- **Frontend**: http://localhost:8080
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
+### Access URLs:
+- **Frontend App**: [http://localhost:8080](http://localhost:8080)
+- **Backend API**: [http://localhost:8000](http://localhost:8000)
+- **Interactive API Docs (Swagger UI)**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-## 📁 Project Structure
+---
 
-```
-Agro-VisionAI/
-├── Frontend/               # React 18 + TypeScript + Vite Application
-│   ├── src/
-│   │   ├── components/     # UI components & feature modules
-│   │   ├── pages/          # Application route pages
-│   │   ├── services/       # API clients & services
-│   │   ├── context/        # React context providers (Auth, Weather, Location)
-│   │   └── types/          # TypeScript interface definitions
-│   └── package.json
-├── Backend/                # FastAPI Application & AI Services
-│   ├── app/
-│   │   ├── routers/        # REST & WebSocket API endpoints
-│   │   ├── models/         # SQLAlchemy database models
-│   │   ├── schemas/        # Pydantic data schemas
-│   │   ├── services/       # ML inference & external API logic
-│   │   └── core/           # Config, CORS & Security
-│   ├── models/             # PyTorch CNN plant disease models
-│   ├── data/               # Soil datasets & Scikit-Learn KNN models
-│   ├── main.py             # FastAPI entry point
-│   └── requirements.txt
-├── start-project.bat       # Dual-server startup script
-├── PRESENTATION_GUIDE.md   # Presentation script & demo steps
-├── QUICKSTART.md           # Fast onboarding steps
-└── README.md
-```
+## 📚 Detailed Documentation
 
-## 🔌 API Endpoints
-
-The backend provides the following main API endpoints:
-
-- `/api/auth/*` - Authentication (register, login, user management)
-- `/api/disease/*` - Disease detection
-- `/api/weather/*` - Weather forecasts
-- `/api/marketplace/*` - Marketplace operations
-- `/api/equipment/*` - Equipment rental
-- `/api/schemes/*` - Government schemes
-- `/api/crops/*` - Crop recommendations
-- `/api/market-prices/*` - Market prices
-- `/api/community/*` - Real-time WebSocket farmer community chat
-
-Full API documentation available at `/docs` when backend is running.
-
+- 📐 [System Architecture Guide](docs/ARCHITECTURE.md)
+- 🎙️ [Presentation & Demo Guide](docs/PRESENTATION_GUIDE.md)
+- ⚡ [Quickstart Guide](docs/QUICKSTART.md)
+- 📄 [Developer Report](docs/Developer_Report.md)
+- 🌐 [FOSS Solutions Guide](docs/FOSS_Solutions_Guide.md)

@@ -13,6 +13,7 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     history: Optional[List[ChatMessage]] = []
+    language: Optional[str] = "en"
 
 class ChatResponse(BaseModel):
     response: str
@@ -26,7 +27,8 @@ async def chat_endpoint(request: ChatRequest):
         # Convert Pydantic models to list of dicts for service
         history_dict = [{"role": msg.role, "content": msg.content} for msg in request.history]
         
-        response = await chatbot_service.get_response(request.message, history_dict)
+        response = await chatbot_service.get_response(request.message, history_dict, request.language)
         return ChatResponse(response=response)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

@@ -56,7 +56,13 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
   const [currentLang, setCurrentLang] = useState('en');
 
   useEffect(() => {
-    // Check for existing language cookie
+    // Check for existing language in localStorage or cookie
+    const storedLang = localStorage.getItem('farmiq_language');
+    if (storedLang) {
+      setCurrentLang(storedLang);
+      return;
+    }
+
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
@@ -69,22 +75,32 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
       const targetLang = cookieLang.split('/').pop();
       if (targetLang) {
         setCurrentLang(targetLang);
+        localStorage.setItem('farmiq_language', targetLang);
       }
     }
   }, []);
 
   const handleLanguageChange = (langCode: string) => {
-    // Set google translate cookie
-    document.cookie = `googtrans=/en/${langCode}; path=/; domain=${window.location.hostname}`;
-    document.cookie = `googtrans=/en/${langCode}; path=/;`; // fallback for some browsers
-
-    // Allow React state to update before reload
     setCurrentLang(langCode);
+    localStorage.setItem('farmiq_language', langCode);
 
-    // Reload page to apply translation
+    const hostname = window.location.hostname;
+    if (langCode === 'en') {
+      // Clear cookies to return to default English
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${hostname}`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    } else {
+      // Set Google Translate cookies
+      document.cookie = `googtrans=/en/${langCode}; path=/; domain=${hostname}`;
+      document.cookie = `googtrans=/en/${langCode}; path=/;`;
+      document.cookie = `googtrans=/auto/${langCode}; path=/; domain=${hostname}`;
+      document.cookie = `googtrans=/auto/${langCode}; path=/;`;
+    }
+
+    // Perform quick reload to apply Google Translate cleanly
     setTimeout(() => {
       window.location.reload();
-    }, 100);
+    }, 80);
   };
 
   // Get today's date

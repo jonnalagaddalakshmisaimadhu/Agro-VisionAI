@@ -460,6 +460,24 @@ class GovernmentSchemeService:
             script = f"ప్రభుత్వ పథకం: {name}. ఈ పథకం ద్వారా లభించే ప్రయోజనం: {benefits}. అర్హత: {eligibility}. అవసరమైన పత్రాలు: {docs}. దరఖాస్తు చేసుకోవడానికి దగ్గరలోని రైతు భరోసా కేంద్రం లేదా మీసేవ కేంద్రాన్ని సంప్రదించండి."
         elif lang.startswith("hi"): # Hindi
             script = f"सरकारी योजना: {name}. इस योजना का मुख्य लाभ: {benefits}. पात्रता: {eligibility}. आवश्यक दस्तावेज़: {docs}. आवेदन के लिए अपने नज़दीकी सीएससी केंद्र या कृषि विभाग से संपर्क करें."
+        elif lang.startswith("ta"): # Tamil
+            script = f"அரசு திட்டம்: {name}. நன்மைகள்: {benefits}. தகுதி: {eligibility}. தேவையான ஆவணங்கள்: {docs}. விண்ணப்பிக்க உங்கள் அருகிலுள்ள சேவை மையத்தை அணுகவும்."
+        elif lang.startswith("bn"): # Bengali
+            script = f"সরকারি প্রকল্প: {name}. সুবিধা: {benefits}. যোগ্যতা: {eligibility}. প্রয়োজনীয় নথি: {docs}. আবেদনের জন্য নিকটস্থ সিএসসি কেন্দ্র বা কৃষি অফিসে যোগাযোগ করুন."
+        elif lang.startswith("mr"): # Marathi
+            script = f"सरकारी योजना: {name}. लाभ: {benefits}. पात्रता: {eligibility}. आवश्यक कागदपत्रे: {docs}. अर्जासाठी आपल्या जवळच्या सेवा केंद्राशी संपर्क साधा."
+        elif lang.startswith("kn"): # Kannada
+            script = f"ಸರ್ಕಾರಿ ಯೋಜನೆ: {name}. ಪ್ರಯೋಜನಗಳು: {benefits}. ಅರ್ಹತೆ: {eligibility}. ಅಗತ್ಯ ದಾಖಲೆಗಳು: {docs}. ಅರ್ಜಿ ಸಲ್ಲಿಸಲು ನಿಮ್ಮ ಹತ್ತಿರದ ಸೇವಾ ಕೇಂದ್ರವನ್ನು ಸಂಪರ್ಕಿಸಿ."
+        elif lang.startswith("ml"): # Malayalam
+            script = f"സർക്കാർ പദ്ധതി: {name}. ആനുകൂല്യങ്ങൾ: {benefits}. യോഗ്യത: {eligibility}. ആവശ്യമായ രേഖകൾ: {docs}. അപേക്ഷിക്കാനായി അടുത്തുള്ള അക്ഷയ കേന്ദ്രവുമായി ബന്ധപ്പെടുക."
+        elif lang.startswith("gu"): # Gujarati
+            script = f"સરકારી યોજના: {name}. લાભ: {benefits}. પાત્રતા: {eligibility}. જરૂરી દસ્તાવેજો: {docs}. અરજી માટે નજીકના સેવા કેન્દ્રનો સંપર્ક કરો."
+        elif lang.startswith("pa"): # Punjabi
+            script = f"ਸਰਕਾਰੀ ਸਕੀਮ: {name}. ਲਾਭ: {benefits}. ਯੋਗਤਾ: {eligibility}. ਲੋੜੀਂਦੇ ਦਸਤਾਵੇਜ਼: {docs}. ਅਰਜ਼ੀ ਲਈ ਆਪਣੇ ਨਜ਼ਦੀਕੀ ਸੇਵਾ ਕੇਂਦਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ."
+        elif lang.startswith("or"): # Odia
+            script = f"ସରକାରୀ ଯୋଜନା: {name}. ଲାଭ: {benefits}. ଯୋଗ୍ୟତା: {eligibility}. ଆବଶ୍ୟକୀୟ କାଗଜପତ୍ର: {docs}. ଆବେଦନ ପାଇଁ ନିକଟସ୍ଥ ଜନସେବା କେନ୍ଦ୍ର ସହିତ ଯୋଗାଯୋଗ କରନ୍ତୁ."
+        elif lang.startswith("ur"): # Urdu
+            script = f"سرکاری اسکیم: {name}۔ فوائد: {benefits}۔ اہلیت: {eligibility}۔ ضروری دستاویزات: {docs}۔ درخواست کے لیے قریبی سی ایس سی مرکز سے رابطہ کریں۔"
         else: # English
             script = f"Government Scheme: {name}. Benefits: {benefits}. Eligibility: {eligibility}. Required Documents: {docs}. Apply online at {scheme.website_url} or visit your nearest Common Service Center."
 

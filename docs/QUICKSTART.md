@@ -29,10 +29,17 @@ npm run dev
 Frontend will be available at: **http://localhost:8080**
 
 
-### Step 3: Configure Environment (Optional)
+### Step 3: Configure Environment
 
-Create `.env.local` file in root directory:
+**1. Backend Environment**  
+Create a `.env` file in the `Backend/` directory:
+```env
+GROQ_API_KEY=your-groq-api-key-here
+GEMINI_API_KEY=your-gemini-api-key-here
+```
 
+**2. Frontend Environment (Optional)**  
+Create a `.env.local` file in the `Frontend/` directory:
 ```env
 VITE_GEMINI_API_KEY=your-api-key-here
 VITE_API_URL=http://localhost:8000
