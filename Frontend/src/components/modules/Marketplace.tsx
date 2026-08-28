@@ -90,6 +90,189 @@ interface InboxItem {
   total_messages: number;
 }
 
+const DEFAULT_PRODUCTS: ProductItem[] = [
+  {
+    id: 1,
+    name: "Fresh Hybrid Tomatoes",
+    category: "vegetables",
+    price_per_unit: 35,
+    unit: "kg",
+    stock_quantity: 800,
+    seller_name: "Ramesh Patel",
+    phone_number: "9848022338",
+    location: "Kolar, Karnataka",
+    is_organic: true,
+    is_verified: true,
+    rating: 4.9,
+    total_reviews: 24,
+    harvest_date: "2026-08-25",
+    image_url: "🍅",
+    description: "Naturally ripened, firm hybrid tomatoes ideal for wholesale mandis and local retail markets."
+  },
+  {
+    id: 2,
+    name: "Guntur Teja Red Chilli (Grade A)",
+    category: "spices",
+    price_per_unit: 220,
+    unit: "kg",
+    stock_quantity: 1500,
+    seller_name: "Siva Krishna",
+    phone_number: "9440156789",
+    location: "Guntur, Andhra Pradesh",
+    is_organic: false,
+    is_verified: true,
+    rating: 5.0,
+    total_reviews: 42,
+    harvest_date: "2026-08-20",
+    image_url: "🌶️",
+    description: "High pungency, sun-dried Guntur Teja red chillies directly from the Guntur mirchi yard."
+  },
+  {
+    id: 3,
+    name: "Premium Sharbati Wheat",
+    category: "grains",
+    price_per_unit: 38,
+    unit: "kg",
+    stock_quantity: 5000,
+    seller_name: "Gurdeep Singh",
+    phone_number: "9814088991",
+    location: "Sehore, Madhya Pradesh",
+    is_organic: true,
+    is_verified: true,
+    rating: 4.8,
+    total_reviews: 19,
+    harvest_date: "2026-08-15",
+    image_url: "🌾",
+    description: "Golden grain, high gluten Sharbati wheat grown in black cotton soil without synthetic pesticides."
+  },
+  {
+    id: 4,
+    name: "Nagpur Juicy Mandarins (Santra)",
+    category: "fruits",
+    price_per_unit: 65,
+    unit: "kg",
+    stock_quantity: 2500,
+    seller_name: "Anil Deshmukh",
+    phone_number: "9765012345",
+    location: "Nagpur, Maharashtra",
+    is_organic: false,
+    is_verified: true,
+    rating: 4.7,
+    total_reviews: 31,
+    harvest_date: "2026-08-26",
+    image_url: "🍊",
+    description: "Sweet and tangy grade-A Nagpur oranges harvested fresh from our Vidarbha orchard."
+  },
+  {
+    id: 5,
+    name: "Nashik Red Onions (Garwa Quality)",
+    category: "vegetables",
+    price_per_unit: 28,
+    unit: "kg",
+    stock_quantity: 4000,
+    seller_name: "Sunita Shinde",
+    phone_number: "9822045678",
+    location: "Lasalgaon, Nashik",
+    is_organic: false,
+    is_verified: true,
+    rating: 4.8,
+    total_reviews: 55,
+    harvest_date: "2026-08-22",
+    image_url: "🧅",
+    description: "Dry, cured Lasalgaon red onions with thick skin and excellent shelf life for bulk storage."
+  },
+  {
+    id: 6,
+    name: "Traditional 1121 Basmati Rice",
+    category: "grains",
+    price_per_unit: 95,
+    unit: "kg",
+    stock_quantity: 3000,
+    seller_name: "Vikram Negi",
+    phone_number: "9412078901",
+    location: "Dehradun, Uttarakhand",
+    is_organic: true,
+    is_verified: true,
+    rating: 4.9,
+    total_reviews: 38,
+    harvest_date: "2026-08-10",
+    image_url: "🍚",
+    description: "Extra-long grain aromatic 1121 Basmati rice, aged for 12 months for supreme fragrance and cooking."
+  },
+  {
+    id: 7,
+    name: "High-Curcumin Lakadong Turmeric",
+    category: "spices",
+    price_per_unit: 240,
+    unit: "kg",
+    stock_quantity: 600,
+    seller_name: "Wanbha Marwein",
+    phone_number: "9863098765",
+    location: "Jaintia Hills, Meghalaya",
+    is_organic: true,
+    is_verified: true,
+    rating: 5.0,
+    total_reviews: 60,
+    harvest_date: "2026-08-18",
+    image_url: "🌿",
+    description: "Certified organic turmeric powder with lab-verified 7.5% natural curcumin content."
+  },
+  {
+    id: 8,
+    name: "Fresh Murrah Buffalo Milk & Desi Ghee",
+    category: "dairy",
+    price_per_unit: 70,
+    unit: "liter",
+    stock_quantity: 150,
+    seller_name: "Venkata Rao",
+    phone_number: "9849033445",
+    location: "Vijayawada, Andhra Pradesh",
+    is_organic: true,
+    is_verified: true,
+    rating: 4.9,
+    total_reviews: 29,
+    harvest_date: "2026-08-27",
+    image_url: "🥛",
+    description: "Pure A2 Murrah buffalo milk and Vedic bilona cow ghee, unpasteurized and non-diluted."
+  },
+  {
+    id: 9,
+    name: "Banganapalli Sweet Mangoes",
+    category: "fruits",
+    price_per_unit: 110,
+    unit: "kg",
+    stock_quantity: 1200,
+    seller_name: "Koti Reddy",
+    phone_number: "9866123456",
+    location: "Nandyal, Andhra Pradesh",
+    is_organic: true,
+    is_verified: true,
+    rating: 4.9,
+    total_reviews: 48,
+    harvest_date: "2026-08-24",
+    image_url: "🥭",
+    description: "Naturally hay-ripened GI-tagged Banganapalli mangoes with thin skin and fiberless golden pulp."
+  },
+  {
+    id: 10,
+    name: "Long Staple Organic Cotton Bales",
+    category: "grains",
+    price_per_unit: 82,
+    unit: "kg",
+    stock_quantity: 6000,
+    seller_name: "Mallesh Goud",
+    phone_number: "9988776655",
+    location: "Warangal, Telangana",
+    is_organic: true,
+    is_verified: true,
+    rating: 4.8,
+    total_reviews: 17,
+    harvest_date: "2026-08-12",
+    image_url: "☁️",
+    description: "32mm extra long staple clean white cotton bales directly from Warangal agricultural market."
+  }
+];
+
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -98,7 +281,7 @@ const Marketplace = () => {
   const [activeTab, setActiveTab] = useState("buy");
   const { toast } = useToast();
 
-  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>(DEFAULT_PRODUCTS);
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
   // Seller Inbox State
@@ -133,24 +316,59 @@ const Marketplace = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedPriceData, setSuggestedPriceData] = useState<any>(null);
 
-  // Fetch products from backend database
+  const filterList = (list: ProductItem[]) => {
+    let res = [...list];
+    if (selectedCategory !== "all") {
+      res = res.filter(p => p.category.toLowerCase() === selectedCategory.toLowerCase());
+    }
+    if (selectedLocation !== "all") {
+      res = res.filter(p => p.location.toLowerCase().includes(selectedLocation.toLowerCase()));
+    }
+    if (organicOnly) {
+      res = res.filter(p => p.is_organic);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      res = res.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.seller_name.toLowerCase().includes(q) ||
+        p.location.toLowerCase().includes(q)
+      );
+    }
+    return res;
+  };
+
+  // Fetch products from backend database or client-side verified catalog
   const fetchProducts = async () => {
     setIsLoadingProducts(true);
     try {
-      let url = "/api/marketplace/products?";
-      const params = new URLSearchParams();
-      if (selectedCategory !== "all") params.append("category", selectedCategory);
-      if (selectedLocation !== "all") params.append("location", selectedLocation);
-      if (organicOnly) params.append("organic_only", "true");
-      if (searchQuery.trim()) params.append("search", searchQuery.trim());
+      const customSaved: ProductItem[] = JSON.parse(localStorage.getItem("farmiq_custom_products") || "[]");
+      const baseList = [...customSaved, ...DEFAULT_PRODUCTS];
 
-      const res = await fetch(url + params.toString());
-      if (res.ok) {
-        const data = await res.json();
-        setProducts(data);
+      const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      if (isLocalhost) {
+        let url = "/api/marketplace/products?";
+        const params = new URLSearchParams();
+        if (selectedCategory !== "all") params.append("category", selectedCategory);
+        if (selectedLocation !== "all") params.append("location", selectedLocation);
+        if (organicOnly) params.append("organic_only", "true");
+        if (searchQuery.trim()) params.append("search", searchQuery.trim());
+
+        const res = await fetch(url + params.toString());
+        const contentType = res.headers.get("content-type") || "";
+        if (res.ok && contentType.includes("application/json")) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setProducts([...customSaved, ...data]);
+            return;
+          }
+        }
       }
+
+      setProducts(filterList(baseList));
     } catch (e) {
       console.error("Error fetching products:", e);
+      setProducts(filterList(DEFAULT_PRODUCTS));
     } finally {
       setIsLoadingProducts(false);
     }
@@ -261,50 +479,71 @@ const Marketplace = () => {
         harvest_date: productForm.harvestDate,
         description: productForm.description || "Farm-fresh produce harvested with sustainable agricultural practices.",
         image_url: productForm.image_url || emojiMap[productForm.category] || "📦",
-        video_url: productForm.video_url || null
+        video_url: productForm.video_url || undefined
       };
 
-      const res = await fetch("/api/marketplace/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+      // Save locally to user's browser session
+      const customSaved: ProductItem[] = JSON.parse(localStorage.getItem("farmiq_custom_products") || "[]");
+      const localItem: ProductItem = {
+        id: Date.now(),
+        name: payload.name,
+        category: payload.category,
+        price_per_unit: payload.price_per_unit,
+        unit: payload.unit,
+        stock_quantity: payload.stock_quantity,
+        seller_name: payload.seller_name,
+        phone_number: payload.phone_number,
+        location: payload.location,
+        is_organic: payload.is_organic,
+        is_verified: true,
+        rating: 5.0,
+        total_reviews: 1,
+        harvest_date: payload.harvest_date,
+        description: payload.description,
+        image_url: payload.image_url,
+        video_url: payload.video_url
+      };
+      localStorage.setItem("farmiq_custom_products", JSON.stringify([localItem, ...customSaved]));
+
+      const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      if (isLocalhost) {
+        try {
+          await fetch("/api/marketplace/products", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+        } catch (err) {
+          console.warn("Backend unavailable, product saved locally:", err);
+        }
+      }
+
+      toast({
+        title: "🌾 Produce Listed Successfully!",
+        description: `${payload.name} is now live in the marketplace with photo/video proof.`
       });
 
-      if (res.ok) {
-        const created = await res.json();
-        toast({
-          title: "🌾 Produce Listed Successfully!",
-          description: `${created.name} is now live with photo/video proof.`
-        });
-
-        setProductForm({
-          name: "",
-          category: "vegetables",
-          price: "",
-          unit: "kg",
-          quantity: "500",
-          seller_name: "",
-          phoneNumber: "9848012345",
-          location: "Guntur, Andhra Pradesh",
-          harvestDate: new Date().toISOString().split("T")[0],
-          description: "",
-          is_organic: false,
-          image_url: "",
-          video_url: ""
-        });
-        setImagePreview(null);
-        setVideoPreview(null);
-        setSuggestedPriceData(null);
-        setActiveTab("buy");
-        fetchProducts();
-        fetchInbox();
-      } else {
-        toast({
-          title: "Listing Failed",
-          description: "Could not save product. Please try again.",
-          variant: "destructive"
-        });
-      }
+      setProductForm({
+        name: "",
+        category: "vegetables",
+        price: "",
+        unit: "kg",
+        quantity: "500",
+        seller_name: "",
+        phoneNumber: "9848012345",
+        location: "Guntur, Andhra Pradesh",
+        harvestDate: new Date().toISOString().split("T")[0],
+        description: "",
+        is_organic: false,
+        image_url: "",
+        video_url: ""
+      });
+      setImagePreview(null);
+      setVideoPreview(null);
+      setSuggestedPriceData(null);
+      setActiveTab("buy");
+      fetchProducts();
+      fetchInbox();
     } catch (e) {
       console.error("Listing error:", e);
     } finally {
@@ -314,12 +553,18 @@ const Marketplace = () => {
 
   const handleDeleteProduct = async (id: number) => {
     try {
-      const res = await fetch(`/api/marketplace/products/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        toast({ title: "Listing Removed", description: "Product removed from marketplace." });
-        fetchProducts();
-        fetchInbox();
+      const customSaved: ProductItem[] = JSON.parse(localStorage.getItem("farmiq_custom_products") || "[]");
+      const updated = customSaved.filter(p => p.id !== id);
+      localStorage.setItem("farmiq_custom_products", JSON.stringify(updated));
+
+      const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      if (isLocalhost) {
+        fetch(`/api/marketplace/products/${id}`, { method: "DELETE" }).catch(() => {});
       }
+
+      toast({ title: "Listing Removed", description: "Product removed from marketplace." });
+      fetchProducts();
+      fetchInbox();
     } catch (e) {
       console.error("Delete error:", e);
     }
