@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LandingPage from "@/components/LandingPage";
 import Dashboard from "@/components/Dashboard";
@@ -10,39 +10,32 @@ import { Capacitor } from "@capacitor/core";
 const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [showSplash, setShowSplash] = useState(true);
-  const [isMobile, setIsMobile] = useState(() => {
-    return Capacitor.isNativePlatform() || window.innerWidth < 1024;
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(Capacitor.isNativePlatform() || window.innerWidth < 1024);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  
+  // Only the installed native mobile app starts from the animated loading/splash screen!
+  // The website (desktop or mobile web browser) starts directly from the Landing Page.
+  const isNative = Capacitor.isNativePlatform();
+  const [showSplash, setShowSplash] = useState(isNative);
 
   const handleLoginClick = () => {
     navigate("/login");
   };
 
-  // 1. Show Clean Animated Native Splash Screen on Launch (Centered App Logo + Title)
-  if (showSplash) {
+  // 1. If running inside installed native mobile app -> Start with Pleasant Loading Screen
+  if (showSplash && isNative) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
-  // 2. If user is already authenticated -> Open Dashboard
+  // 2. If user is already authenticated (Logged in) -> Open FarmIQ Dashboard
   if (user) {
     return <Dashboard />;
   }
 
-  // 3. On Native Android/iOS App (Capacitor) or Mobile screens -> Ask for Login Page directly!
-  if (isMobile || Capacitor.isNativePlatform()) {
+  // 3. If running inside installed native mobile app (not yet logged in) -> Open Login Page
+  if (isNative) {
     return <AuthPage />;
   }
 
-  // 4. On Desktop Web Browser -> Show Marketing Landing Page
+  // 4. If visiting the Website from web browser (Desktop / Mobile web) -> Start from Landing Page!
   return <LandingPage onClickLogin={handleLoginClick} />;
 };
 

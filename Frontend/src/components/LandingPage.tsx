@@ -183,9 +183,9 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
               <span className="text-xl font-bold text-foreground">FarmIQ</span>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-24 sm:w-32 h-9 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -197,10 +197,10 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" className="hidden sm:flex" onClick={onClickLogin}>Login</Button>
-              <Button size="sm" className="hidden sm:flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={() => setIsDownloadModalOpen(true)}>
-                <Download className="h-4 w-4" />
-                Download App
+              <Button variant="outline" size="sm" className="h-9 px-2.5 sm:px-4 text-xs sm:text-sm" onClick={onClickLogin}>Login</Button>
+              <Button size="sm" className="h-9 px-2.5 sm:px-4 text-xs sm:text-sm flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={() => setIsDownloadModalOpen(true)}>
+                <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Download</span> App
               </Button>
             </div>
           </div>
