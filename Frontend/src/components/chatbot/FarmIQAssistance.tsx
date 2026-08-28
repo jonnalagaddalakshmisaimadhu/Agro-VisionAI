@@ -8,6 +8,7 @@ import { MessageCircle, X, Send, Mic, MicOff, Sprout, Loader2, ArrowRight, Leaf,
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { askFarmIQAI } from "@/services/geminiService";
 
 interface Message {
     role: 'user' | 'assistant';
@@ -152,30 +153,15 @@ export const FarmIQAssistance = () => {
             const history = messages.map(msg => ({ role: msg.role, content: msg.content }));
             const activeLang = getActiveLang();
 
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: userMessage.content,
-                    history: history,
-                    language: activeLang
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to get response');
-            }
-
-            const data = await response.json();
-            await simulateTyping(data.response);
+            const aiReply = await askFarmIQAI(userMessage.content, history, activeLang);
+            await simulateTyping(aiReply);
         } catch (error) {
             console.error('Error sending message:', error);
+            const activeLang = getActiveLang();
             const errFallback = activeLang === 'te' 
-                ? "సర్వర్‌తో కనెక్ట్ అవ్వడంలో సమస్య ఉంది. దయచేసి కాసేపటి తర్వాత మళ్ళీ ప్రయత్నించండి."
+                ? "నమస్కారం! సర్వర్‌తో కనెక్ట్ అవ్వడంలో సమస్య ఉంది. దయచేసి కాసేపటి తర్వాత మళ్ళీ ప్రయత్నించండి."
                 : (activeLang === 'hi'
-                    ? "सर्वर से कनेक्ट करने में समस्या आ रही है। कृपया थोड़ी देर बाद पुनः प्रयास करें。"
+                    ? "नमस्ते! सर्वर से कनेक्ट करने में समस्या आ रही है। कृपया थोड़ी देर बाद पुनः प्रयास करें。"
                     : "I'm having trouble connecting to the server. If the problem persists, please check your internet connection.");
             setMessages(prev => [...prev, { role: 'assistant', content: errFallback }]);
             setIsLoading(false);

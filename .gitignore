@@ -54,3 +54,7 @@ Frontend/.env.local
 *.apk
 Frontend/public/*.apk
 Frontend/dist/*.apk
+
+Frontend/.env.production
+Frontend/.env.local
+Frontend/.env

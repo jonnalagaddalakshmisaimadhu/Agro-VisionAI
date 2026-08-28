@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from "@/lib/utils";
+import { askFarmIQAI } from "@/services/geminiService";
 
 interface Message {
     role: 'user' | 'assistant';
@@ -58,8 +59,7 @@ const EmbeddedAIChat: React.FC<EmbeddedAIChatProps> = ({ diseaseName, contextDat
         const fetchInitialRecommendation = async () => {
             setIsInitialLoading(true);
             try {
-                // Determine a relevant prompt based on whether it's a real disease or background
-                const isBackground = diseaseName.toLowerCase().includes('background');
+                const isBackground = diseaseName.toLowerCase().includes('background') || diseaseName.toLowerCase().includes('no plant');
                 const initialPrompt = isBackground
                     ? `The user uploaded an image that was detected as: ${diseaseName}. Context: ${contextData}. 
                        Explain that No Plant was detected and give tips for better photography. Do NOT suggest pesticides.`
@@ -69,18 +69,8 @@ const EmbeddedAIChat: React.FC<EmbeddedAIChatProps> = ({ diseaseName, contextDat
                        (Google search URLs in markdown format: [Order Now](https://www.google.com/search?q=buy+pesticide_name)), 
                        followed by 'User Safety Precautions' and a brief 'Conclusion'.`;
 
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: initialPrompt,
-                        history: []
-                    }),
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch initial advice');
-                const data = await response.json();
-                await simulateTyping(data.response);
+                const aiResponse = await askFarmIQAI(initialPrompt, [], "en", contextData);
+                await simulateTyping(aiResponse);
             } catch (error) {
                 console.error('Error fetching initial advice:', error);
                 setMessages([{
@@ -108,40 +98,22 @@ const EmbeddedAIChat: React.FC<EmbeddedAIChatProps> = ({ diseaseName, contextDat
         setIsLoading(true);
 
         try {
-            // Create a history that includes the context as a hidden system-like message first if needed, 
-            // but typically we just append the conversation. 
-            // To make the bot "aware", we can prepend a context message to the history sent to the API, 
-            // OR we rely on the user's prompt. 
-            // Better approach: Prepend a system instruction to the history array we send.
-
             const apiHistory = [
                 {
                     role: "assistant",
-                    content: `Context: The user is looking at a report for ${diseaseName}. Details: ${contextData}. I am ready to answer follow-up questions about this.`
+                    content: `Context: The user is looking at a report for ${diseaseName}. Details: ${contextData}.`
                 },
-                ...messages.map(msg => ({ role: msg.role, content: msg.content })),
-                { role: 'user', content: userMessage.content }
+                ...messages.map(msg => ({ role: msg.role, content: msg.content }))
             ];
 
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: userMessage.content,
-                    history: apiHistory
-                }),
-            });
-
-            if (!response.ok) throw new Error('Failed to get response');
-
-            const data = await response.json();
-            await simulateTyping(data.response);
-
+            const aiResponse = await askFarmIQAI(userMessage.content, apiHistory, "en", contextData);
+            await simulateTyping(aiResponse);
         } catch (error) {
             console.error('Error sending message:', error);
-            setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting. Please try again." }]);
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: "I apologize, but I encountered an issue generating a response. Please check your internet connection or ask again."
+            }]);
             setIsLoading(false);
         }
     };

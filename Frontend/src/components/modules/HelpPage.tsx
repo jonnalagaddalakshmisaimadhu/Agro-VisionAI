@@ -46,6 +46,7 @@ import {
   ExternalLink,
   ArrowRight
 } from "lucide-react";
+import { askFarmIQAI } from "@/services/geminiService";
 import {
   Dialog,
   DialogContent,
@@ -210,7 +211,7 @@ const HelpPage: React.FC<HelpPageProps> = ({ setActiveModule }) => {
 
   // Fetch Channels from Backend
   useEffect(() => {
-    fetch("http://localhost:8000/api/community/channels")
+    fetch("/api/community/channels")
       .then((res) => res.json())
       .then((data) => {
         if (data.channels && data.channels.length > 0) {
@@ -230,7 +231,7 @@ const HelpPage: React.FC<HelpPageProps> = ({ setActiveModule }) => {
     const channelId = selectedChannel.id;
 
     // Fetch initial chat history
-    fetch(`http://localhost:8000/api/community/channels/${channelId}/history`)
+    fetch(`/api/community/channels/${channelId}/history`)
       .then((res) => res.json())
       .then((data) => {
         if (data.messages && data.messages.length > 0) {
@@ -329,31 +330,22 @@ const HelpPage: React.FC<HelpPageProps> = ({ setActiveModule }) => {
     setAiLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/chatbot/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: question,
-          context: {
-            location: locationData?.locationName || "Andhra Pradesh",
-            temp: locationData?.weatherData?.main?.temp || 28
-          }
-        })
-      });
+      const activeLang = localStorage.getItem("farmiq_language") || "en";
+      const reply = await askFarmIQAI(
+        question,
+        aiChat.map((m) => ({ role: m.sender === "user" ? "user" : "assistant", content: m.text })),
+        activeLang,
+        `Location: ${locationData?.locationName || "Andhra Pradesh"}, Temperature: ${locationData?.weatherData?.main?.temp || 28}°C`
+      );
 
-      if (res.ok) {
-        const data = await res.json();
-        setAiChat((prev) => [
-          ...prev,
-          {
-            sender: "bot",
-            text: data.response || data.reply || "Here is the recommended agricultural action for your query.",
-            time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-          }
-        ]);
-      } else {
-        throw new Error("Chat error");
-      }
+      setAiChat((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: reply,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        }
+      ]);
     } catch (err) {
       let reply = "General Agricultural Recommendation: Maintain proper field drainage, inspect leaf tips for discoloration, and use balanced NPK fertilizers. For sudden pest flare-ups, consult your nearest Krishi Vigyan Kendra (KVK) or district agricultural officer.";
       if (question.toLowerCase().includes("blast") || question.toLowerCase().includes("paddy")) {

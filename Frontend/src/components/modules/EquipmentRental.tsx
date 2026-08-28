@@ -467,12 +467,17 @@ const EquipmentRental = () => {
         webSocketRef.current.close();
       }
 
-      const wsUrl = `ws://localhost:8000/api/equipment/ws/${equipmentId}`;
-      const ws = new WebSocket(wsUrl);
-      ws.onerror = (e) => {
-        console.log("WebSocket connection skipped in current network mode.");
-      };
-      webSocketRef.current = ws;
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${wsProtocol}//${window.location.host}/api/equipment/ws/${equipmentId}`;
+      try {
+        const ws = new WebSocket(wsUrl);
+        ws.onerror = () => {
+          console.log("WebSocket connection skipped in current network mode.");
+        };
+        webSocketRef.current = ws;
+      } catch (e) {
+        console.log("WebSocket initialization skipped:", e);
+      }
 
       ws.onmessage = async (event) => {
         try {
@@ -827,7 +832,7 @@ const EquipmentRental = () => {
       if (operatorFilter === "with_operator") params.append("operator_available", "true");
       if (operatorFilter === "self_driven") params.append("operator_available", "false");
 
-      const res = await fetch(`http://localhost:8000/api/equipment?${params.toString()}`, {
+      const res = await fetch(`/api/equipment?${params.toString()}`, {
         signal: AbortSignal.timeout(3000)
       });
       if (res.ok) {

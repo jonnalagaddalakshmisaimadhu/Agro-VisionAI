@@ -160,14 +160,15 @@ const GovernmentSchemes = () => {
   };
 
   const handleCheckEligibility = async () => {
+    setCalculating(true);
+    const acres = parseFloat(landAcres) || 2.0;
     try {
-      setCalculating(true);
       const res = await fetch("/api/schemes/check-eligibility", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           state: selectedState,
-          landholding_acres: parseFloat(landAcres) || 2.0,
+          landholding_acres: acres,
           farmer_type: farmerType,
           crop: selectedCrop === "All Crops" ? "Paddy" : selectedCrop
         })
@@ -175,12 +176,103 @@ const GovernmentSchemes = () => {
       if (res.ok) {
         const data = await res.json();
         setEligibilityResult(data);
+        setCalculating(false);
+        return;
       }
     } catch (e) {
-      console.error("Eligibility check failed:", e);
-    } finally {
-      setCalculating(false);
+      console.warn("Backend eligibility engine unavailable, calculating client-side:", e);
     }
+
+    // Client-side instant eligibility calculation engine
+    const eligibleList: any[] = [];
+    let totalDirectBenefit = 0;
+    let totalSubsidyVal = 0;
+
+    // PM-KISAN
+    if (acres <= 5.0) {
+      eligibleList.push({
+        scheme_id: 1,
+        scheme_name: "PM-KISAN Samman Nidhi Yojana",
+        benefit: "₹6,000 / year (Direct Bank Transfer)",
+        subsidy_amount: 6000,
+        category: "Direct Benefit Transfer",
+        status: "Eligible"
+      });
+      totalDirectBenefit += 6000;
+    }
+
+    // State specific DBT
+    if (selectedState === "Andhra Pradesh") {
+      eligibleList.push({
+        scheme_id: 2,
+        scheme_name: "YSR Rythu Bharosa (Andhra Pradesh)",
+        benefit: "₹13,500 / year (State Support)",
+        subsidy_amount: 13500,
+        category: "Direct Benefit Transfer",
+        status: "Eligible"
+      });
+      totalDirectBenefit += 13500;
+    } else if (selectedState === "Telangana") {
+      const tbBenefit = acres * 10000;
+      eligibleList.push({
+        scheme_id: 3,
+        scheme_name: "Rythu Bandhu (Telangana)",
+        benefit: `₹${tbBenefit.toLocaleString()} / year (₹10,000/acre)`,
+        subsidy_amount: tbBenefit,
+        category: "Direct Benefit Transfer",
+        status: "Eligible"
+      });
+      totalDirectBenefit += tbBenefit;
+    }
+
+    // PMFBY Crop Insurance
+    eligibleList.push({
+      scheme_id: 4,
+      scheme_name: "PM Fasal Bima Yojana (Crop Insurance)",
+      benefit: "90% Premium Subsidy & ₹2,00,000/ha coverage",
+      subsidy_amount: 45000,
+      category: "Insurance",
+      status: "Eligible"
+    });
+    totalSubsidyVal += 45000;
+
+    // Drip Irrigation / PMKSY
+    eligibleList.push({
+      scheme_id: 5,
+      scheme_name: "PM Krishi Sinchayee Yojana (Micro-Irrigation)",
+      benefit: selectedState === "Andhra Pradesh" || selectedState === "Telangana" ? "90% Drip Subsidy" : "70% Subsidy",
+      subsidy_amount: 40000,
+      category: "Equipment",
+      status: "Eligible"
+    });
+    totalSubsidyVal += 40000;
+
+    // Kisan Credit Card
+    eligibleList.push({
+      scheme_id: 7,
+      scheme_name: "Kisan Credit Card (KCC Loan @ 4%)",
+      benefit: "Collateral-free low-interest credit up to ₹3,00,000",
+      subsidy_amount: 100000,
+      category: "Credit/Loan",
+      status: "Eligible"
+    });
+
+    setEligibilityResult({
+      state: selectedState,
+      landholding_acres: acres,
+      farmer_type: farmerType,
+      crop: selectedCrop,
+      eligible_schemes_count: eligibleList.length,
+      estimated_annual_benefit: totalDirectBenefit,
+      total_estimated_subsidy: totalSubsidyVal,
+      eligible_schemes: eligibleList,
+      recommended_next_steps: [
+        "Visit your nearest Common Service Centre (CSC) or Rythu Bharosa Kendra (RBK)",
+        "Carry your Aadhaar card and Pattadar passbook for e-KYC authentication",
+        "Ensure your bank account is Aadhaar-seeded for automatic Direct Benefit Transfer (DBT)"
+      ]
+    });
+    setCalculating(false);
   };
 
   const handleResetFilters = () => {
