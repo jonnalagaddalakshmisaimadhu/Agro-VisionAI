@@ -111,18 +111,13 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
       label: "Settings",
       icon: Settings,
       color: "text-slate-600 dark:text-slate-300",
-      bgColor: "bg-slate-100 dark:bg-slate-800",
-      route: "/settings"
+      bgColor: "bg-slate-100 dark:bg-slate-800"
     }
   ];
 
   const handleSelect = (feat: RemainingFeature | { id: string }) => {
     setIsOpen(false);
-    if ('route' in feat && feat.route) {
-      navigate(feat.route);
-    } else {
-      setActiveModule(feat.id);
-    }
+    setActiveModule(feat.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

@@ -48,7 +48,12 @@ export const AppUpdateChecker: React.FC = () => {
 
   const checkVersion = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/app/check-update?current_version=${APP_CURRENT_VERSION}&platform=android`);
+      const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      const apiUrl = isLocalhost 
+        ? `http://localhost:8000/api/app/check-update?current_version=${APP_CURRENT_VERSION}&platform=android`
+        : `/api/app/check-update?current_version=${APP_CURRENT_VERSION}&platform=android`;
+
+      const response = await fetch(apiUrl, { signal: AbortSignal.timeout(4000) });
       if (response.ok) {
         const data: UpdateInfo = await response.json();
         if (data.update_available) {
@@ -68,7 +73,7 @@ export const AppUpdateChecker: React.FC = () => {
         }
       }
     } catch (error) {
-      console.log("App update check skipped (offline/local):", error);
+      // Gracefully skip update check if offline or server is sleeping
     }
   };
 
