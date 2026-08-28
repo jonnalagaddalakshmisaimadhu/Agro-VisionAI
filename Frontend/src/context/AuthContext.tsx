@@ -39,9 +39,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const cached = localStorage.getItem('farmiq_current_user');
       if (cached) {
-        return JSON.parse(cached);
+        const parsed = JSON.parse(cached);
+        if (parsed && (parsed.id || parsed.email || parsed.username)) {
+          return parsed;
+        }
       }
-      return localAuthService.getCurrentUser();
+      return null;
     } catch {
       return null;
     }
@@ -215,6 +218,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     authService.removeToken();
     localAuthService.logout();
+    localStorage.removeItem('farmiq_current_user');
+    localStorage.removeItem('farmiq_logged_in');
+    localStorage.removeItem('farmiq_token');
+    window.location.href = "/login";
   };
 
   const updateUser = async (updates: Partial<AuthUser>): Promise<boolean> => {
