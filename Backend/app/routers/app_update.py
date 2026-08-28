@@ -84,3 +84,22 @@ async def check_app_update(
 async def get_latest_version():
     """Get the full metadata of the latest release"""
     return LATEST_RELEASE
+
+@router.get("/download-apk")
+async def download_app_apk():
+    """Directly stream and download the latest compiled FarmIQ Android APK"""
+    import os
+    from fastapi.responses import FileResponse
+    
+    # Path to compiled APK in project
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    apk_path = os.path.join(base_dir, "Frontend", "android", "app", "build", "outputs", "apk", "debug", "app-debug.apk")
+    
+    if os.path.exists(apk_path):
+        return FileResponse(
+            path=apk_path,
+            filename="FarmIQ-v1.0.1.apk",
+            media_type="application/vnd.android.package-archive"
+        )
+    raise HTTPException(status_code=404, detail="APK file not found on server")
+

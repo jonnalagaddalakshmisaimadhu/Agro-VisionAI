@@ -36,10 +36,10 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
     setDownloadStarted(true);
     setProgress(15);
 
-    // Trigger browser file download
+    // Trigger browser file download via backend endpoint
     const link = document.createElement("a");
-    link.href = "/farmiq-app.apk";
-    link.setAttribute("download", "FarmIQ-v2.0.apk");
+    link.href = "/api/app/download-apk";
+    link.setAttribute("download", "FarmIQ-v1.0.1.apk");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
