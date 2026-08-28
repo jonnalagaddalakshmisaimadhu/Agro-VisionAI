@@ -83,41 +83,6 @@ const AuthPage = () => {
     }
   };
 
-  const handleDemoLogin = async () => {
-    setAuthError(null);
-    setIsLoading(true);
-    try {
-      const ok = await login("farmer", "farmer123");
-      if (ok) {
-        navigate("/", { replace: true });
-      } else {
-        localStorage.setItem("farmiq_current_user", JSON.stringify({
-          id: "demo_farmer_1",
-          username: "Demo Farmer",
-          email: "demo.farmer@farmiq.ai",
-          full_name: "Demo Farmer User",
-          location: "Guntur, Andhra Pradesh",
-          farm_size: "3.5 Acres",
-          created_at: new Date().toISOString()
-        }));
-        window.location.href = "/";
-      }
-    } catch {
-      localStorage.setItem("farmiq_current_user", JSON.stringify({
-        id: "demo_farmer_1",
-        username: "Demo Farmer",
-        email: "demo.farmer@farmiq.ai",
-        full_name: "Demo Farmer User",
-        location: "Guntur, Andhra Pradesh",
-        farm_size: "3.5 Acres",
-        created_at: new Date().toISOString()
-      }));
-      window.location.href = "/";
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen relative flex items-center justify-center lg:justify-end p-4 sm:p-6 lg:pr-24 xl:pr-36">
       {/* FarmIQ Tractor Background */}
@@ -273,18 +238,6 @@ const AuthPage = () => {
                 ) : (
                   "Login"
                 )}
-              </Button>
-
-              {/* 1-Click Demo Login Button */}
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-11 border-green-300 bg-green-50/80 hover:bg-green-100 text-green-800 font-semibold text-sm rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 mt-2"
-                onClick={handleDemoLogin}
-                disabled={isLoading}
-              >
-                <Sprout className="h-4 w-4 text-green-600 stroke-[2.5]" />
-                <span>🌾 1-Click Demo Login (Instant Access)</span>
               </Button>
 
               {/* Divider */}
