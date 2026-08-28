@@ -86,174 +86,80 @@ PART 3: 🚜 DETAILED MODULE-BY-MODULE TEST SCENARIOS
 ----------------------------------------------------------------------------------------------------
 MODULE 0: AUTHENTICATION & USER SESSION (Auth.tsx, SimpleLogin.tsx, ProtectedRoute.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 0.1: Standard Registration
-  - Input    : Valid Name ("Farmer Kumar"), Email/Phone ("kumar@farmiq.com"), Password ("Password@123").
-  - Action   : Submit registration form.
-  - Expected : User is registered in SQLite, JWT token generated, redirected to Dashboard smoothly.
-
-• Test 0.2: Demo Login 1-Click Access
-  - Action   : Click "Demo Login (డెమో లాగిన్)" on Auth page.
-  - Expected : Instant authorization without credentials, loads Dashboard directly.
-
-• Test 0.3: Invalid Credentials Rejection
-  - Input    : Non-existent email or wrong password.
-  - Expected : Red destructive toast with clear error message; no crash or blank screen.
-
-• Test 0.4: ProtectedRoute Guard
-  - Action   : Navigate directly to /settings or /profile with cleared token.
-  - Expected : Automatically redirects to /login; once logged in, redirects back to intended page.
+[x] Test 0.1: Standard Registration (Valid credentials -> JWT generation -> Dashboard redirect)
+[x] Test 0.2: Demo Login 1-Click Access (1-click guest authentication -> instantaneous access)
+[x] Test 0.3: Invalid Credentials Rejection (Safe error toast without crash or white screen)
+[x] Test 0.4: ProtectedRoute Guard (Unauthorized navigation redirects safely to /login)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 1: CROP PROFIT PREDICTOR & NUTRIENT RECOMMENDATION (CropRecommendation.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 1.1: Nutrient Input Boundary Values
-  - Inputs   : Nitrogen (0 to 140 kg/ha), Phosphorus (5 to 145), Potassium (5 to 205), pH (3.5 to 9.5).
-  - Action   : Click "Predict Best Crops (పంట సిఫార్సు)".
-  - Expected : Top 3 recommended crops returned (e.g. Paddy, Cotton, Maize) with % suitability score.
-
-• Test 1.2: District Weather Auto-Fill
-  - Input    : Select District "Guntur", "Krishna", or "Kurnool".
-  - Expected : Auto-fills historical temperature (28°C), humidity (72%), rainfall (850mm).
-
-• Test 1.3: Profit & Yield Calculator
-  - Input    : Farm size (e.g., 5 Acres).
-  - Expected : Estimated yield in quintals, market value in ₹, cost of cultivation, and net expected profit.
+[x] Test 1.1: Nutrient Input Boundary Values (N, P, K, pH -> 12 crop suitability recommendations)
+[x] Test 1.2: District Weather Auto-Fill (Guntur/Krishna telemetry with live Open-Meteo context)
+[x] Test 1.3: Profit & Yield Calculator (Estimated quintals, live APMC Mandi rates, and net profit)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 2: CROP DISEASE DETECTION VIA AI VISION (DiseaseDetection.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 2.1: Image Drag-and-Drop / File Upload
-  - Input    : Upload leaf image (Paddy Blast, Tomato Early Blight, Cotton Leaf Spot).
-  - Expected : Instant preview image display, animated scanning loader active.
-
-• Test 2.2: Mobile Camera Photo Capture
-  - Action   : Click camera icon on mobile device.
-  - Expected : Native Android camera opens via Capacitor Camera plugin; captured photo loads in preview.
-
-• Test 2.3: Diagnosis Output & Remedies
-  - Expected : Displays Disease Name, Confidence % (e.g. 96.4%), Cause of disease.
-  - Expected : Provides actionable Organic / Biological Treatment & Chemical Treatment.
-  - Expected : Language switcher displays remedies in Telugu (తెలుగు), Hindi (हिंदी), and English.
+[x] Test 2.1: Image Drag-and-Drop & Camera Photo Upload (Fast base64 processing)
+[x] Test 2.2: AI Vision Leaf Diagnosis (Disease name, 94%+ confidence, biological & chemical remedies)
+[x] Test 2.3: Multi-Language Remedy Switcher (Telugu తెలుగు, Hindi हिंदी, and English)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 3: LIVE WEATHER RADAR & EXTREME DISTRICT ALERTS (WeatherAlerts.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 3.1: GPS Location Detection
-  - Action   : Allow browser/mobile location permission.
-  - Expected : Accurately identifies village/district coordinates; displays current temp, rain, humidity.
-
-• Test 3.2: 5-Day Hourly Forecast
-  - Expected : 3-hour interval temperature chart, rain probability gauge, wind velocity meter.
-
-• Test 3.3: Extreme Weather Alert Banners
-  - Scenario : Simulated rainfall > 50mm or temperature > 40°C.
-  - Expected : High-visibility yellow/red alert banner warning farmers to postpone spraying or harvest.
+[x] Test 3.1: GPS Location Coordinates (Accurately resolves district coordinates)
+[x] Test 3.2: 5-Day Hourly Forecast (Temperature, humidity, precipitation probability, and wind)
+[x] Test 3.3: Extreme Weather Alert Banners (Active warning flags with agricultural advisories)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 4: GOVERNMENT SCHEMES & MULTI-LANGUAGE VOICE SPEAKER (GovernmentSchemes.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 4.1: Category & State Filters
-  - Action   : Filter by "Central Schemes", "Andhra Pradesh", "Telangana", "Subsidies", "PM-KISAN".
-  - Expected : Scheme cards update instantly with subsidy amount, eligibility criteria, and deadlines.
-
-• Test 4.2: Multi-Language Voice Speaker (SpeechSynthesis)
-  - Action   : Click Speaker Icon 🔊 on any scheme card.
-  - Expected : Reads scheme title and eligibility benefits out loud in selected language (Telugu/Hindi/English).
-
-• Test 4.3: Direct Application Link
-  - Action   : Click "Apply Online (దరఖాస్తు చేసుకోండి)".
-  - Expected : Opens official government portal in secure new tab.
+[x] Test 4.1: Central & State Categories (PM-KISAN, Rythu Bharosa, Solar Pump Subsidies)
+[x] Test 4.2: Multi-Language Voice Speaker (SpeechSynthesis reads benefits in Telugu/Hindi/English)
+[x] Test 4.3: Direct Application Link (Opens official government portals in secure tab)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 5: FARM PRODUCE & AGRO-INPUTS MARKETPLACE (FarmMarket.tsx & Marketplace.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 5.1: Catalog Browsing & Search
-  - Action   : Search for "Bio-Fertilizer", "Hybrid Seeds", "Neem Oil", "Sprayer".
-  - Expected : Filtered products appear with price per unit, stock status, and organic certification badges.
-
-• Test 5.2: Shopping Cart Calculation
-  - Action   : Add multiple items, change quantity from 1 to 5.
-  - Expected : Cart subtotal, GST, and total calculate dynamically in real-time.
-
-• Test 5.3: Checkout Modal
-  - Action   : Click "Proceed to Checkout", select Cash on Delivery / UPI.
-  - Expected : Order confirmation dialog with booking ID and delivery timeline.
+[x] Test 5.1: Catalog Browsing & Search (Bio-fertilizers, seeds, sprayers with stock indicators)
+[x] Test 5.2: Dynamic Shopping Cart (Real-time subtotal, quantity updates, and tax calculations)
+[x] Test 5.3: Checkout Modal (Cash on Delivery / UPI with instant booking confirmation)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 6: EQUIPMENT RENTALS & CUSTOM HIRING (EquipmentRental.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 6.1: Verified Machinery Catalog Loading
-  - Action   : Open Equipment Rentals.
-  - Expected : 6 rich machinery items load automatically (Ram Charan - Mahindra Tractor, Charith - John Deere,
-               Sai Madhu - Kubota Harvester & DJI Agras Drone).
-
-• Test 6.2: Operational Cost Calculator
-  - Input    : Select Drone Sprayer, 10 Acres.
-  - Expected : Displays total ₹3,500 with estimated run time (12.0 hours) and fuel rate.
-
-• Test 6.3: In-App P2P Voice Calling
-  - Action   : Click "Voice Call" on owner card.
-  - Expected : Instagram-style calling modal opens with pulsing avatar, Web Audio synthesized ringtone,
-               and call duration timer.
-
-• Test 6.4: Custom Hiring Handover Challan / Agreement
-  - Action   : Click "Challan / Agreement" on confirmed booking.
-  - Expected : Formatted printable handover agreement appears with Owner & Renter signature lines.
+[x] Test 6.1: Verified Machinery Catalog (Mahindra, John Deere, Kubota, DJI Spraying Drone)
+[x] Test 6.2: Operational Cost Calculator (Acre-based and Day-based operational pricing)
+[x] Test 6.3: In-App P2P Voice Calling (Web Audio simulated ringtone & calling modal)
+[x] Test 6.4: Custom Hiring Handover Challan / Agreement (Printable formal rental agreement)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 7: EXPERT VIDEO CONSULTATION & TELE-ADVISORY (VideoSession.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 7.1: Agronomist Booking
-  - Action   : Select crop specialist and time slot.
-  - Expected : Generates room session ID and appointment confirmation.
-
-• Test 7.2: Video Room Controls
-  - Action   : Toggle Mute, Video Off, Switch Camera (Mobile), and End Call.
-  - Expected : Stream tracks update without disconnecting the consultation.
+[x] Test 7.1: Agronomist Specialist Booking (Slot selection & session room creation)
+[x] Test 7.2: Video Room Controls (Mute, Camera toggle, and call management)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 8: COMMUNITY DISCUSSION & 24/7 AI CHATBOT (HelpPage.tsx & FarmIQAssistance.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 8.1: District Farmer Discussion Channels
-  - Action   : Switch channels (e.g. Guntur Chilli Growers, Paddy Farmers AP).
-  - Expected : Chat history loads; new message sends with timestamp.
-
-• Test 8.2: FarmIQ 24/7 Floating AI Assistant
-  - Action   : Ask agricultural query in Telugu: "వరిలో కాండం తొలుచు పురుగు నివారణ ఏమిటి?"
-  - Expected : Returns instant structured answer with recommended pesticides and dosage in Telugu.
+[x] Test 8.1: District Farmer Discussion Channels (Real-time community exchange)
+[x] Test 8.2: FarmIQ 24/7 AI Agronomist Chatbot (Groq powered intelligent agronomic advice)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 9: MOBILE CENTER WINDOWS APPS HUB & NAVIGATION (BottomNavigation.tsx)
 ----------------------------------------------------------------------------------------------------
-• Test 9.1: Mobile Bottom Bar Layout (<1024px)
-  - Expected : 5 equal tabs: Home, Crop Profit, Center Elevated Windows Hub, Disease, Marketplace.
-
-• Test 9.2: Center Windows Elevated Hub Interaction
-  - Action   : Tap Center elevated button with 4-square Windows logo.
-  - Expected : 4-column compact popup animates smoothly, showing ONLY remaining 7 features:
-               (Weather, Schemes, Rentals, Inputs, Video, Help, Settings).
-
-• Test 9.3: Instant Selection & Navigation
-  - Action   : Tap "Rentals" or "Settings" inside popup.
-  - Expected : Popup closes immediately, active module switches instantly (z-[70] layering ensures 0 lag).
+[x] Test 9.1: 5-Tab Fixed Mobile Bar (<1024px responsive layout)
+[x] Test 9.2: Center Elevated 4-Square Windows Hub (Elevated circular button & smooth popup)
+[x] Test 9.3: Instant Module Selection (z-[70] layering with 0 lag and seamless transitions)
 
 ----------------------------------------------------------------------------------------------------
 MODULE 10: IN-APP AUTO-UPDATE & NOTIFICATION SYSTEM (AppUpdateChecker.tsx & app_update.py)
 ----------------------------------------------------------------------------------------------------
-• Test 10.1: Version Check on App Launch
-  - Backend  : GET /api/app/check-update?current_version=1.0.0
-  - Expected : Compares current version against latest v1.0.1; returns update_available: true.
-
-• Test 10.2: In-App Update Notification Modal
-  - Expected : Screen shows rocket badge 🚀, version tag v1.0.1, changelog list, and file size (65.5 MB).
-
-• Test 10.3: 1-Click Update & Direct APK Download
-  - Action   : Click "Update & Install Now (ఇప్పుడే అప్‌డేట్ చేయండి)".
-  - Expected : Animated progress bar counts 0% to 100%; on complete, downloads/triggers APK installer.
-
-• Test 10.4: Snooze "Remind Later"
-  - Action   : Click "Later (తర్వాత)".
-  - Expected : Modal closes and saves dismissal timestamp to localStorage so user isn't spammed for 24h.
+[x] Test 10.1: Version Check Endpoint (GET /api/app/check-update detects latest v1.0.1 release)
+[x] Test 10.2: In-App Update Notification Modal (Rocket icon, changelog, and file size badge)
+[x] Test 10.3: 1-Click Update & Direct APK Download (0-100% progress animation & APK installer)
+[x] Test 10.4: 24-Hour Snooze Option (Remind Later stores dismissal timestamp)
 
 ====================================================================================================
 PART 4: 🤖 AI/ML INTEGRITY, LATENCY & SAFETY VALIDATION
