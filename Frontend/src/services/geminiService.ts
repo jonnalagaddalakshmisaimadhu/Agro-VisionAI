@@ -1,11 +1,36 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 import { CropPrediction, CropRecommendation, MarketInsight, DiseaseDetectionResult } from '../types/cropPrediction';
 
-// Initialize Gemini AI with API key from environment
-const siteApiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-const siteModelName = import.meta.env.VITE_GEMINI_MODEL || 'gemini-1.5-flash';
+// Initialize Gemini AI with production verified key and gemini-2.5-flash model
+const siteApiKey = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyB6DWFZyOCxlViVAe3zcFODF9ZDzwFe-Yw';
+const siteModelName = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
 const genAI = new GoogleGenerativeAI(siteApiKey);
 const model: GenerativeModel = genAI.getGenerativeModel({ model: siteModelName as any });
+
+/**
+ * Robust Direct REST + SDK caller for Google Gemini 2.5 Flash
+ */
+async function callGeminiGenerate(contents: any[]): Promise<string> {
+    try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${siteModelName}:generateContent?key=${siteApiKey}`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) return text;
+        }
+    } catch (restErr) {
+        console.warn("Direct REST error, falling back to SDK instance:", restErr);
+    }
+
+    const result = await model.generateContent(contents);
+    const response = await result.response;
+    return response.text();
+}
 
 export const askFarmIQAI = async (
     message: string,
@@ -34,7 +59,7 @@ export const askFarmIQAI = async (
         console.warn("Backend chat unavailable, using Gemini AI client-side:", backendErr);
     }
 
-    // 2. Client-side Gemini AI
+    // 2. Client-side Gemini 2.5 Flash AI
     try {
         const systemPrompt = `You are FarmIQ AI, an empathetic, highly knowledgeable agricultural expert and farming advisor in India.
 You provide clear, practical, actionable advice on:
@@ -57,9 +82,8 @@ Formatting: Use bullet points, bold keywords, and concise structured steps.`;
         const chatContext = history.slice(-6).map(h => `${h.role === 'user' ? 'Farmer' : 'FarmIQ'}: ${h.content}`).join('\n');
         const fullPrompt = `${systemPrompt}\n\nConversation History:\n${chatContext}\n\nFarmer's Question: ${message}\n${context ? `Context Info: ${context}\n` : ''}\nFarmIQ Advice:`;
 
-        const result = await model.generateContent(fullPrompt);
-        const response = await result.response;
-        return response.text();
+        const text = await callGeminiGenerate([{ parts: [{ text: fullPrompt }] }]);
+        return text;
     } catch (geminiErr: any) {
         console.error("Gemini AI Chat Error:", geminiErr);
         if (language === 'te') {
@@ -189,12 +213,10 @@ export const getCropPredictions = async (details: {
     `;
 
     try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-
-        const cleanText = text.replace(/```json|```/g, '').trim();
-        const predictions = JSON.parse(cleanText) as CropPrediction[];
+        const text = await callGeminiGenerate([{ parts: [{ text: prompt }] }]);
+        const jsonMatch = text.match(/\[[\s\S]*\]/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : text.replace(/```json|```/g, '').trim();
+        const predictions = JSON.parse(jsonStr) as CropPrediction[];
         return predictions.slice(0, 6);
 
     } catch (error) {
@@ -210,11 +232,10 @@ export const getMarketInsights = async (cropName: string, location: string): Pro
     `;
 
     try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
-        const cleanText = text.replace(/```json|```/g, '').trim();
-        return JSON.parse(cleanText) as MarketInsight;
+        const text = await callGeminiGenerate([{ parts: [{ text: prompt }] }]);
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : text.replace(/```json|```/g, '').trim();
+        return JSON.parse(jsonStr) as MarketInsight;
     } catch (error) {
         return getFallbackMarketInsights(cropName);
     }
@@ -258,16 +279,16 @@ export const detectPlantDisease = async (
             };
         }
     } catch (backendErr) {
-        console.warn("Backend ML service unreachable, utilizing Gemini Vision AI client-side:", backendErr);
+        console.warn("Backend ML service unreachable, utilizing Gemini 2.5 Flash Vision AI:", backendErr);
     }
 
-    // 2. Client-Side Gemini Vision AI Engine
+    // 2. Client-Side Gemini 2.5 Flash Vision AI Engine
     try {
         const prompt = `You are a world-class plant pathologist and agronomist.
 Analyze this crop leaf/plant image carefully and diagnose any disease, nutrient deficiency, pest infestation, or confirm if the plant is healthy.
 Target output language: ${language}.
 
-Respond ONLY with valid JSON in this exact structure without markdown code blocks:
+Respond ONLY with valid JSON in this exact structure without markdown formatting or introductory text:
 {
   "isPlantDetected": true,
   "cropType": "Crop name (e.g. Tomato, Rice, Chilli, Cotton, Banana, etc.)",
@@ -284,18 +305,24 @@ Respond ONLY with valid JSON in this exact structure without markdown code block
 
 If the image is not a plant/leaf, set isPlantDetected: false, diseaseName: "No Plant Detected", confidence: 0, description: "Please upload a clear picture of a crop leaf or stem.".`;
 
-        const imagePart = {
-            inlineData: {
-                data: imageDataBase64,
-                mimeType: mimeType || "image/jpeg"
+        const contents = [
+            {
+                parts: [
+                    { text: prompt },
+                    {
+                        inline_data: {
+                            mime_type: mimeType || "image/jpeg",
+                            data: imageDataBase64
+                        }
+                    }
+                ]
             }
-        };
+        ];
 
-        const result = await model.generateContent([prompt, imagePart]);
-        const response = await result.response;
-        const text = response.text();
-        const cleanText = text.replace(/```json|```/g, '').trim();
-        const parsed = JSON.parse(cleanText);
+        const text = await callGeminiGenerate(contents);
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : text.replace(/```json|```/g, '').trim();
+        const parsed = JSON.parse(jsonStr);
 
         return {
             isPlantDetected: parsed.isPlantDetected !== false,
