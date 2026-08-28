@@ -139,16 +139,14 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
           </div>
 
           {/* Quick Direct Download Button */}
-          <a
-            href={APK_DOWNLOAD_URL}
-            download="FarmIQ.apk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-600/25 flex items-center justify-center gap-2 no-underline"
+          <button
+            type="button"
+            onClick={startDownload}
+            className="w-full h-12 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all border-0"
           >
             <Download className="w-4 h-4" />
-            Direct Download FarmIQ.apk (64.5 MB)
-          </a>
+            Download FarmIQ.apk (64.5 MB)
+          </button>
 
           {/* Quick 3-Step Install Guide */}
           <div className="space-y-2.5 pt-1">
