@@ -4,15 +4,18 @@ import {
   TrendingUp, 
   Sprout, 
   ShoppingCart, 
-  LayoutGrid, 
   X, 
   CloudRain, 
   FileText, 
   Truck, 
   MessageCircle, 
   Video,
+  Package,
+  Settings,
+  ShieldCheck,
+  Search,
   Sparkles,
-  BarChart3
+  LayoutGrid
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,15 +25,14 @@ interface BottomNavigationProps {
   onToggleSidebar?: () => void;
 }
 
-interface QuickFeature {
+interface FeatureItem {
   id: string;
   label: string;
-  shortLabel: string;
   icon: React.ElementType;
   badge?: string;
+  badgeColor?: string;
   color: string;
   bgColor: string;
-  borderColor: string;
 }
 
 const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationProps) => {
@@ -47,65 +49,95 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
     { id: "marketplace", icon: ShoppingCart, label: "Market" },
   ];
 
-  // All Remaining & Quick Features for Circular Popup Hub
-  const circularFeatures: QuickFeature[] = [
+  // 🌟 COMPLETE LIST OF ALL FEATURES FOR WINDOWS APPS HUB
+  const allFeatures: FeatureItem[] = [
     {
-      id: "market-supply-tracker",
-      label: "Weather & Alerts",
-      shortLabel: "Weather",
-      icon: CloudRain,
-      badge: "Live",
-      color: "text-sky-500",
-      bgColor: "bg-sky-50 dark:bg-sky-950/60",
-      borderColor: "border-sky-200 dark:border-sky-800"
+      id: "crop-profit-predictor",
+      label: "Crop Predictor",
+      icon: TrendingUp,
+      badge: "AI",
+      badgeColor: "bg-emerald-600",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-100/80 dark:bg-emerald-950/70"
     },
     {
-      id: "government-schemes",
-      label: "Govt Schemes",
-      shortLabel: "Schemes",
-      icon: FileText,
-      badge: "Gov",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50 dark:bg-emerald-950/60",
-      borderColor: "border-emerald-200 dark:border-emerald-800"
+      id: "disease-detection",
+      label: "Disease Doctor",
+      icon: Sprout,
+      badge: "AI",
+      badgeColor: "bg-emerald-600",
+      color: "text-green-600",
+      bgColor: "bg-green-100/80 dark:bg-green-950/70"
+    },
+    {
+      id: "marketplace",
+      label: "Crop Trade",
+      icon: ShoppingCart,
+      badge: "0% Fee",
+      badgeColor: "bg-teal-600",
+      color: "text-teal-600",
+      bgColor: "bg-teal-100/80 dark:bg-teal-950/70"
+    },
+    {
+      id: "farmer-market",
+      label: "Farm Inputs",
+      icon: Package,
+      badge: "Seeds",
+      badgeColor: "bg-amber-600",
+      color: "text-amber-600",
+      bgColor: "bg-amber-100/80 dark:bg-amber-950/70"
     },
     {
       id: "rentals",
       label: "Equipment Rentals",
-      shortLabel: "Rentals",
       icon: Truck,
-      color: "text-amber-600",
-      bgColor: "bg-amber-50 dark:bg-amber-950/60",
-      borderColor: "border-amber-200 dark:border-amber-800"
+      badge: "Machinery",
+      badgeColor: "bg-orange-600",
+      color: "text-orange-600",
+      bgColor: "bg-orange-100/80 dark:bg-orange-950/70"
+    },
+    {
+      id: "market-supply-tracker",
+      label: "Weather & Alerts",
+      icon: CloudRain,
+      badge: "Live",
+      badgeColor: "bg-sky-600",
+      color: "text-sky-600",
+      bgColor: "bg-sky-100/80 dark:bg-sky-950/70"
+    },
+    {
+      id: "government-schemes",
+      label: "Govt Schemes",
+      icon: FileText,
+      badge: "Gov",
+      badgeColor: "bg-indigo-600",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-100/80 dark:bg-indigo-950/70"
     },
     {
       id: "video-session",
-      label: "Live Video Sessions",
-      shortLabel: "Video",
-      badge: "New",
+      label: "Video Sessions",
       icon: Video,
-      color: "text-rose-500",
-      bgColor: "bg-rose-50 dark:bg-rose-950/60",
-      borderColor: "border-rose-200 dark:border-rose-800"
+      badge: "Live",
+      badgeColor: "bg-rose-600",
+      color: "text-rose-600",
+      bgColor: "bg-rose-100/80 dark:bg-rose-950/70"
     },
     {
       id: "help",
-      label: "Help & Knowledge",
-      shortLabel: "Help",
+      label: "Kisan Help",
       icon: MessageCircle,
-      color: "text-indigo-500",
-      bgColor: "bg-indigo-50 dark:bg-indigo-950/60",
-      borderColor: "border-indigo-200 dark:border-indigo-800"
+      badge: "24/7",
+      badgeColor: "bg-purple-600",
+      color: "text-purple-600",
+      bgColor: "bg-purple-100/80 dark:bg-purple-950/70"
     },
     {
-      id: "disease-detection",
-      label: "Disease Scanner",
-      shortLabel: "Doctor AI",
-      badge: "AI",
-      icon: Sprout,
-      color: "text-emerald-500",
-      bgColor: "bg-emerald-50 dark:bg-emerald-950/60",
-      borderColor: "border-emerald-200 dark:border-emerald-800"
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      color: "text-slate-600",
+      bgColor: "bg-slate-100/80 dark:bg-slate-800"
     }
   ];
 
@@ -114,13 +146,9 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
     setIsOpen(false);
   };
 
-  // Radial positioning math for circular arc (angles from 170° to 10°)
-  const radius = 125; // Distance in px from center button
-  const totalItems = circularFeatures.length;
-
   return (
     <>
-      {/* Dim Backdrop when Circular Menu is Open */}
+      {/* 🌑 Dim Backdrop when Menu is Open */}
       {isOpen && (
         <div 
           className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 transition-opacity duration-300 animate-in fade-in"
@@ -128,56 +156,74 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
         />
       )}
 
-      {/* 🎡 Circular Radial Menu Popup from Center Button */}
+      {/* 🪟 WINDOWS APPS HUB POPUP (Above center button) */}
       {isOpen && (
-        <div className="lg:hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-55 pointer-events-none">
-          {/* Radial Wheel Container */}
-          <div className="relative w-72 h-44 flex items-end justify-center pointer-events-auto">
-            {circularFeatures.map((feat, index) => {
-              // Calculate radial angle in an arc over the center button
-              // Distribute evenly from 170 deg to 10 deg
-              const angleDeg = 170 - (index * (160 / (totalItems - 1)));
-              const angleRad = (angleDeg * Math.PI) / 180;
-              const x = Math.round(Math.cos(angleRad) * radius);
-              const y = Math.round(-Math.sin(angleRad) * radius);
+        <div className="lg:hidden fixed bottom-20 left-3 right-3 max-w-sm mx-auto z-55 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-card border-2 border-border/80 shadow-2xl rounded-3xl p-4 overflow-hidden">
+            
+            {/* Hub Header */}
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-border/60">
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 rounded-lg bg-emerald-600 text-white shadow-xs">
+                  <div className="grid grid-cols-2 gap-0.5">
+                    <div className="w-1.5 h-1.5 bg-white rounded-xs" />
+                    <div className="w-1.5 h-1.5 bg-white rounded-xs" />
+                    <div className="w-1.5 h-1.5 bg-white rounded-xs" />
+                    <div className="w-1.5 h-1.5 bg-white rounded-xs" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-foreground leading-none">FarmIQ All Features</h3>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Select any smart farming tool</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
 
-              const isSelected = activeModule === feat.id;
-
-              return (
-                <div
-                  key={feat.id}
-                  style={{
-                    transform: `translate(${x}px, ${y}px)`,
-                    transitionDelay: `${index * 35}ms`
-                  }}
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out animate-in zoom-in-50"
-                >
+            {/* 3-Column Apps Grid */}
+            <div className="grid grid-cols-3 gap-2.5 max-h-[380px] overflow-y-auto pr-0.5 pb-1">
+              {allFeatures.map((feat) => {
+                const isSelected = activeModule === feat.id;
+                return (
                   <button
+                    key={feat.id}
                     onClick={() => handleSelect(feat.id)}
                     className={cn(
-                      "group flex flex-col items-center justify-center p-2 rounded-2xl border shadow-lg bg-card backdrop-blur-md hover:scale-110 active:scale-95 transition-all duration-200 w-16 h-16",
-                      feat.borderColor,
-                      isSelected ? "ring-2 ring-primary shadow-primary/20 scale-105" : "hover:border-primary/50"
+                      "relative flex flex-col items-center justify-center p-2.5 rounded-2xl border transition-all duration-200 active:scale-95 group",
+                      isSelected 
+                        ? "bg-primary/10 border-primary shadow-xs ring-1 ring-primary" 
+                        : "bg-background/80 hover:bg-muted/60 border-border/60"
                     )}
                   >
-                    <div className={cn("p-1.5 rounded-xl mb-0.5", feat.bgColor, feat.color)}>
+                    {/* App Icon Circle */}
+                    <div className={cn("p-2 rounded-xl mb-1.5 shadow-xs transition-transform group-hover:scale-105", feat.bgColor, feat.color)}>
                       <feat.icon className="h-5 w-5" />
                     </div>
-                    <span className="text-[9px] font-bold text-foreground truncate w-full text-center leading-tight">
-                      {feat.shortLabel}
+
+                    {/* App Title */}
+                    <span className="text-[11px] font-semibold text-foreground text-center line-clamp-1 leading-tight">
+                      {feat.label}
                     </span>
+
+                    {/* Badge */}
                     {feat.badge && (
-                      <span className="absolute -top-1 -right-1 px-1 py-0.1 text-[8px] font-extrabold rounded-full bg-primary text-primary-foreground shadow-xs">
+                      <span className={cn(
+                        "absolute -top-1 -right-1 px-1.5 py-0.2 text-[8px] font-bold text-white rounded-full shadow-xs",
+                        feat.badgeColor || "bg-primary"
+                      )}>
                         {feat.badge}
                       </span>
                     )}
                   </button>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
 
-            {/* Central Glow Halo */}
-            <div className="absolute -bottom-2 w-28 h-28 rounded-full bg-primary/20 blur-xl pointer-events-none -z-10 animate-pulse" />
           </div>
         </div>
       )}
