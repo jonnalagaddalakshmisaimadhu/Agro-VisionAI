@@ -16,111 +16,104 @@ const DashboardFooter = () => {
 
   return (
     <footer className="bg-card border-t border-border mt-auto" role="contentinfo">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 md:py-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8">
+      {/* Mobile Compact Footer */}
+      <div className="md:hidden px-4 py-3 text-center space-y-1.5">
+        <div className="flex items-center justify-center space-x-1.5 text-xs text-muted-foreground">
+          <Tractor className="h-4 w-4 text-primary" />
+          <span className="font-semibold text-foreground">FarmIQ</span>
+          <span>•</span>
+          <span>AI Agricultural Assistant</span>
+        </div>
+        <div className="flex items-center justify-center space-x-3 text-[11px] text-muted-foreground">
+          <span>© {currentYear} FarmIQ</span>
+          <span>•</span>
+          <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+          <span>•</span>
+          <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
+          <span>•</span>
+          <a href="mailto:farmiq.in@gmail.com" className="hover:text-primary transition-colors">Contact</a>
+        </div>
+      </div>
+
+      {/* Desktop / Tablet Full Footer */}
+      <div className="hidden md:block max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-4 gap-8">
           {/* Brand Section */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <Tractor className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold text-foreground">FarmIQ</span>
+              <Tractor className="h-5 w-5 text-primary" />
+              <span className="text-lg font-bold text-foreground">FarmIQ</span>
             </div>
-            <p className="text-muted-foreground text-xs md:text-sm">
+            <p className="text-muted-foreground text-xs leading-relaxed">
               Empowering farmers with smart technology and data-driven insights for sustainable agriculture.
             </p>
-            <div className="flex space-x-2">
-              <Button variant="ghost" size="sm">
-                <Facebook className="h-4 w-4" />
+            <div className="flex space-x-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                <Facebook className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="sm">
-                <Twitter className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                <Twitter className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="sm">
-                <Instagram className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                <Instagram className="h-3.5 w-3.5" />
               </Button>
-              <Button variant="ghost" size="sm">
-                <Youtube className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+                <Youtube className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-3 md:space-y-4">
-            <h3 className="font-semibold text-foreground text-sm">Quick Links</h3>
-            <div className="flex flex-col space-y-0.5 md:space-y-1">
-              <Button variant="ghost" className="h-auto p-2 text-muted-foreground hover:text-foreground justify-start text-xs md:text-sm w-full text-left">
-                About Us
-              </Button>
-              <Button variant="ghost" className="h-auto p-2 text-muted-foreground hover:text-foreground justify-start text-xs md:text-sm w-full text-left">
-                Our Services
-              </Button>
-              <Button variant="ghost" className="h-auto p-2 text-muted-foreground hover:text-foreground justify-start text-xs md:text-sm w-full text-left">
-                Success Stories
-              </Button>
-              <Button variant="ghost" className="h-auto p-2 text-muted-foreground hover:text-foreground justify-start text-xs md:text-sm w-full text-left">
-                Blog
-              </Button>
+          <div className="space-y-2.5">
+            <h3 className="font-semibold text-foreground text-xs uppercase tracking-wider">Quick Links</h3>
+            <div className="flex flex-col space-y-1 text-xs">
+              <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors py-0.5">About Us</a>
+              <a href="#services" className="text-muted-foreground hover:text-foreground transition-colors py-0.5">Our Services</a>
+              <a href="#stories" className="text-muted-foreground hover:text-foreground transition-colors py-0.5">Success Stories</a>
+              <a href="#blog" className="text-muted-foreground hover:text-foreground transition-colors py-0.5">Farming Blog</a>
             </div>
           </div>
 
           {/* Support */}
-          <div className="space-y-3 md:space-y-4">
-            <h3 className="font-semibold text-foreground text-sm">Support</h3>
-            <div className="flex flex-col space-y-0.5 md:space-y-1">
-              <Button variant="ghost" className="h-auto p-2 text-muted-foreground hover:text-foreground justify-start text-xs md:text-sm w-full text-left">
-                Help Center
-              </Button>
-              <Button variant="ghost" className="h-auto p-2 text-muted-foreground hover:text-foreground justify-start text-xs md:text-sm w-full text-left">
-                Contact Support
-              </Button>
-              <Button variant="ghost" className="h-auto p-2 text-muted-foreground hover:text-foreground justify-start text-xs md:text-sm w-full text-left">
-                Privacy Policy
-              </Button>
-              <Button variant="ghost" className="h-auto p-2 text-muted-foreground hover:text-foreground justify-start text-xs md:text-sm w-full text-left">
-                Terms of Service
-              </Button>
+          <div className="space-y-2.5">
+            <h3 className="font-semibold text-foreground text-xs uppercase tracking-wider">Support</h3>
+            <div className="flex flex-col space-y-1 text-xs">
+              <a href="#help" className="text-muted-foreground hover:text-foreground transition-colors py-0.5">Help Center</a>
+              <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors py-0.5">Contact Support</a>
+              <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors py-0.5">Privacy Policy</a>
+              <a href="/terms" className="text-muted-foreground hover:text-foreground transition-colors py-0.5">Terms of Service</a>
             </div>
           </div>
 
           {/* Contact Info */}
-          <div className="space-y-3 md:space-y-4">
-            <h3 className="font-semibold text-foreground text-sm">Contact Us</h3>
-            <div className="flex flex-col space-y-0.5 md:space-y-1">
-              <div className="flex items-center space-x-2 text-muted-foreground text-xs md:text-sm py-2">
-                <Phone className="h-4 w-4" />
-                <span className="text-sm">+91 86396 68662, +91 63059 36623</span>
+          <div className="space-y-2.5">
+            <h3 className="font-semibold text-foreground text-xs uppercase tracking-wider">Contact Us</h3>
+            <div className="flex flex-col space-y-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center space-x-2">
+                <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span>+91 86396 68662, +91 63059 36623</span>
               </div>
-              <div className="flex items-center space-x-2 text-muted-foreground text-xs md:text-sm py-2">
-                <Mail className="h-4 w-4" />
-                <span className="text-sm">farmiq.in@gmail.com</span>
+              <div className="flex items-center space-x-2">
+                <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span>farmiq.in@gmail.com</span>
               </div>
-              <div className="flex items-start space-x-2 text-muted-foreground text-xs md:text-sm py-2">
-                <MapPin className="h-4 w-4 mt-0.5" />
-                <span className="text-sm">
-                  Agricultural Technology Hub<br />
-                  New Delhi, India 110001
-                </span>
+              <div className="flex items-start space-x-2">
+                <MapPin className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                <span>Agricultural Technology Hub, New Delhi, 110001</span>
               </div>
             </div>
           </div>
         </div>
 
-        <Separator className="my-3 md:my-4" />
+        <Separator className="my-4" />
 
         {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
-          <p className="text-muted-foreground text-xs md:text-sm">
-            © {currentYear} FarmIQ. All rights reserved.
-          </p>
+        <div className="flex justify-between items-center text-xs text-muted-foreground">
+          <p>© {currentYear} FarmIQ. All rights reserved.</p>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" className="h-auto p-0 text-muted-foreground hover:text-foreground text-xs md:text-sm">
-              Privacy Policy
-            </Button>
-            <Button variant="ghost" className="h-auto p-0 text-muted-foreground hover:text-foreground text-xs md:text-sm">
-              Terms of Service
-            </Button>
-            <Button variant="ghost" className="h-auto p-0 text-muted-foreground hover:text-foreground text-xs md:text-sm">
-              Cookie Policy
-            </Button>
+            <a href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-foreground transition-colors">Terms of Service</a>
+            <a href="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</a>
           </div>
         </div>
       </div>
