@@ -13,9 +13,7 @@ import {
   Package,
   Settings,
   ShieldCheck,
-  Search,
-  Sparkles,
-  LayoutGrid
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +23,7 @@ interface BottomNavigationProps {
   onToggleSidebar?: () => void;
 }
 
-interface FeatureItem {
+interface RemainingFeature {
   id: string;
   label: string;
   icon: React.ElementType;
@@ -38,7 +36,7 @@ interface FeatureItem {
 const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Left & Right Primary Bar Items
+  // 4 Primary Navigation Items displayed on the bottom bar
   const leftNavItems = [
     { id: "home", icon: Home, label: "Home" },
     { id: "crop-profit-predictor", icon: TrendingUp, label: "Predict" },
@@ -49,95 +47,68 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
     { id: "marketplace", icon: ShoppingCart, label: "Market" },
   ];
 
-  // 🌟 COMPLETE LIST OF ALL FEATURES FOR WINDOWS APPS HUB
-  const allFeatures: FeatureItem[] = [
-    {
-      id: "crop-profit-predictor",
-      label: "Crop Predictor",
-      icon: TrendingUp,
-      badge: "AI",
-      badgeColor: "bg-emerald-600",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-100/80 dark:bg-emerald-950/70"
-    },
-    {
-      id: "disease-detection",
-      label: "Disease Doctor",
-      icon: Sprout,
-      badge: "AI",
-      badgeColor: "bg-emerald-600",
-      color: "text-green-600",
-      bgColor: "bg-green-100/80 dark:bg-green-950/70"
-    },
-    {
-      id: "marketplace",
-      label: "Crop Trade",
-      icon: ShoppingCart,
-      badge: "0% Fee",
-      badgeColor: "bg-teal-600",
-      color: "text-teal-600",
-      bgColor: "bg-teal-100/80 dark:bg-teal-950/70"
-    },
-    {
-      id: "farmer-market",
-      label: "Farm Inputs",
-      icon: Package,
-      badge: "Seeds",
-      badgeColor: "bg-amber-600",
-      color: "text-amber-600",
-      bgColor: "bg-amber-100/80 dark:bg-amber-950/70"
-    },
-    {
-      id: "rentals",
-      label: "Equipment Rentals",
-      icon: Truck,
-      badge: "Machinery",
-      badgeColor: "bg-orange-600",
-      color: "text-orange-600",
-      bgColor: "bg-orange-100/80 dark:bg-orange-950/70"
-    },
+  // 🌟 ONLY REMAINING FEATURES (Excluded items already in bottom bar: Home, Predict, Disease, Market)
+  const remainingFeatures: RemainingFeature[] = [
     {
       id: "market-supply-tracker",
-      label: "Weather & Alerts",
+      label: "Weather",
       icon: CloudRain,
       badge: "Live",
-      badgeColor: "bg-sky-600",
-      color: "text-sky-600",
-      bgColor: "bg-sky-100/80 dark:bg-sky-950/70"
+      badgeColor: "bg-sky-500",
+      color: "text-sky-600 dark:text-sky-400",
+      bgColor: "bg-sky-100/90 dark:bg-sky-950/80"
     },
     {
       id: "government-schemes",
-      label: "Govt Schemes",
+      label: "Schemes",
       icon: FileText,
       badge: "Gov",
-      badgeColor: "bg-indigo-600",
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-100/80 dark:bg-indigo-950/70"
+      badgeColor: "bg-indigo-500",
+      color: "text-indigo-600 dark:text-indigo-400",
+      bgColor: "bg-indigo-100/90 dark:bg-indigo-950/80"
+    },
+    {
+      id: "rentals",
+      label: "Rentals",
+      icon: Truck,
+      badge: "Hire",
+      badgeColor: "bg-orange-500",
+      color: "text-orange-600 dark:text-orange-400",
+      bgColor: "bg-orange-100/90 dark:bg-orange-950/80"
+    },
+    {
+      id: "farmer-market",
+      label: "Inputs",
+      icon: Package,
+      badge: "Seeds",
+      badgeColor: "bg-amber-500",
+      color: "text-amber-600 dark:text-amber-400",
+      bgColor: "bg-amber-100/90 dark:bg-amber-950/80"
     },
     {
       id: "video-session",
-      label: "Video Sessions",
+      label: "Video",
       icon: Video,
       badge: "Live",
-      badgeColor: "bg-rose-600",
-      color: "text-rose-600",
-      bgColor: "bg-rose-100/80 dark:bg-rose-950/70"
+      badgeColor: "bg-rose-500",
+      color: "text-rose-600 dark:text-rose-400",
+      bgColor: "bg-rose-100/90 dark:bg-rose-950/80"
     },
     {
       id: "help",
-      label: "Kisan Help",
+      label: "Help",
       icon: MessageCircle,
       badge: "24/7",
-      badgeColor: "bg-purple-600",
-      color: "text-purple-600",
-      bgColor: "bg-purple-100/80 dark:bg-purple-950/70"
+      badgeColor: "bg-purple-500",
+      color: "text-purple-600 dark:text-purple-400",
+      bgColor: "bg-purple-100/90 dark:bg-purple-950/80"
     },
     {
       id: "settings",
       label: "Settings",
       icon: Settings,
-      color: "text-slate-600",
-      bgColor: "bg-slate-100/80 dark:bg-slate-800"
+      color: "text-slate-600 dark:text-slate-300",
+      bgColor: "bg-slate-100 dark:bg-slate-800"
     }
   ];
 
@@ -151,69 +122,67 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
       {/* 🌑 Dim Backdrop when Menu is Open */}
       {isOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 transition-opacity duration-300 animate-in fade-in"
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 transition-opacity duration-200 animate-in fade-in"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* 🪟 WINDOWS APPS HUB POPUP (Above center button) */}
+      {/* 🪟 COMPACT POPUP - SMALL LOGOS WITH NAMES */}
       {isOpen && (
-        <div className="lg:hidden fixed bottom-20 left-3 right-3 max-w-sm mx-auto z-55 animate-in fade-in zoom-in-95 duration-200">
-          <div className="bg-card border-2 border-border/80 shadow-2xl rounded-3xl p-4 overflow-hidden">
+        <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-[310px] z-55 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-card border border-border/90 shadow-2xl rounded-2xl p-3">
             
-            {/* Hub Header */}
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-border/60">
-              <div className="flex items-center space-x-2">
-                <div className="p-1.5 rounded-lg bg-emerald-600 text-white shadow-xs">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-border/60">
+              <div className="flex items-center space-x-1.5">
+                <div className="p-1 rounded-md bg-emerald-600 text-white shadow-xs">
                   <div className="grid grid-cols-2 gap-0.5">
-                    <div className="w-1.5 h-1.5 bg-white rounded-xs" />
-                    <div className="w-1.5 h-1.5 bg-white rounded-xs" />
-                    <div className="w-1.5 h-1.5 bg-white rounded-xs" />
-                    <div className="w-1.5 h-1.5 bg-white rounded-xs" />
+                    <div className="w-1 h-1 bg-white rounded-xs" />
+                    <div className="w-1 h-1 bg-white rounded-xs" />
+                    <div className="w-1 h-1 bg-white rounded-xs" />
+                    <div className="w-1 h-1 bg-white rounded-xs" />
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-foreground leading-none">FarmIQ All Features</h3>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Select any smart farming tool</p>
-                </div>
+                <span className="text-xs font-bold text-foreground">More Services</span>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                className="p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                aria-label="Close"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
 
-            {/* 3-Column Apps Grid */}
-            <div className="grid grid-cols-3 gap-2.5 max-h-[380px] overflow-y-auto pr-0.5 pb-1">
-              {allFeatures.map((feat) => {
+            {/* Compact 4-Column Grid of Small Logos with Names */}
+            <div className="grid grid-cols-4 gap-2">
+              {remainingFeatures.map((feat) => {
                 const isSelected = activeModule === feat.id;
                 return (
                   <button
                     key={feat.id}
                     onClick={() => handleSelect(feat.id)}
                     className={cn(
-                      "relative flex flex-col items-center justify-center p-2.5 rounded-2xl border transition-all duration-200 active:scale-95 group",
+                      "relative flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all duration-150 active:scale-90 group",
                       isSelected 
                         ? "bg-primary/10 border-primary shadow-xs ring-1 ring-primary" 
-                        : "bg-background/80 hover:bg-muted/60 border-border/60"
+                        : "bg-background hover:bg-muted/60 border-border/50"
                     )}
                   >
-                    {/* App Icon Circle */}
-                    <div className={cn("p-2 rounded-xl mb-1.5 shadow-xs transition-transform group-hover:scale-105", feat.bgColor, feat.color)}>
-                      <feat.icon className="h-5 w-5" />
+                    {/* Small Logo / Icon */}
+                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center mb-1 shadow-xs transition-transform group-hover:scale-105", feat.bgColor, feat.color)}>
+                      <feat.icon className="h-4 w-4" />
                     </div>
 
-                    {/* App Title */}
-                    <span className="text-[11px] font-semibold text-foreground text-center line-clamp-1 leading-tight">
+                    {/* Feature Name */}
+                    <span className="text-[10px] font-medium text-foreground text-center leading-tight truncate w-full">
                       {feat.label}
                     </span>
 
-                    {/* Badge */}
+                    {/* Small Badge */}
                     {feat.badge && (
                       <span className={cn(
-                        "absolute -top-1 -right-1 px-1.5 py-0.2 text-[8px] font-bold text-white rounded-full shadow-xs",
+                        "absolute -top-1 -right-1 px-1 py-0.1 text-[7px] font-bold text-white rounded-full shadow-xs leading-none",
                         feat.badgeColor || "bg-primary"
                       )}>
                         {feat.badge}
@@ -250,11 +219,11 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
           </div>
 
           {/* 🪟 CENTER WINDOWS-STYLE FLOATING HUB BUTTON */}
-          <div className="relative -top-5 flex flex-col items-center px-2">
+          <div className="relative -top-4 flex flex-col items-center px-1">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
-                "w-13 h-13 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 transform active:scale-95 border-4 border-card ring-2",
+                "w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all duration-200 transform active:scale-95 border-3 border-card ring-2",
                 isOpen 
                   ? "bg-destructive text-white ring-destructive/30 rotate-90 scale-105" 
                   : "bg-gradient-to-tr from-emerald-600 via-teal-600 to-green-500 text-white ring-primary/30 hover:scale-105 shadow-emerald-600/30"
@@ -262,19 +231,19 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
               aria-label="Toggle Features Menu"
             >
               {isOpen ? (
-                <X className="h-6 w-6 text-white" />
+                <X className="h-5 w-5 text-white" />
               ) : (
                 /* Windows 4-Square Style Grid Logo */
-                <div className="grid grid-cols-2 gap-1 p-0.5">
-                  <div className="w-2.5 h-2.5 bg-white rounded-xs opacity-95 group-hover:scale-105 transition-transform" />
-                  <div className="w-2.5 h-2.5 bg-white/90 rounded-xs opacity-95 group-hover:scale-105 transition-transform" />
-                  <div className="w-2.5 h-2.5 bg-white/90 rounded-xs opacity-95 group-hover:scale-105 transition-transform" />
-                  <div className="w-2.5 h-2.5 bg-white rounded-xs opacity-95 group-hover:scale-105 transition-transform" />
+                <div className="grid grid-cols-2 gap-0.5 p-0.5">
+                  <div className="w-2 h-2 bg-white rounded-xs opacity-95" />
+                  <div className="w-2 h-2 bg-white/90 rounded-xs opacity-95" />
+                  <div className="w-2 h-2 bg-white/90 rounded-xs opacity-95" />
+                  <div className="w-2 h-2 bg-white rounded-xs opacity-95" />
                 </div>
               )}
             </button>
             <span className={cn(
-              "text-[10px] font-bold mt-0.5 transition-colors",
+              "text-[9px] font-bold mt-0.5 transition-colors",
               isOpen ? "text-destructive" : "text-primary"
             )}>
               {isOpen ? "Close" : "Apps"}
