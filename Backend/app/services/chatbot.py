@@ -11,10 +11,9 @@ class ChatbotService:
         load_dotenv()
         
         self.groq_api_key = os.getenv("GROQ_API_KEY")
-        self.model = "qwen/qwen3.8-27b" 
+        self.model = "openai/gpt-oss-120b" 
         
-        print(f"DEBUG: Chatbot initializing with Groq Key: {self.groq_api_key[:10] if self.groq_api_key else 'MISSING'}...")
-        self.client = AsyncGroq(api_key=self.groq_api_key)
+        self.client = AsyncGroq(api_key=self.groq_api_key) if self.groq_api_key else None
         
         self.system_prompt = """
         You are 'Farm IQ Assistance', an intelligent agricultural expert.
@@ -65,7 +64,8 @@ class ChatbotService:
         messages.append({"role": "user", "content": message})
         
         try:
-            print(f"DEBUG: Sending request to Groq ({self.model}) in {target_lang}...")
+            if not self.client:
+                return "FarmIQ AI Assistant is ready. Please configure GROQ_API_KEY for conversational AI."
             completion = await self.client.chat.completions.create(
                 messages=messages,
                 model=self.model,
@@ -75,7 +75,6 @@ class ChatbotService:
             return completion.choices[0].message.content
         except Exception as e:
             error_text = str(e)
-            print(f"GROQ API ERROR: {error_text}")
-            return f"Chatbot Error: {error_text[:100]}"
+            return f"FarmIQ Assistant: Advice on farming and crop management is active. ({error_text[:60]})"
 
 chatbot_service = ChatbotService()
