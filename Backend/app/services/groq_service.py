@@ -8,7 +8,7 @@ from app.core.config import settings
 class GroqService:
     def __init__(self):
         self.api_url = "https://api.groq.com/openai/v1/chat/completions"
-        self.model = "llama-3.3-70b-versatile"  # Updated to supported model
+        self.model = "openai/gpt-oss-120b"  # High-performance 120B agricultural model on Groq
 
     def get_disease_details(self, disease_name: str, confidence: float) -> Dict:
         """

@@ -91,15 +91,21 @@ async def download_app_apk():
     import os
     from fastapi.responses import FileResponse
     
-    # Path to compiled APK in project
+    # Path to compiled APK in project (prioritizing app-universal-debug.apk)
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    apk_path = os.path.join(base_dir, "Frontend", "android", "app", "build", "outputs", "apk", "debug", "app-debug.apk")
+    candidate_paths = [
+        os.path.join(base_dir, "Frontend", "android", "app", "build", "outputs", "apk", "debug", "app-universal-debug.apk"),
+        os.path.join(base_dir, "Frontend", "android", "release", "FarmIQ.apk"),
+        os.path.join(base_dir, "Frontend", "android", "app", "build", "outputs", "apk", "debug", "app-arm64-v8a-debug.apk"),
+        os.path.join(base_dir, "Frontend", "android", "app", "build", "outputs", "apk", "debug", "app-debug.apk")
+    ]
     
-    if os.path.exists(apk_path):
-        return FileResponse(
-            path=apk_path,
-            filename="FarmIQ-v1.0.1.apk",
-            media_type="application/vnd.android.package-archive"
-        )
+    for apk_path in candidate_paths:
+        if os.path.exists(apk_path):
+            return FileResponse(
+                path=apk_path,
+                filename="FarmIQ.apk",
+                media_type="application/vnd.android.package-archive"
+            )
     raise HTTPException(status_code=404, detail="APK file not found on server")
 
