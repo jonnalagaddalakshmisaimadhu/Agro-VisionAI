@@ -50,3 +50,7 @@ Backend/uploads/*
 Frontend/node_modules/
 Frontend/dist/
 Frontend/.env.local
+
+*.apk
+Frontend/public/*.apk
+Frontend/dist/*.apk

@@ -29,11 +29,14 @@ import {
   Target,
   Zap,
   TrendingDown,
-  Building2
+  Building2,
+  Download
 } from "lucide-react";
+import { DownloadAppModal } from "@/components/common/DownloadAppModal";
 
 const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
   const [language, setLanguage] = useState("en");
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   const problems = [
     { icon: TrendingDown, text: "Low crop profits due to poor market timing" },
@@ -195,6 +198,10 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
               </Select>
 
               <Button variant="outline" className="hidden sm:flex" onClick={onClickLogin}>Login</Button>
+              <Button size="sm" className="hidden sm:flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={() => setIsDownloadModalOpen(true)}>
+                <Download className="h-4 w-4" />
+                Download App
+              </Button>
             </div>
           </div>
         </div>
@@ -223,7 +230,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
-                <Button size="lg" className="h-12 lg:h-14 px-6 lg:px-8 text-base lg:text-lg bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
+                <Button size="lg" onClick={() => setIsDownloadModalOpen(true)} className="h-12 lg:h-14 px-6 lg:px-8 text-base lg:text-lg bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all">
                   <Smartphone className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
                   Download App
                 </Button>
@@ -573,7 +580,7 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 justify-center items-center pt-6 lg:pt-8">
-              <Button size="lg" className="h-14 lg:h-16 px-8 lg:px-10 text-lg lg:text-xl bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all animate-pulse-glow">
+              <Button size="lg" onClick={() => setIsDownloadModalOpen(true)} className="h-14 lg:h-16 px-8 lg:px-10 text-lg lg:text-xl bg-primary hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all animate-pulse-glow">
                 <Smartphone className="mr-3 h-5 w-5 lg:h-6 lg:w-6" />
                 Download FarmIQ App
               </Button>
@@ -656,6 +663,11 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
         </div>
       </footer>
 
+      {/* Interactive Download App & Install Modal */}
+      <DownloadAppModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => setIsDownloadModalOpen(false)}
+      />
     </div>
   );
 };
