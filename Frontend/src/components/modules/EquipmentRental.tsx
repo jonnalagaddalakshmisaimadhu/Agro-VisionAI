@@ -182,6 +182,153 @@ const INITIAL_CONVERSATIONS: Record<number, ChatMessage[]> = {
   ]
 };
 
+const DEFAULT_EQUIPMENT: EquipmentItem[] = [
+  {
+    id: 1,
+    name: "Mahindra 575 DI Sarpanch Tractor",
+    type: "tractor",
+    description: "45 HP heavy duty diesel tractor with high backup torque. Ideal for primary tillage, rotavator, and heavy haulage.",
+    price_per_day: 2400,
+    price_per_hour: 350,
+    price_per_acre: 850,
+    operator_available: true,
+    operator_fee: 400,
+    fuel_included: false,
+    horse_power: "45 HP",
+    security_deposit: 2000,
+    location: "Guntur, Andhra Pradesh",
+    district: "Guntur",
+    owner_name: "Ram Charan",
+    phone_number: "6305936623",
+    rating: 4.9,
+    total_rentals: 42,
+    image_url: "/equipment/mahindra_tractor.jpg",
+    specifications: { power: "45 HP", fuel: "Diesel", cylinders: "4" },
+    features: ["Heavy Duty Rotavator Attached", "Dual Clutch", "Power Steering"],
+    is_available: true
+  },
+  {
+    id: 2,
+    name: "John Deere 5050D PowerPro Tractor",
+    type: "tractor",
+    description: "50 HP 2WD/4WD tractor with Collarshift gearbox and top PTO efficiency for disc harrows, laser levelers, and balers.",
+    price_per_day: 2800,
+    price_per_hour: 400,
+    price_per_acre: 950,
+    operator_available: true,
+    operator_fee: 500,
+    fuel_included: false,
+    horse_power: "50 HP",
+    security_deposit: 2500,
+    location: "Vijayawada, Andhra Pradesh",
+    district: "Krishna",
+    owner_name: "Charith",
+    phone_number: "8341505040",
+    rating: 4.95,
+    total_rentals: 68,
+    image_url: "/equipment/john_deere_tractor.jpg",
+    specifications: { power: "50 HP", fuel: "Diesel", pto: "540 RPM" },
+    features: ["Reverse PTO", "Oil Immersed Disc Brakes", "JDLink GPS Enabled"],
+    is_available: true
+  },
+  {
+    id: 3,
+    name: "Kubota DC-68G Combine Harvester",
+    type: "harvester",
+    description: "High-throughput tracked paddy & wheat combine harvester. Harvests and threshes up to 2.5 acres per hour with minimal grain loss.",
+    price_per_day: 9500,
+    price_per_hour: 1400,
+    price_per_acre: 1600,
+    operator_available: true,
+    operator_fee: 800,
+    fuel_included: true,
+    horse_power: "68 HP",
+    security_deposit: 5000,
+    location: "Bapatla, Andhra Pradesh",
+    district: "Bapatla",
+    owner_name: "Sai Madhu",
+    phone_number: "8639668662",
+    rating: 4.85,
+    total_rentals: 31,
+    image_url: "/equipment/combine_harvester.jpg",
+    specifications: { power: "68 HP Turbocharged", fuel: "Diesel Included" },
+    features: ["Rubber Crawlers for Wet Mud Fields", "Dual Threshing Rotor"],
+    is_available: true
+  },
+  {
+    id: 4,
+    name: "DJI Agras T40 Smart Spraying Drone",
+    type: "drone",
+    description: "40 kg payload agricultural drone with dual atomized centrifugal spray discs. Sprays 40 acres per hour with millimeter precision.",
+    price_per_day: 4500,
+    price_per_hour: 800,
+    price_per_acre: 350,
+    operator_available: true,
+    operator_fee: 0,
+    fuel_included: true,
+    horse_power: "Electric 30,000 mAh",
+    security_deposit: 3000,
+    location: "Amaravati, Andhra Pradesh",
+    district: "Guntur",
+    owner_name: "Sai Madhu",
+    phone_number: "8639668662",
+    rating: 4.98,
+    total_rentals: 112,
+    image_url: "/equipment/dji_agras_drone.jpg",
+    specifications: { capacity: "40 Liters", spray_rate: "12 L/min" },
+    features: ["DGCA Certified Pilot Included", "Active Phased Array Radar"],
+    is_available: true
+  },
+  {
+    id: 5,
+    name: "Sonalika Heavy Duty Multi-Speed Rotavator",
+    type: "tiller",
+    description: "7 feet heavy-duty 48-blade rotavator with boron steel blades. Delivers seedbed preparation in a single pass.",
+    price_per_day: 1200,
+    price_per_hour: 200,
+    price_per_acre: 500,
+    operator_available: false,
+    operator_fee: 0,
+    fuel_included: false,
+    horse_power: "Fits 45-55 HP",
+    security_deposit: 1500,
+    location: "Tenali, Andhra Pradesh",
+    district: "Guntur",
+    owner_name: "Ram Charan",
+    phone_number: "6305936623",
+    rating: 4.75,
+    total_rentals: 19,
+    image_url: "/equipment/rotavator.jpg",
+    specifications: { blades: "48 L-Type Boron Steel", width: "7 Feet" },
+    features: ["Multi-Speed Gearbox", "Heavy Duty Side Gear Drive"],
+    is_available: true
+  },
+  {
+    id: 6,
+    name: "Lemken Laser Land Leveler Pro",
+    type: "leveler",
+    description: "Precision laser transmitter and hydraulic dual-mast scraper bucket. Saves up to 25% irrigation water by leveling fields perfectly.",
+    price_per_day: 3200,
+    price_per_hour: 450,
+    price_per_acre: 800,
+    operator_available: true,
+    operator_fee: 400,
+    fuel_included: false,
+    horse_power: "Fits 50+ HP",
+    security_deposit: 3000,
+    location: "Krishna District, Andhra Pradesh",
+    district: "Krishna",
+    owner_name: "Charith",
+    phone_number: "8341505040",
+    rating: 4.9,
+    total_rentals: 28,
+    image_url: "/equipment/laser_leveler.jpg",
+    specifications: { range: "800 Meters Laser", bucket: "2.5 Meter Hydraulic" },
+    features: ["High Precision Dual Laser Transmitter", "Touch Controller"],
+    is_available: true
+  }
+];
+
 const ICE_SERVERS = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
@@ -192,8 +339,8 @@ const ICE_SERVERS = {
 
 const EquipmentRental = () => {
   const { toast } = useToast();
-  const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [equipmentList, setEquipmentList] = useState<EquipmentItem[]>(DEFAULT_EQUIPMENT);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedRadius, setSelectedRadius] = useState("all");
@@ -218,7 +365,7 @@ const EquipmentRental = () => {
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [callRecipient, setCallRecipient] = useState<{ name: string; equipment: string; id: number; mobile: string }>({
     name: "Ram Charan",
-    equipment: "Machindra 575 DI",
+    equipment: "Mahindra 575 DI",
     id: 1,
     mobile: "6305936623"
   });
@@ -236,23 +383,30 @@ const EquipmentRental = () => {
 
   // Initialize Remote Audio element in DOM
   useEffect(() => {
-    if (!remoteAudioRef.current) {
-      const audioEl = document.createElement("audio");
-      audioEl.autoplay = true;
-      remoteAudioRef.current = audioEl;
-      document.body.appendChild(audioEl);
-    }
-    return () => {
-      if (remoteAudioRef.current) {
-        remoteAudioRef.current.remove();
-        remoteAudioRef.current = null;
+    try {
+      if (!remoteAudioRef.current && typeof document !== "undefined") {
+        const audioEl = document.createElement("audio");
+        audioEl.autoplay = true;
+        remoteAudioRef.current = audioEl;
+        document.body.appendChild(audioEl);
       }
+    } catch (e) {}
+    return () => {
+      try {
+        if (remoteAudioRef.current) {
+          remoteAudioRef.current.remove();
+          remoteAudioRef.current = null;
+        }
+      } catch (e) {}
     };
   }, []);
 
-  // Auto-connect to Real-Time Voice WebSocket channel so user receives incoming calls anytime
+  // Auto-connect to Real-Time Voice WebSocket channel only in local dev
   useEffect(() => {
-    connectRealtimeWebSocket(1);
+    const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    if (isLocalhost) {
+      connectRealtimeWebSocket(1);
+    }
   }, []);
 
   // Timer for active call duration
@@ -303,69 +457,76 @@ const EquipmentRental = () => {
   } | null>(null);
   const [isIncomingCallOpen, setIsIncomingCallOpen] = useState(false);
 
-  // Connect Realtime WebSocket for WebRTC Signaling and Messaging
+  // Connect Realtime WebSocket for WebRTC Signaling and Messaging (Localhost Only)
   const connectRealtimeWebSocket = (equipmentId: number) => {
-    if (webSocketRef.current) {
-      webSocketRef.current.close();
-    }
+    try {
+      const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      if (!isLocalhost) return;
 
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.host;
-    const wsUrl = `${protocol}//${host}/api/equipment/ws/${equipmentId}`;
-
-    const ws = new WebSocket(wsUrl);
-    webSocketRef.current = ws;
-
-    ws.onmessage = async (event) => {
-      try {
-        const data = JSON.parse(event.data);
-
-        // 0. Incoming Call Trigger from another user/tab
-        if (data.type === "incoming_call") {
-          setIncomingCall({
-            callerName: data.callerName || "Farmer",
-            equipmentName: data.equipmentName || "Machinery",
-            equipmentId: data.equipmentId || equipmentId,
-            phone: data.phone || "6305936623"
-          });
-          setIsIncomingCallOpen(true);
-          startRingtone();
-        }
-        // 1. WebRTC Signaling: Offer
-        else if (data.type === "webrtc_offer" && peerConnectionRef.current) {
-          await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
-          const answer = await peerConnectionRef.current.createAnswer();
-          await peerConnectionRef.current.setLocalDescription(answer);
-          ws.send(JSON.stringify({ type: "webrtc_answer", sdp: answer }));
-          setCallStatus("connected");
-          stopRingtone();
-        }
-        // 2. WebRTC Signaling: Answer
-        else if (data.type === "webrtc_answer" && peerConnectionRef.current) {
-          await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
-          setCallStatus("connected");
-          stopRingtone();
-        }
-        // 3. WebRTC Signaling: ICE Candidate
-        else if (data.type === "webrtc_ice" && peerConnectionRef.current) {
-          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
-        }
-        // 4. Real-Time Chat Message
-        else if (data.type === "chat_message") {
-          setChatMessages((prev) => ({
-            ...prev,
-            [equipmentId]: [...(prev[equipmentId] || []), data.message]
-          }));
-        }
-        // 5. Call Ended Signal
-        else if (data.type === "call_ended") {
-          endConfidentialCall(false);
-          setIsIncomingCallOpen(false);
-        }
-      } catch (err) {
-        console.log("WebSocket signal error:", err);
+      if (webSocketRef.current) {
+        webSocketRef.current.close();
       }
-    };
+
+      const wsUrl = `ws://localhost:8000/api/equipment/ws/${equipmentId}`;
+      const ws = new WebSocket(wsUrl);
+      ws.onerror = (e) => {
+        console.log("WebSocket connection skipped in current network mode.");
+      };
+      webSocketRef.current = ws;
+
+      ws.onmessage = async (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          // 0. Incoming Call Trigger from another user/tab
+          if (data.type === "incoming_call") {
+            setIncomingCall({
+              callerName: data.callerName || "Farmer",
+              equipmentName: data.equipmentName || "Machinery",
+              equipmentId: data.equipmentId || equipmentId,
+              phone: data.phone || "6305936623"
+            });
+            setIsIncomingCallOpen(true);
+            startRingtone();
+          }
+          // 1. WebRTC Signaling: Offer
+          else if (data.type === "webrtc_offer" && peerConnectionRef.current) {
+            await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
+            const answer = await peerConnectionRef.current.createAnswer();
+            await peerConnectionRef.current.setLocalDescription(answer);
+            ws.send(JSON.stringify({ type: "webrtc_answer", sdp: answer }));
+            setCallStatus("connected");
+            stopRingtone();
+          }
+          // 2. WebRTC Signaling: Answer
+          else if (data.type === "webrtc_answer" && peerConnectionRef.current) {
+            await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
+            setCallStatus("connected");
+            stopRingtone();
+          }
+          // 3. WebRTC Signaling: ICE Candidate
+          else if (data.type === "webrtc_ice" && peerConnectionRef.current) {
+            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+          }
+          // 4. Real-Time Chat Message
+          else if (data.type === "chat_message") {
+            setChatMessages((prev) => ({
+              ...prev,
+              [equipmentId]: [...(prev[equipmentId] || []), data.message]
+            }));
+          }
+          // 5. Call Ended Signal
+          else if (data.type === "call_ended") {
+            endConfidentialCall(false);
+            setIsIncomingCallOpen(false);
+          }
+        } catch (err) {
+          console.log("WebSocket signal parse error:", err);
+        }
+      };
+    } catch (err) {
+      console.log("WebSocket init skipped:", err);
+    }
   };
 
   // Accept Incoming Call (Recipient Action)
@@ -625,23 +786,62 @@ const EquipmentRental = () => {
   const [calcMode, setCalcMode] = useState<"acre" | "day" | "hour">("acre");
   const [calcUnits, setCalcUnits] = useState(5);
 
-  // Fetch equipment from backend
+  // Fetch equipment from backend with static fallback
   const fetchEquipment = async () => {
     setIsLoading(true);
     try {
+      const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      
+      // Filter helper
+      const filterItems = (items: EquipmentItem[]) => {
+        let res = [...items];
+        if (selectedCategory !== "all") {
+          res = res.filter((item) => item.type === selectedCategory);
+        }
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          res = res.filter(
+            (item) =>
+              item.name.toLowerCase().includes(q) ||
+              (item.owner_name && item.owner_name.toLowerCase().includes(q)) ||
+              (item.location && item.location.toLowerCase().includes(q))
+          );
+        }
+        if (operatorFilter === "with_operator") {
+          res = res.filter((item) => item.operator_available);
+        } else if (operatorFilter === "self_driven") {
+          res = res.filter((item) => !item.operator_available);
+        }
+        return res;
+      };
+
+      if (!isLocalhost) {
+        setEquipmentList(filterItems(DEFAULT_EQUIPMENT));
+        setIsLoading(false);
+        return;
+      }
+
       const params = new URLSearchParams();
       if (selectedCategory !== "all") params.append("equipment_type", selectedCategory);
       if (searchQuery) params.append("search", searchQuery);
       if (operatorFilter === "with_operator") params.append("operator_available", "true");
       if (operatorFilter === "self_driven") params.append("operator_available", "false");
 
-      const res = await fetch(`/api/equipment?${params.toString()}`);
+      const res = await fetch(`http://localhost:8000/api/equipment?${params.toString()}`, {
+        signal: AbortSignal.timeout(3000)
+      });
       if (res.ok) {
         const data = await res.json();
-        setEquipmentList(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setEquipmentList(data);
+        } else {
+          setEquipmentList(filterItems(DEFAULT_EQUIPMENT));
+        }
+      } else {
+        setEquipmentList(filterItems(DEFAULT_EQUIPMENT));
       }
     } catch (err) {
-      console.error("Error fetching equipment:", err);
+      setEquipmentList(DEFAULT_EQUIPMENT);
     } finally {
       setIsLoading(false);
     }
@@ -1076,17 +1276,17 @@ const EquipmentRental = () => {
                       <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-3 gap-2 text-center">
                         <div>
                           <p className="text-[10px] uppercase font-bold text-slate-400">Daily</p>
-                          <p className="text-sm font-extrabold text-slate-900">₹{item.price_per_day.toLocaleString()}</p>
+                          <p className="text-sm font-extrabold text-slate-900">₹{Number(item.price_per_day || 0).toLocaleString()}</p>
                         </div>
                         {item.price_per_acre && item.price_per_acre > 0 ? (
                           <div className="border-x border-slate-200">
                             <p className="text-[10px] uppercase font-bold text-emerald-600">Per Acre</p>
-                            <p className="text-sm font-extrabold text-emerald-700">₹{item.price_per_acre.toLocaleString()}</p>
+                            <p className="text-sm font-extrabold text-emerald-700">₹{Number(item.price_per_acre || 0).toLocaleString()}</p>
                           </div>
                         ) : (
                           <div className="border-x border-slate-200">
                             <p className="text-[10px] uppercase font-bold text-slate-400">Hourly</p>
-                            <p className="text-sm font-extrabold text-slate-900">₹{item.price_per_hour || 300}</p>
+                            <p className="text-sm font-extrabold text-slate-900">₹{Number(item.price_per_hour || 300).toLocaleString()}</p>
                           </div>
                         )}
                         <div>
