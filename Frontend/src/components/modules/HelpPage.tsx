@@ -539,25 +539,25 @@ const HelpPage: React.FC<HelpPageProps> = ({ setActiveModule }) => {
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 animate-in fade-in duration-200">
+    <div className="p-3 sm:p-5 md:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6 animate-in fade-in duration-200">
       
       {/* 1. CLEAN, MODERN HEADER */}
-      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-emerald-200 text-xs font-medium">
-              <HelpCircle className="h-3.5 w-3.5" />
+      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 text-white rounded-xl p-4 sm:p-6 shadow-xs relative overflow-hidden">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/10 rounded-full text-emerald-200 text-[10px] sm:text-xs font-medium">
+              <HelpCircle className="h-3 w-3" />
               <span>Help & Knowledge Center</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-base sm:text-2xl font-bold tracking-tight text-white leading-tight">
               How can we help you today?
             </h1>
-            <p className="text-emerald-100 text-xs sm:text-sm max-w-2xl leading-relaxed">
-              Step-by-step guides for every feature, real-time regional farmer channels, instant AI agricultural diagnosis, and toll-free helplines.
+            <p className="text-emerald-100 text-[11px] sm:text-xs max-w-2xl leading-normal line-clamp-2 sm:line-clamp-none">
+              Step-by-step guides for every feature, regional farmer forum, instant AI diagnosis, and toll-free helplines.
             </p>
             {locationData?.locationName && (
-              <div className="flex items-center gap-2 text-xs text-emerald-200 font-medium pt-1">
-                <MapPin className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-1.5 text-[11px] text-emerald-200 font-medium pt-0.5">
+                <MapPin className="h-3 w-3" />
                 <span>Region: {locationData.locationName}</span>
                 {locationData.weatherData && (
                   <span>• {Math.round(locationData.weatherData.main.temp)}°C</span>
@@ -567,50 +567,52 @@ const HelpPage: React.FC<HelpPageProps> = ({ setActiveModule }) => {
           </div>
 
           {/* Action Button */}
-          <div className="shrink-0 flex items-center gap-3">
+          <div className="shrink-0 flex items-center gap-2 self-end md:self-center">
             <Button
               onClick={startCall}
-              className="bg-white hover:bg-emerald-50 text-emerald-900 font-bold rounded-xl px-5 py-5 shadow-sm flex items-center gap-2 text-xs sm:text-sm transition-all"
+              className="bg-white hover:bg-emerald-50 text-emerald-900 font-bold rounded-lg h-8 sm:h-9 px-3.5 shadow-xs flex items-center gap-1.5 text-xs transition-all"
             >
-              <PhoneCall className="h-4 w-4 text-emerald-700" />
-              <span>In-App Kisan Helpline</span>
+              <PhoneCall className="h-3.5 w-3.5 text-emerald-700" />
+              <span>Kisan Helpline</span>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* 2. NAVIGATION TABS */}
-      <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="space-y-6">
-        <TabsList className="bg-slate-100 p-1 rounded-xl grid grid-cols-2 md:grid-cols-4 gap-1 w-full max-w-2xl">
-          <TabsTrigger
-            value="guide"
-            className="rounded-lg font-semibold text-xs py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
-          >
-            <BookOpen className="h-3.5 w-3.5" />
-            <span>User Guides</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="community"
-            className="rounded-lg font-semibold text-xs py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
-          >
-            <Users className="h-3.5 w-3.5" />
-            <span>Community Forum</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="ai_helpdesk"
-            className="rounded-lg font-semibold text-xs py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
-          >
-            <Bot className="h-3.5 w-3.5" />
-            <span>AI Farming Assistant</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="contact"
-            className="rounded-lg font-semibold text-xs py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
-          >
-            <Mail className="h-3.5 w-3.5" />
-            <span>Helplines & Support</span>
-          </TabsTrigger>
-        </TabsList>
+      {/* 2. NAVIGATION TABS - 4 Equal Grid on Mobile */}
+      <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="space-y-4 sm:space-y-6">
+        <div className="flex justify-center w-full mb-3 sm:mb-5">
+          <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs grid grid-cols-4 w-full sm:w-auto sm:inline-flex max-w-2xl h-auto gap-0.5 sm:gap-1">
+            <TabsTrigger
+              value="guide"
+              className="rounded-lg font-medium py-1.5 px-1 sm:px-3 text-[11px] sm:text-xs data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1 truncate"
+            >
+              <BookOpen className="h-3 w-3 hidden sm:inline" />
+              <span>Guides</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="community"
+              className="rounded-lg font-medium py-1.5 px-1 sm:px-3 text-[11px] sm:text-xs data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1 truncate"
+            >
+              <Users className="h-3 w-3 hidden sm:inline" />
+              <span>Forum</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="ai_helpdesk"
+              className="rounded-lg font-medium py-1.5 px-1 sm:px-3 text-[11px] sm:text-xs data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1 truncate"
+            >
+              <Bot className="h-3 w-3 hidden sm:inline" />
+              <span>AI Help</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="contact"
+              className="rounded-lg font-medium py-1.5 px-1 sm:px-3 text-[11px] sm:text-xs data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1 truncate"
+            >
+              <Mail className="h-3 w-3 hidden sm:inline" />
+              <span>Support</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* TAB 1: USER GUIDES */}
         <TabsContent value="guide" className="space-y-6">

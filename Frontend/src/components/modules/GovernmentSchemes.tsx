@@ -209,20 +209,20 @@ const GovernmentSchemes = () => {
   const newSchemes = schemes.filter(scheme => scheme.is_new);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-3.5 sm:p-5 rounded-xl border border-border shadow-xs">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Government & Private Schemes</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-base sm:text-xl font-bold tracking-tight text-foreground leading-tight">Government & Private Schemes</h1>
+          <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">
             Direct Cash Grants (DBT), Crop Insurance, Micro-Irrigation, and Machinery Subsidies
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           {/* Vernacular Language Selector */}
           <Select value={language} onValueChange={(val: any) => setLanguage(val)}>
-            <SelectTrigger className="w-[140px] bg-background shadow-sm">
+            <SelectTrigger className="w-[120px] sm:w-[140px] h-8 sm:h-9 text-xs bg-background shadow-xs">
               <SelectValue placeholder="Language" />
             </SelectTrigger>
             <SelectContent>
@@ -238,20 +238,20 @@ const GovernmentSchemes = () => {
             size="sm"
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 shadow-sm"
+            className="flex items-center gap-1.5 h-8 sm:h-9 text-xs shadow-xs"
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin text-primary" : ""}`} />
-            {refreshing ? "Syncing..." : "Sync Portals"}
+            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin text-primary" : ""}`} />
+            {refreshing ? "Syncing..." : "Sync"}
           </Button>
         </div>
       </div>
 
       {/* 🚀 Single Unified Finder & Eligibility Panel */}
-      <Card className="border-2 border-primary/20 shadow-md bg-card">
-        <CardHeader className="pb-3 border-b bg-muted/20">
+      <Card className="border border-primary/20 shadow-sm bg-card rounded-xl">
+        <CardHeader className="p-3.5 sm:p-4 pb-3 border-b bg-muted/20">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <CardTitle className="flex items-center gap-2 text-primary text-lg">
-              <ShieldCheck className="h-5 w-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-primary text-sm sm:text-base font-semibold">
+              <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Scheme Finder & Subsidy Calculator
             </CardTitle>
             <div className="flex items-center gap-2">

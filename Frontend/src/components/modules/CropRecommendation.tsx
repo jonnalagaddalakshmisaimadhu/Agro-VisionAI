@@ -135,49 +135,55 @@ const CropRecommendation = () => {
   };
 
   return (
-    <div className="space-y-6 lg:pl-4 pt-6">
-      <div className="flex items-center space-x-3">
-        <div className="p-2 bg-gradient-to-r from-primary to-primary-glow rounded-lg">
-          <Sprout className="h-6 w-6 text-white" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold">AI Crop Recommendation</h1>
-          <p className="text-muted-foreground">Get personalized crop suggestions based on your farm conditions</p>
+    <div className="p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-5 rounded-xl border border-border shadow-xs">
+        <div className="flex items-center space-x-2.5 sm:space-x-3">
+          <div className="p-2 sm:p-2.5 bg-gradient-to-r from-primary to-primary-glow rounded-lg text-white shadow-xs shrink-0">
+            <Sprout className="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight leading-tight">AI Crop Recommendation</h1>
+            <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">
+              Personalized crop suggestions & profit predictions based on your soil & climate
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Input Form */}
-        <Card className="border-0 shadow-card-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center space-x-2">
-                <MapPin className="h-5 w-5" />
-                <span>Farm Details</span>
+        <Card className="border border-border/80 shadow-xs rounded-xl bg-card">
+          <CardHeader className="p-3.5 sm:p-5 pb-2 border-b border-border/50">
+            <CardTitle className="text-sm sm:text-base font-semibold flex items-center justify-between">
+              <span className="flex items-center space-x-2 text-foreground">
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <span>Farm & Soil Parameters</span>
               </span>
               {locationName && (
-                <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[200px]" title={locationName}>{locationName}</span>
+                <span className="text-[11px] text-muted-foreground truncate max-w-[150px] font-normal" title={locationName}>📍 {locationName}</span>
               )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-2">
+          <CardContent className="p-3.5 sm:p-5 space-y-3 sm:space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+              <div className="flex flex-row gap-1.5 sm:gap-2">
                 <div className="flex-1">
                   <Input
-                    placeholder="Search city for weather context..."
+                    placeholder="Search city for climate context..."
                     value={cityInput}
                     onChange={(e) => setCityInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter' && cityInput.trim()) { fetchWeatherByCity(cityInput.trim()); } }}
+                    className="h-8 sm:h-9 text-xs sm:text-sm bg-background"
                   />
                 </div>
-                <Button type="button" onClick={() => cityInput.trim() && fetchWeatherByCity(cityInput.trim())}>Search</Button>
-                <Button type="button" variant="outline" onClick={useCurrentLocation}><MapPin className="h-4 w-4 mr-1.5" />Use Current</Button>
+                <Button type="button" size="sm" className="h-8 sm:h-9 px-2.5 text-xs" onClick={() => cityInput.trim() && fetchWeatherByCity(cityInput.trim())}>Search</Button>
+                <Button type="button" size="sm" variant="outline" className="h-8 sm:h-9 px-2 text-xs" onClick={useCurrentLocation}><MapPin className="h-3.5 w-3.5 mr-1" /><span className="hidden sm:inline">Use </span>GPS</Button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 <div>
-                  <Label htmlFor="location">Location / District</Label>
+                  <Label htmlFor="location" className="text-xs">Location / District</Label>
                   <Input
                     id="location"
                     value={formData.location}

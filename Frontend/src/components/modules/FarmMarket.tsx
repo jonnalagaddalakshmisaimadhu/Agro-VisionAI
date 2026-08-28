@@ -242,79 +242,85 @@ const FarmMarket = () => {
   };
 
   return (
-    <div className="space-y-6 lg:pl-4 pt-6">
-      <div className="flex items-center justify-between">
+    <div className="p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-5 rounded-xl border border-border shadow-xs">
         <div>
-          <h1 className="text-3xl font-bold">Market Place</h1>
-          <p className="text-muted-foreground mt-2">
-            Everything you need for successful farming
+          <h1 className="text-base sm:text-xl font-bold tracking-tight text-foreground leading-tight">Farm Inputs Marketplace</h1>
+          <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">
+            High quality organic fertilizers, certified hybrid seeds, and biological pest controls
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
           <Button 
             variant="outline" 
+            size="sm"
             onClick={addAllToCart}
             disabled={filteredProducts.length === 0}
+            className="h-8 sm:h-9 text-xs"
           >
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add All to Cart
+            <PlusCircle className="h-3.5 w-3.5 mr-1" />
+            <span className="hidden sm:inline">Add </span>All
           </Button>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="relative">
-                <ShoppingCart className="h-4 w-4 mr-2" />
+              <Button size="sm" variant="outline" className="h-8 sm:h-9 text-xs relative">
+                <ShoppingCart className="h-3.5 w-3.5 mr-1" />
                 Cart ({getCartItemCount()})
                 {getCartItemCount() > 0 && (
-                  <Badge className="ml-2">₹{getCartTotal().toLocaleString()}</Badge>
+                  <Badge className="ml-1.5 text-[10px] py-0 px-1">₹{getCartTotal().toLocaleString()}</Badge>
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-96">
+            <SheetContent className="w-full sm:w-96">
               <SheetHeader>
-                <SheetTitle>Shopping Cart ({getCartItemCount()} items)</SheetTitle>
+                <SheetTitle className="text-base">Shopping Cart ({getCartItemCount()} items)</SheetTitle>
               </SheetHeader>
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-3">
                 {Object.keys(cart).length === 0 ? (
                   <div className="text-center py-8">
-                    <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Your cart is empty</p>
+                    <ShoppingCart className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-xs text-muted-foreground">Your cart is empty</p>
                   </div>
                 ) : (
                   <>
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
                       {Object.entries(cart).map(([productId, quantity]) => {
                         const product = products.find(p => p.id === productId);
                         if (!product) return null;
                         
                         return (
-                          <div key={productId} className="flex items-center space-x-3 p-3 border rounded-lg">
-                            <div className="text-2xl">{product.image}</div>
+                          <div key={productId} className="flex items-center space-x-2.5 p-2.5 border rounded-lg">
+                            <div className="text-xl">{product.image}</div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-medium truncate">{product.name}</h4>
-                              <p className="text-sm text-muted-foreground">₹{product.price} per {product.unit}</p>
+                              <h4 className="font-medium text-xs truncate">{product.name}</h4>
+                              <p className="text-[11px] text-muted-foreground">₹{product.price} / {product.unit}</p>
                             </div>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-1">
                               <Button
-                                size="sm"
+                                size="icon"
                                 variant="outline"
+                                className="h-6 w-6"
                                 onClick={() => removeFromCart(productId)}
                               >
-                                <Minus className="h-3 w-3" />
+                                <Minus className="h-2.5 w-2.5" />
                               </Button>
-                              <span className="text-sm font-medium w-8 text-center">{quantity}</span>
+                              <span className="text-xs font-medium w-6 text-center">{quantity}</span>
                               <Button
-                                size="sm"
+                                size="icon"
                                 variant="outline"
+                                className="h-6 w-6"
                                 onClick={() => addToCart(productId)}
                               >
-                                <Plus className="h-3 w-3" />
+                                <Plus className="h-2.5 w-2.5" />
                               </Button>
                               <Button
-                                size="sm"
+                                size="icon"
                                 variant="outline"
+                                className="h-6 w-6 text-destructive"
                                 onClick={() => removeAllFromCart(productId)}
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <Trash2 className="h-2.5 w-2.5" />
                               </Button>
                             </div>
                           </div>
@@ -322,23 +328,12 @@ const FarmMarket = () => {
                       })}
                     </div>
                     <Separator />
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-sm">
                         <span className="font-medium">Total:</span>
-                        <span className="text-xl font-bold">₹{getCartTotal().toLocaleString()}</span>
+                        <span className="text-base font-bold">₹{getCartTotal().toLocaleString()}</span>
                       </div>
-                      <div className="space-y-2">
-                        <Button className="w-full" size="lg">
-                          Proceed to Checkout
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          className="w-full" 
-                          onClick={clearCart}
-                        >
-                          Clear Cart
-                        </Button>
-                      </div>
+                      <Button className="w-full h-9 text-xs" onClick={() => toast({ title: "Order Placed!", description: "Your farm supplies order is confirmed." })}>Checkout Now</Button>
                     </div>
                   </>
                 )}
@@ -349,19 +344,19 @@ const FarmMarket = () => {
       </div>
 
       {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search products..."
+            placeholder="Search fertilizers, seeds, pesticides..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-9 h-8 sm:h-9 text-xs sm:text-sm bg-background"
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="w-48">
-            <Filter className="h-4 w-4 mr-2" />
+          <SelectTrigger className="w-full sm:w-44 h-8 sm:h-9 text-xs">
+            <Filter className="h-3.5 w-3.5 mr-1.5" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -373,50 +368,50 @@ const FarmMarket = () => {
         </Select>
       </div>
 
-      {/* Category Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-card-shadow">
-          <CardContent className="p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-success to-primary">
-                <ShoppingCart className="h-5 w-5 text-white" />
+      {/* Category Stats - 2x2 on mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <Card className="border border-border/80 shadow-xs rounded-xl bg-card">
+          <CardContent className="p-3 text-center">
+            <div className="flex items-center justify-center mb-1">
+              <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+                <ShoppingCart className="h-4 w-4" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{products.length}</p>
-            <p className="text-sm text-muted-foreground">Total Products</p>
+            <p className="text-lg sm:text-xl font-bold">{products.length}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Total Products</p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-card-shadow">
-          <CardContent className="p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary-glow">
-                <Leaf className="h-5 w-5 text-white" />
+        <Card className="border border-border/80 shadow-xs rounded-xl bg-card">
+          <CardContent className="p-3 text-center">
+            <div className="flex items-center justify-center mb-1">
+              <div className="p-1.5 rounded-lg bg-green-100 text-green-700">
+                <Leaf className="h-4 w-4" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{products.filter(p => p.category === 'fertilizer').length}</p>
-            <p className="text-sm text-muted-foreground">Fertilizers</p>
+            <p className="text-lg sm:text-xl font-bold">{products.filter(p => p.category === 'fertilizer').length}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Fertilizers</p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-card-shadow">
-          <CardContent className="p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-accent to-warning">
-                <Package className="h-5 w-5 text-white" />
+        <Card className="border border-border/80 shadow-xs rounded-xl bg-card">
+          <CardContent className="p-3 text-center">
+            <div className="flex items-center justify-center mb-1">
+              <div className="p-1.5 rounded-lg bg-amber-100 text-amber-700">
+                <Package className="h-4 w-4" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{products.filter(p => p.category === 'seeds').length}</p>
-            <p className="text-sm text-muted-foreground">Seeds</p>
+            <p className="text-lg sm:text-xl font-bold">{products.filter(p => p.category === 'seeds').length}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Seeds</p>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-card-shadow">
-          <CardContent className="p-4 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-warning to-accent">
-                <Bug className="h-5 w-5 text-white" />
+        <Card className="border border-border/80 shadow-xs rounded-xl bg-card">
+          <CardContent className="p-3 text-center">
+            <div className="flex items-center justify-center mb-1">
+              <div className="p-1.5 rounded-lg bg-red-100 text-red-700">
+                <Bug className="h-4 w-4" />
               </div>
             </div>
-            <p className="text-2xl font-bold">{products.filter(p => p.category === 'pest-control').length}</p>
-            <p className="text-sm text-muted-foreground">Pest Control</p>
+            <p className="text-lg sm:text-xl font-bold">{products.filter(p => p.category === 'pest-control').length}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Pest Control</p>
           </CardContent>
         </Card>
       </div>

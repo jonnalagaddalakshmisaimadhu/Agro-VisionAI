@@ -247,66 +247,68 @@ const ExpertConsultation = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)}
-            className="flex items-center space-x-2"
+    <div className="min-h-screen bg-slate-50/60 p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+      {/* Header Bar */}
+      <div className="flex items-center justify-between bg-white p-3.5 sm:p-5 rounded-xl border border-slate-200 shadow-xs">
+        <div className="flex items-center space-x-2.5 sm:space-x-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/disease-detection")}
+            className="flex items-center space-x-1 h-8 px-2 text-xs"
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back</span>
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Expert Consultation</h1>
-            <p className="text-gray-600">Get professional help for low-confidence disease detections</p>
+            <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight">Expert Agronomist Consultation</h1>
+            <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">Get certified help for complex diseases, soil health & remedies</p>
           </div>
         </div>
       </div>
 
       {/* Alert for low accuracy cases */}
-      <Alert className="border-orange-200 bg-orange-50">
+      <Alert className="border-orange-200 bg-orange-50 py-2.5">
         <AlertTriangle className="h-4 w-4 text-orange-600" />
-        <AlertDescription className="text-orange-800">
-          <strong>Low Accuracy Detected:</strong> Some plant disease detections had confidence below 75%. 
-          Our experts can provide more accurate diagnosis and treatment recommendations.
+        <AlertDescription className="text-xs text-orange-800">
+          <strong>Need human verification?</strong> Plant pathology doctors and agronomists are available for live review.
         </AlertDescription>
       </Alert>
 
-      {/* Tabs */}
-      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
-        <button
-          onClick={() => setActiveTab("experts")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            activeTab === "experts" 
-              ? "bg-white text-gray-900 shadow-sm" 
-              : "text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          Available Experts
-        </button>
-        <button
-          onClick={() => setActiveTab("cases")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            activeTab === "cases" 
-              ? "bg-white text-gray-900 shadow-sm" 
-              : "text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          Low Accuracy Cases ({lowAccuracyCases.length})
-        </button>
-        <button
-          onClick={() => setActiveTab("analytics")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            activeTab === "analytics" 
-              ? "bg-white text-gray-900 shadow-sm" 
-              : "text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          Analytics
-        </button>
+      {/* Tabs - 3 Equal Columns on Mobile */}
+      <div className="flex justify-center w-full">
+        <div className="grid grid-cols-3 w-full sm:w-auto sm:inline-flex max-w-lg bg-gray-100 p-1 rounded-xl gap-1">
+          <button
+            onClick={() => setActiveTab("experts")}
+            className={`py-1.5 px-2 sm:px-4 rounded-lg text-[11px] sm:text-sm font-medium transition-colors truncate ${
+              activeTab === "experts" 
+                ? "bg-white text-gray-900 shadow-xs" 
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Experts
+          </button>
+          <button
+            onClick={() => setActiveTab("cases")}
+            className={`py-1.5 px-2 sm:px-4 rounded-lg text-[11px] sm:text-sm font-medium transition-colors truncate ${
+              activeTab === "cases" 
+                ? "bg-white text-gray-900 shadow-xs" 
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Cases ({lowAccuracyCases.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`py-1.5 px-2 sm:px-4 rounded-lg text-[11px] sm:text-sm font-medium transition-colors truncate ${
+              activeTab === "analytics" 
+                ? "bg-white text-gray-900 shadow-xs" 
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Analytics
+          </button>
+        </div>
       </div>
 
       {/* Experts Tab */}

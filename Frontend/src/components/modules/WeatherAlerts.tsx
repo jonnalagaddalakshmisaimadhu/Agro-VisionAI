@@ -181,52 +181,61 @@ const WeatherAlerts = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div className="flex items-center space-x-3">
-        <div className="p-2 bg-gradient-to-r from-primary to-accent rounded-lg">
-          <CloudRain className="h-6 w-6 text-white" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold">Weather & Alerts</h1>
-          <p className="text-muted-foreground">Stay informed with real-time weather updates and farming alerts</p>
+    <div className="p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-5 rounded-xl border border-border shadow-xs">
+        <div className="flex items-center space-x-2.5 sm:space-x-3">
+          <div className="p-2 sm:p-2.5 bg-gradient-to-r from-primary to-accent rounded-lg text-white shadow-xs shrink-0">
+            <CloudRain className="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-xl font-bold text-foreground tracking-tight leading-tight">Weather & Alerts</h1>
+            <p className="text-[11px] sm:text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">Stay informed with real-time weather updates and precision agricultural advisories</p>
+          </div>
         </div>
       </div>
 
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="py-2.5">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Error Fetching Weather</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertTitle className="text-xs">Error Fetching Weather</AlertTitle>
+          <AlertDescription className="text-xs">{error}</AlertDescription>
         </Alert>
       )}
 
-      <Card className="border-0 shadow-card-shadow">
-        <CardHeader>
-          <CardTitle>Location</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col sm:flex-row gap-4 items-center">
+      {/* Location Search Bar */}
+      <Card className="border border-border/80 shadow-xs rounded-xl bg-card">
+        <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row gap-2 items-center">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
-              placeholder="Enter a city name..."
+              placeholder="Search city / district name..."
               value={cityInput}
               onChange={(e) => setCityInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="pl-10"
+              className="pl-9 h-8 sm:h-9 text-xs sm:text-sm bg-background"
             />
           </div>
-          <Button onClick={handleSearch}>Search</Button>
-          <Button variant="outline" onClick={useCurrentLocation}><MapPin className="h-4 w-4 mr-2" />Use Current Location</Button>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button size="sm" className="h-8 sm:h-9 px-3 text-xs flex-1 sm:flex-none" onClick={handleSearch}>Search</Button>
+            <Button size="sm" variant="outline" className="h-8 sm:h-9 px-3 text-xs flex-1 sm:flex-none" onClick={useCurrentLocation}>
+              <MapPin className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Use </span>GPS
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-fit grid-cols-2 sm:grid-cols-4">
-          <TabsTrigger value="current">Current</TabsTrigger>
-          <TabsTrigger value="forecast">Forecast</TabsTrigger>
-          <TabsTrigger value="alerts">Alerts</TabsTrigger>
-          <TabsTrigger value="radar">🛰️ Satellite & Radar</TabsTrigger>
-        </TabsList>
+      {/* Main Tabs - 4 Equal Columns on Mobile */}
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4 sm:space-y-6">
+        <div className="flex justify-center w-full mb-3 sm:mb-5">
+          <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs grid grid-cols-4 w-full sm:w-auto sm:inline-flex max-w-2xl h-auto gap-0.5 sm:gap-1">
+            <TabsTrigger value="current" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-primary truncate">Current</TabsTrigger>
+            <TabsTrigger value="forecast" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-primary truncate">Forecast</TabsTrigger>
+            <TabsTrigger value="alerts" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-primary truncate">Alerts</TabsTrigger>
+            <TabsTrigger value="radar" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-primary truncate">Radar</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="current" className="space-y-6">
           {currentWeather && (

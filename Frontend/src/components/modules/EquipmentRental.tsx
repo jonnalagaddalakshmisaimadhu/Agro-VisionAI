@@ -856,26 +856,24 @@ const EquipmentRental = () => {
     });
   };
 
-  const currentActiveThreadEquipment = equipmentList.find((e) => e.id === activeChatTabEquipmentId);
-
   return (
-    <div className="min-h-screen bg-slate-50/60 p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-slate-50/60 p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 1. CLEAN REFINED HEADER */}
-      <div className="bg-white px-6 py-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center space-x-3.5">
-          <div className="p-3 bg-emerald-600 rounded-2xl text-white shadow-md shadow-emerald-600/20">
-            <Truck className="h-6 w-6" />
+      <div className="bg-white p-3.5 sm:p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center space-x-2.5 sm:space-x-3.5">
+          <div className="p-2 sm:p-2.5 bg-emerald-600 rounded-lg text-white shadow-xs shrink-0">
+            <Truck className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Equipment Rentals & Custom Hiring</h1>
-              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 font-semibold text-[11px] flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight">Equipment Rentals & Custom Hiring</h1>
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 font-semibold text-[10px] sm:text-xs py-0 h-5 flex items-center gap-1">
                 <Radio className="h-3 w-3 text-emerald-600 animate-pulse" />
                 Live P2P Calling
               </Badge>
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Rent tractors, harvesters, drone sprayers & implements directly from verified owners (Ram Charan, Charith, Sai Madhu)
+            <p className="text-[11px] sm:text-xs text-slate-500 line-clamp-1 sm:line-clamp-none">
+              Rent tractors, harvesters, drone sprayers & implements directly from verified owners
             </p>
           </div>
         </div>
@@ -883,50 +881,50 @@ const EquipmentRental = () => {
         {/* Primary Action Button */}
         <Button
           onClick={() => setIsListModalOpen(true)}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-5 py-2.5 font-semibold shadow-xs flex items-center gap-2 shrink-0 transition-all"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg h-8 sm:h-9 px-3.5 text-xs font-semibold shadow-xs flex items-center gap-1.5 shrink-0 self-end sm:self-center transition-all"
         >
-          <Plus className="h-4 w-4" />
-          <span>List Your Machinery</span>
+          <Plus className="h-3.5 w-3.5" />
+          <span>List Machinery</span>
         </Button>
       </div>
 
-      {/* 2. CENTERED MODERN TABS */}
+      {/* 2. CENTERED MODERN TABS - 4 Equal Grid on Mobile */}
       <Tabs defaultValue="browse" className="w-full">
-        <div className="flex justify-center w-full mb-6">
-          <TabsList className="bg-slate-200/70 p-1 rounded-2xl shadow-xs inline-flex border border-slate-200/60">
+        <div className="flex justify-center w-full mb-3 sm:mb-5">
+          <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs grid grid-cols-4 w-full sm:w-auto sm:inline-flex max-w-2xl h-auto gap-0.5 sm:gap-1">
             <TabsTrigger
               value="browse"
-              className="rounded-xl font-medium px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-800 data-[state=active]:shadow-xs"
+              className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-800 truncate"
             >
-              Browse Machinery
+              Browse
             </TabsTrigger>
             <TabsTrigger
               value="messages"
-              className="rounded-xl font-medium px-5 py-2 flex items-center gap-1.5 data-[state=active]:bg-white data-[state=active]:text-emerald-800 data-[state=active]:shadow-xs"
+              className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm flex items-center justify-center gap-1 data-[state=active]:bg-white data-[state=active]:text-emerald-800 truncate"
             >
-              <MessageCircle className="h-4 w-4" />
-              <span>Messages</span>
-              <span className="bg-emerald-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+              <MessageCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 hidden sm:inline" />
+              <span>Chats</span>
+              <span className="bg-emerald-600 text-white text-[10px] font-bold px-1 rounded-full">
                 {Object.keys(chatMessages).length}
               </span>
             </TabsTrigger>
             <TabsTrigger
               value="calculator"
-              className="rounded-xl font-medium px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-800 data-[state=active]:shadow-xs"
+              className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-800 truncate"
             >
-              Cost Estimator
+              Estimator
             </TabsTrigger>
             <TabsTrigger
               value="my-rentals"
-              className="rounded-xl font-medium px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-emerald-800 data-[state=active]:shadow-xs"
+              className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-800 truncate"
             >
-              My Bookings ({bookings.length})
+              Bookings ({bookings.length})
             </TabsTrigger>
           </TabsList>
         </div>
 
         {/* TAB 1: BROWSE MACHINERY */}
-        <TabsContent value="browse" className="space-y-6">
+        <TabsContent value="browse" className="space-y-4 sm:space-y-6">
           {/* Integrated Search & Category Control */}
           <div className="bg-white p-4 md:p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
             {/* Category Pills */}

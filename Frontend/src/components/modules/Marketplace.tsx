@@ -331,56 +331,56 @@ const Marketplace = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-1 sm:px-2">
+    <div className="p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 🌾 Clean & Pleasant Hero Banner Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-emerald-500/15 border border-emerald-500/20 p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 border-0 text-xs px-2.5 py-0.5 font-semibold shadow-sm">
-                <Store className="h-3.5 w-3.5 mr-1" />
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-emerald-500/15 border border-emerald-500/20 p-3.5 sm:p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5">
+              <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 border-0 text-[10px] sm:text-xs px-2 py-0.5 font-semibold shadow-xs">
+                <Store className="h-3 w-3 mr-1" />
                 Direct Farm Trade
               </Badge>
-              <Badge variant="outline" className="text-xs text-muted-foreground border-emerald-500/30 bg-background/50">
-                0% Commission • Verified Produce
+              <Badge variant="outline" className="text-[10px] sm:text-xs text-muted-foreground border-emerald-500/30 bg-background/50">
+                0% Fee • Verified
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            <h1 className="text-base sm:text-2xl font-bold tracking-tight text-foreground leading-tight">
               Agricultural Marketplace
             </h1>
-            <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-muted-foreground max-w-2xl leading-normal line-clamp-1 sm:line-clamp-none">
               Connect directly with farmers, negotiate wholesale crop rates via in-app chat, and inspect live field media proof.
             </p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
             <Button
               variant="outline"
               size="sm"
               onClick={() => { fetchProducts(); fetchInbox(); }}
               disabled={isLoadingProducts}
-              className="h-10 px-3.5 gap-2 text-xs font-semibold bg-background hover:bg-muted/80 shadow-sm border-border/80"
+              className="h-8 sm:h-9 px-3 gap-1.5 text-xs font-medium bg-background hover:bg-muted/80 shadow-xs border-border/80"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoadingProducts ? "animate-spin text-emerald-600" : ""}`} />
+              <RefreshCw className={`h-3.5 w-3.5 ${isLoadingProducts ? "animate-spin text-emerald-600" : ""}`} />
               Refresh
             </Button>
 
             <Button
               size="sm"
               onClick={() => setActiveTab("sell")}
-              className="h-10 px-4 gap-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all"
+              className="h-8 sm:h-9 px-3.5 gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all"
             >
-              <PlusCircle className="h-4 w-4" />
-              Sell Your Crop
+              <PlusCircle className="h-3.5 w-3.5" />
+              Sell Crop
             </Button>
           </div>
         </div>
       </div>
 
       {/* Tabs Navigation Bar */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="p-1.5 bg-muted/40 border rounded-2xl shadow-sm">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+        <div className="p-1 bg-muted/40 border rounded-xl shadow-xs">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-transparent gap-1 p-0 h-auto">
             <TabsTrigger
               value="buy"

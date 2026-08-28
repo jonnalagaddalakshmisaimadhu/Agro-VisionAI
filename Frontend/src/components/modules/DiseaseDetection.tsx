@@ -324,60 +324,60 @@ const DiseaseDetection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50 p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white p-4 md:p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-        <div className="flex items-center space-x-3">
-          <div className="p-3 bg-emerald-600 rounded-xl text-white shadow-md shadow-emerald-500/20">
-            <Leaf className="h-7 w-7" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-5 rounded-xl border border-slate-200 shadow-xs">
+        <div className="flex items-center space-x-2.5 sm:space-x-3">
+          <div className="p-2 sm:p-2.5 bg-emerald-600 rounded-lg text-white shadow-sm shrink-0">
+            <Leaf className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">AI Crop Disease Detection</h1>
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight">AI Crop Disease Detection</h1>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] sm:text-xs py-0 h-5">
                 <Brain className="h-3 w-3 mr-1" />
-                PyTorch CNN + Groq AI
+                PyTorch + AI
               </Badge>
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Upload or scan plant images for instant AI-powered disease identification & remedies
+            <p className="text-[11px] sm:text-xs text-slate-500 line-clamp-1 sm:line-clamp-none">
+              Upload or scan plant images for instant disease identification & remedies
             </p>
           </div>
         </div>
       </div>
 
-      {/* Main Tabs - Centered Position */}
+      {/* Main Tabs - 4 equal columns on mobile, clean pills */}
       <Tabs defaultValue="analyze" className="w-full">
-        <div className="flex justify-start sm:justify-center w-full mb-4 sm:mb-6 overflow-x-auto pb-1 no-scrollbar">
-          <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs inline-flex shrink-0">
-            <TabsTrigger value="analyze" className="rounded-lg font-medium px-3 sm:px-5 text-xs sm:text-sm">Analyze</TabsTrigger>
-            <TabsTrigger value="history" className="rounded-lg font-medium px-3 sm:px-5 text-xs sm:text-sm">Recent Scans ({scanHistory.length})</TabsTrigger>
-            <TabsTrigger value="agronomists" className="rounded-lg font-medium px-3 sm:px-5 text-xs sm:text-sm">Agronomists</TabsTrigger>
-            <TabsTrigger value="low-accuracy" className="rounded-lg font-medium px-3 sm:px-5 text-xs sm:text-sm">Low Accuracy</TabsTrigger>
+        <div className="flex justify-center w-full mb-3 sm:mb-5">
+          <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs grid grid-cols-4 w-full sm:w-auto sm:inline-flex max-w-2xl h-auto gap-0.5 sm:gap-1">
+            <TabsTrigger value="analyze" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-700 truncate">Analyze</TabsTrigger>
+            <TabsTrigger value="history" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-700 truncate">History ({scanHistory.length})</TabsTrigger>
+            <TabsTrigger value="agronomists" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-700 truncate">Doctors</TabsTrigger>
+            <TabsTrigger value="low-accuracy" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-700 truncate">Review</TabsTrigger>
           </TabsList>
         </div>
 
         {/* SCAN & DIAGNOSE TAB */}
-        <TabsContent value="analyze" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <TabsContent value="analyze" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
             
             {/* SCANNER CONTROLS CARD */}
-            <Card className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-              <CardHeader className="border-b border-slate-100 pb-4">
+            <Card className="lg:col-span-6 bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+              <CardHeader className="border-b border-slate-100 p-3.5 sm:p-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2 text-slate-900">
-                    <Camera className="h-5 w-5 text-emerald-600" />
+                  <CardTitle className="text-sm sm:text-base font-semibold flex items-center gap-2 text-slate-900">
+                    <Camera className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
                     <span>Upload Plant Image</span>
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     {isLiveCameraActive && (
-                      <Badge className="bg-red-500 text-white animate-pulse text-xs">LIVE CAMERA</Badge>
+                      <Badge className="bg-red-500 text-white animate-pulse text-[10px] sm:text-xs">LIVE CAMERA</Badge>
                     )}
                   </div>
                 </div>
               </CardHeader>
 
-              <CardContent className="p-6 space-y-4">
+              <CardContent className="p-3.5 sm:p-5 space-y-3 sm:space-y-4">
                 {/* LIVE CAMERA VIEW */}
                 {isLiveCameraActive ? (
                   <div className="relative rounded-2xl overflow-hidden bg-slate-950 aspect-4/3 flex items-center justify-center border-2 border-emerald-500 shadow-inner">
@@ -451,33 +451,33 @@ const DiseaseDetection = () => {
                       e.stopPropagation();
                     }}
                     onDrop={handleDrop}
-                    className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-2xl p-8 bg-slate-50/70 hover:bg-slate-100/60 transition-colors text-center"
+                    className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-4 sm:p-6 bg-slate-50/70 hover:bg-slate-100/60 transition-colors text-center"
                   >
                     {!selectedImage ? (
                       <>
-                        <div className="h-16 w-16 rounded-2xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center mb-3 shadow-inner">
-                          <Upload className="h-8 w-8" />
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center mb-2 shadow-xs">
+                          <Upload className="h-6 w-6 sm:h-7 sm:w-7" />
                         </div>
-                        <p className="text-base font-semibold text-slate-800">Upload Plant Image</p>
-                        <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
-                          Click here or drag and drop an image of the affected plant (JPG, PNG, max 5MB)
+                        <p className="text-sm sm:text-base font-semibold text-slate-800">Upload Plant Leaf Image</p>
+                        <p className="text-[11px] sm:text-xs text-slate-500 max-w-sm mt-0.5 mb-3">
+                          Select photo or capture live leaf image (JPG, PNG, max 5MB)
                         </p>
 
-                        <div className="flex flex-wrap items-center justify-center gap-3 w-full">
+                        <div className="flex flex-row items-center justify-center gap-2 w-full max-w-xs">
                           <Button
                             onClick={() => fileInputRef.current?.click()}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-5 rounded-xl font-medium shadow-xs"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white flex-1 h-9 sm:h-10 text-xs sm:text-sm rounded-lg font-medium shadow-xs"
                           >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Choose Image
+                            <Upload className="h-3.5 w-3.5 mr-1.5" />
+                            Upload Photo
                           </Button>
                           <Button
                             onClick={startLiveCamera}
                             variant="secondary"
-                            className="border-slate-300 hover:bg-slate-200 text-slate-800 px-5 py-5 rounded-xl font-medium shadow-xs"
+                            className="border-slate-300 hover:bg-slate-200 text-slate-800 flex-1 h-9 sm:h-10 text-xs sm:text-sm rounded-lg font-medium shadow-xs"
                           >
-                            <Camera className="h-4 w-4 mr-2 text-emerald-600" />
-                            Use Camera
+                            <Camera className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                            Live Camera
                           </Button>
                         </div>
                       </>
