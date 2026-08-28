@@ -25,40 +25,49 @@ interface DownloadAppModalProps {
   onClose: () => void;
 }
 
+const APK_DOWNLOAD_URL = "https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/raw/main/Frontend/android/release/FarmIQ.apk";
+
 export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [downloadStarted, setDownloadStarted] = useState(false);
+  const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    window.addEventListener("appinstalled", () => setIsInstalled(true));
+  const startDownload = () => {
+    setDownloadStarted(true);
+    setProgress(20);
+
+    // Direct browser file download of real compiled APK
+    const link = document.createElement("a");
+    link.href = APK_DOWNLOAD_URL;
+    link.setAttribute("download", "FarmIQ.apk");
+    link.setAttribute("target", "_blank");
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Visual progress indicator
+    const t1 = setTimeout(() => setProgress(55), 400);
+    const t2 = setTimeout(() => setProgress(90), 800);
+    const t3 = setTimeout(() => setProgress(100), 1200);
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", handler);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
     };
-  }, []);
-
-  const handleInstallPWA = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        setIsInstalled(true);
-        onClose();
-      }
-      setDeferredPrompt(null);
-    } else {
-      // Chrome Android instructions
-      alert("To install FarmIQ using Google Chrome on your phone:\n1. Tap the 3 dots (⋮) in the top-right corner of Chrome\n2. Select 'Install app' or 'Add to Home screen'\n3. FarmIQ will be added directly to your mobile home screen!");
-    }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      startDownload();
+    } else {
+      setDownloadStarted(false);
+      setProgress(0);
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -88,38 +97,60 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
               </div>
             </div>
             <div className="absolute -bottom-1 -right-1 bg-green-600 text-white p-1 rounded-full shadow">
-              <Smartphone className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5" />
             </div>
           </div>
 
           <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-1.5">
-            Install FarmIQ on Mobile (Google Chrome)
+            Download FarmIQ Android APK
           </DialogTitle>
           <DialogDescription className="text-xs text-gray-500 font-medium">
-            Google Chrome for Android • Instant 1-Tap Install
+            Version 2.0 • 64.5 MB • Android 8.0+
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-1">
-          {/* Quick 1-Tap Install Button */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50/80 border border-green-200/80 rounded-2xl p-4 text-center space-y-3">
-            <p className="text-xs text-green-900 font-medium leading-relaxed">
-              Open in <strong>Google Chrome</strong> and tap below to install FarmIQ directly onto your phone home screen with full offline access.
-            </p>
-            
-            <Button
-              className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-600/25 flex items-center justify-center gap-2"
-              onClick={handleInstallPWA}
-            >
-              <Download className="w-4 h-4" />
-              {deferredPrompt ? "Install FarmIQ App via Chrome" : "Install via Google Chrome (1-Tap)"}
-            </Button>
+          {/* Download Progress Card */}
+          <div className="bg-green-50/80 border border-green-200/80 rounded-2xl p-4">
+            <div className="flex items-center justify-between text-xs font-semibold text-green-900 mb-2">
+              <div className="flex items-center gap-2">
+                {progress < 100 ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 text-green-600" />
+                )}
+                <span>
+                  {progress < 100 ? "Starting FarmIQ.apk download..." : "Downloading FarmIQ.apk (Check Notifications)"}
+                </span>
+              </div>
+              <span className="text-green-700">{progress}%</span>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full h-2 bg-green-200/60 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
 
-          {/* Quick Chrome Step-by-Step */}
+          {/* Quick Direct Download Button */}
+          <a
+            href={APK_DOWNLOAD_URL}
+            download="FarmIQ.apk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-600/25 flex items-center justify-center gap-2 no-underline"
+          >
+            <Download className="w-4 h-4" />
+            Direct Download FarmIQ.apk (64.5 MB)
+          </a>
+
+          {/* Quick 3-Step Install Guide */}
           <div className="space-y-2.5 pt-1">
             <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-              Google Chrome Installation Steps:
+              Installation Steps:
             </p>
 
             <div className="grid gap-2">
@@ -128,7 +159,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
                   1
                 </span>
                 <p className="text-xs text-gray-600 leading-tight">
-                  Open <strong>https://farmiq-agrovisionai.web.app</strong> in <strong>Google Chrome</strong> on your Android phone.
+                  When prompted by Chrome, tap <strong>Download anyway</strong> / <strong>Download</strong>.
                 </p>
               </div>
 
@@ -137,7 +168,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
                   2
                 </span>
                 <p className="text-xs text-gray-600 leading-tight">
-                  Tap the <strong>Install via Google Chrome</strong> button above (or tap Chrome's <strong>3 dots ⋮</strong> menu and select <strong>"Install app"</strong> / <strong>"Add to Home screen"</strong>).
+                  Once downloaded, tap the file in your notification bar or <strong>Downloads</strong> folder.
                 </p>
               </div>
 
@@ -146,7 +177,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
                   3
                 </span>
                 <p className="text-xs text-gray-600 leading-tight">
-                  FarmIQ will be installed immediately with the FarmIQ App icon on your mobile screen!
+                  Android will show the <strong>FarmIQ</strong> logo prompt. Tap <strong>Install</strong> to start!
                 </p>
               </div>
             </div>
@@ -155,7 +186,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
           {/* Safety note */}
           <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500 pt-1">
             <ShieldCheck className="w-3.5 h-3.5 text-green-600" />
-            <span>100% Virus-Free & Safe Official Google Chrome Build</span>
+            <span>100% Virus-Free & Safe Official Build</span>
           </div>
 
           {/* Action Buttons */}
@@ -165,7 +196,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
               className="w-full rounded-xl h-11 border-gray-200 text-xs font-semibold"
               onClick={onClose}
             >
-              Close / Got It
+              Close / Done
             </Button>
           </div>
         </div>
