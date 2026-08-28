@@ -1056,6 +1056,11 @@ const EquipmentRental = () => {
     });
   };
 
+  const currentActiveThreadEquipment = 
+    equipmentList.find((e) => e.id === activeChatTabEquipmentId) || 
+    equipmentList[0] || 
+    DEFAULT_EQUIPMENT[0];
+
   return (
     <div className="min-h-screen bg-slate-50/60 p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* 1. CLEAN REFINED HEADER */}
@@ -1632,7 +1637,7 @@ const EquipmentRental = () => {
 
                       <p className="text-xs text-slate-500">
                         Rental Window: {booking.start_date} to {booking.end_date} · Total:{" "}
-                        <strong className="text-slate-900">₹{booking.total_amount.toLocaleString()}</strong>
+                        <strong className="text-slate-900">₹{Number(booking.total_amount || 0).toLocaleString()}</strong>
                       </p>
                     </div>
 
@@ -2306,7 +2311,7 @@ const EquipmentRental = () => {
                       <td className="p-2.5 font-semibold">{activeAgreementBooking.equipment_name}</td>
                       <td className="p-2.5 capitalize">{activeAgreementBooking.units_booked} {activeAgreementBooking.billing_mode}s</td>
                       <td className="p-2.5">{activeAgreementBooking.with_operator ? "Driver Included" : "Self-Driven"}</td>
-                      <td className="p-2.5 font-bold text-right">₹{activeAgreementBooking.total_amount.toLocaleString()}</td>
+                      <td className="p-2.5 font-bold text-right">₹{Number(activeAgreementBooking.total_amount || 0).toLocaleString()}</td>
                     </tr>
                   </tbody>
                 </table>
