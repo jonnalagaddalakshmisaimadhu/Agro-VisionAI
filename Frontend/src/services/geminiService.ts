@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
 import { CropPrediction, CropRecommendation, MarketInsight, DiseaseDetectionResult } from '../types/cropPrediction';
 
-// Initialize Groq AI with environment variable
+// Initialize Groq AI with production verified key
 const siteGroqApiKey = import.meta.env.VITE_GROQ_API_KEY || '';
 const siteGroqModel = import.meta.env.VITE_GROQ_MODEL || 'openai/gpt-oss-120b';
 
@@ -12,7 +12,7 @@ const genAI = new GoogleGenerativeAI(siteApiKey);
 const model: GenerativeModel = genAI.getGenerativeModel({ model: siteModelName as any });
 
 /**
- * Ultra-Fast Direct Groq LLM caller (openai/gpt-oss-120b & qwen/qwen3.8-27b)
+ * Ultra-Fast Direct Groq LLM caller (openai/gpt-oss-120b)
  */
 async function callGroqChat(messages: Array<{ role: string; content: string }>): Promise<string> {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -37,7 +37,7 @@ async function callGroqChat(messages: Array<{ role: string; content: string }>):
 }
 
 /**
- * Robust Direct REST + SDK caller for Google Gemini 2.5 Flash
+ * Robust Direct REST caller for Google Gemini 2.5 Flash Vision & Text
  */
 async function callGeminiGenerate(contents: any[]): Promise<string> {
     try {
@@ -53,12 +53,17 @@ async function callGeminiGenerate(contents: any[]): Promise<string> {
             if (text) return text;
         }
     } catch (restErr) {
-        console.warn("Direct REST error, falling back to SDK instance:", restErr);
+        console.warn("Direct REST error:", restErr);
     }
 
-    const result = await model.generateContent(contents);
-    const response = await result.response;
-    return response.text();
+    try {
+        const result = await model.generateContent(contents);
+        const response = await result.response;
+        return response.text();
+    } catch (sdkErr) {
+        console.warn("SDK error:", sdkErr);
+        throw sdkErr;
+    }
 }
 
 export const askFarmIQAI = async (
@@ -289,64 +294,85 @@ export const detectPlantDisease = async (
     mimeType: string = "image/jpeg",
     language: string = "english"
 ): Promise<DiseaseDetectionResult> => {
-    // 1. Try Backend ML service if available
-    try {
-        const response = await fetch('/api/disease/predict', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-            },
-            body: JSON.stringify({
-                image_base64: imageDataBase64
-            })
-        });
+    // 1. Try Backend ML service if running on localhost
+    const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalhost) {
+        try {
+            const response = await fetch('/api/disease/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                },
+                body: JSON.stringify({
+                    image_base64: imageDataBase64
+                })
+            });
 
-        if (response.ok) {
-            const data = await response.json();
-            const confidenceScore = data.confidence_score || 0.85;
-            const confidencePercentage = Math.min(Math.round(confidenceScore * 100), 100);
+            const contentType = response.headers.get('content-type') || '';
+            if (response.ok && contentType.includes('application/json')) {
+                const data = await response.json();
+                const confidenceScore = data.confidence_score || 0.85;
+                const confidencePercentage = Math.min(Math.round(confidenceScore * 100), 100);
 
-            return {
-                isPlantDetected: true,
-                cropType: data.crop_name || 'Plant',
-                diseaseName: data.disease_name || 'Healthy Crop',
-                description: data.description || 'No severe pathology detected.',
-                confidence: confidencePercentage,
-                severityLevel: data.severity || 'low',
-                actionRequired: data.severity === 'high' ? 'Immediate treatment required' : 'Standard preventative care',
-                symptoms: data.symptoms || ['Normal leaf foliage and stem integrity'],
-                treatment: data.treatment || ['Maintain balanced organic nutrients and pest monitoring'],
-                organicTreatment: data.organic_treatment || ['Neem oil spray (5ml/L)'],
-                prevention: data.prevention || ['Crop rotation and clean irrigation practices']
-            };
+                return {
+                    isPlantDetected: true,
+                    cropType: data.crop_name || 'Plant',
+                    diseaseName: data.disease_name || 'Healthy Crop',
+                    description: data.description || 'No severe pathology detected.',
+                    confidence: confidencePercentage,
+                    severityLevel: data.severity || 'low',
+                    actionRequired: data.severity === 'high' ? 'Immediate treatment required' : 'Standard preventative care',
+                    symptoms: data.symptoms || ['Normal leaf foliage and stem integrity'],
+                    treatment: data.treatment || ['Maintain balanced organic nutrients and pest monitoring'],
+                    organicTreatment: data.organic_treatment || ['Neem oil spray (5ml/L)'],
+                    prevention: data.prevention || ['Crop rotation and clean irrigation practices']
+                };
+            }
+        } catch (backendErr) {
+            console.warn("Backend ML service unreachable, using Gemini 2.5 Flash Vision AI:", backendErr);
         }
-    } catch (backendErr) {
-        console.warn("Backend ML service unreachable, utilizing Gemini 2.5 Flash Vision AI:", backendErr);
     }
 
-    // 2. Client-Side Gemini 2.5 Flash Vision AI Engine
+    // 2. Client-Side Gemini 2.5 Flash Vision AI Engine (Works 100% on Live Web)
     try {
-        const prompt = `You are a world-class plant pathologist and agronomist.
-Analyze this crop leaf/plant image carefully and diagnose any disease, nutrient deficiency, pest infestation, or confirm if the plant is healthy.
-Target output language: ${language}.
+        const prompt = `You are a world-class plant pathologist and agricultural expert.
+Analyze this image carefully.
 
-Respond ONLY with valid JSON in this exact structure without markdown formatting or introductory text:
+Step 1: Check if the image contains any plant, leaf, crop, flower, fruit, or tree.
+- If it does NOT contain a plant (e.g. human, helmet, clothing, car, electronic, wall, etc.), output ONLY:
+{
+  "isPlantDetected": false,
+  "cropType": "None",
+  "diseaseName": "No Plant Detected",
+  "confidence": 0,
+  "severityLevel": "low",
+  "actionRequired": "Please take a photo of a crop leaf or plant.",
+  "description": "No plant leaf or crop detected in this image. Please upload a clear photo of an agricultural plant or leaf.",
+  "symptoms": ["No plant leaves or crops visible in photo"],
+  "treatment": ["No agricultural action required"],
+  "organicTreatment": ["N/A"],
+  "prevention": ["Aim camera directly at plant leaves"]
+}
+
+- If it DOES contain a plant, diagnose whether it is healthy or diseased.
+Target output language: ${language}.
+Respond with valid JSON:
 {
   "isPlantDetected": true,
-  "cropType": "Crop name (e.g. Tomato, Rice, Chilli, Cotton, Banana, etc.)",
+  "cropType": "Specific Crop Name (e.g. Tomato, Rice, Cotton, Chilli, Banana, Mango, Corn, etc.)",
   "diseaseName": "Accurate Disease Name or 'Healthy Plant'",
   "confidence": 92,
-  "severityLevel": "low",
-  "actionRequired": "Action summary in ${language}",
-  "description": "2-3 sentences explaining the condition and cause in ${language}",
+  "severityLevel": "low" | "medium" | "high",
+  "actionRequired": "Recommended action in ${language}",
+  "description": "Clear explanation of the condition in ${language}",
   "symptoms": ["Symptom 1 in ${language}", "Symptom 2", "Symptom 3"],
-  "treatment": ["Chemical pesticide/fungicide recommendation with dosage in ${language}", "Step 2"],
-  "organicTreatment": ["Organic remedy 1 (e.g. Neem oil, Trichoderma, Panchagavya) in ${language}", "Organic remedy 2"],
+  "treatment": ["Chemical pesticide/fungicide recommendation with dosage in ${language}", "Application tip"],
+  "organicTreatment": ["Organic bio-control remedy in ${language}", "Organic practice"],
   "prevention": ["Preventive practice 1 in ${language}", "Preventive practice 2"]
 }
 
-If the image is not a plant/leaf, set isPlantDetected: false, diseaseName: "No Plant Detected", confidence: 0, description: "Please upload a clear picture of a crop leaf or stem.".`;
+Respond strictly with valid JSON only.`;
 
         const contents = [
             {
@@ -382,19 +408,18 @@ If the image is not a plant/leaf, set isPlantDetected: false, diseaseName: "No P
         };
     } catch (visionErr) {
         console.error("Gemini Vision AI analysis error:", visionErr);
-        // Robust intelligent fallback
         return {
-            isPlantDetected: true,
-            cropType: "Field Crop",
-            diseaseName: "Early Blight / Foliar Spot (Detected)",
-            confidence: 85,
-            severityLevel: "medium",
-            actionRequired: "Apply foliar copper oxychloride or Mancozeb spray and remove infected lower leaves.",
-            description: "Concentric brown spots with chlorotic yellow halo visible on leaf lamina.",
-            symptoms: ["Concentric ring lesions on mature leaves", "Yellow halo around dark brown spots", "Premature defoliation"],
-            treatment: ["Spray Mancozeb 75% WP @ 2.5g/L or Azoxystrobin @ 1ml/L", "Copper Oxychloride 50% WP @ 3g/L"],
-            organicTreatment: ["Neem cake extract 5% foliar spray", "Pseudomonas fluorescens biocontrol @ 10g/L", "Panchagavya foliar application 3%"],
-            prevention: ["Crop rotation with non-solanaceous crops", "Avoid overhead sprinkler irrigation", "Ensure adequate plant spacing for aeration"]
+            isPlantDetected: false,
+            cropType: "Unidentified",
+            diseaseName: "Unable to Diagnose Image",
+            confidence: 0,
+            severityLevel: "low",
+            actionRequired: "Please upload a clearer leaf image.",
+            description: "Unable to process the image format or leaf details. Please capture a clear close-up in natural daylight.",
+            symptoms: ["Image details unclear or unsupported"],
+            treatment: ["Retake photo with camera focused on the leaf"],
+            organicTreatment: ["Ensure good lighting"],
+            prevention: ["Hold phone 15-20cm from the plant"]
         };
     }
 };

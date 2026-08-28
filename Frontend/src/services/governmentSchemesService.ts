@@ -347,13 +347,17 @@ class GovernmentSchemesService {
     };
 
     try {
-      const response = await fetch(url, config);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+      if (!isLocalhost) {
+        return this.handleFallbackEndpoint<T>(endpoint);
       }
 
-      return await response.json();
+      const response = await fetch(url, config);
+      const contentType = response.headers.get('content-type') || '';
+      if (response.ok && contentType.includes('application/json')) {
+        return await response.json();
+      }
+      return this.handleFallbackEndpoint<T>(endpoint);
     } catch (error) {
       // Graceful client fallback for live static web hosting
       return this.handleFallbackEndpoint<T>(endpoint);
