@@ -156,45 +156,48 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
   }
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
       {/* Welcome Section */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          {`Welcome back, ${user?.username || "Farmer"}! 🌱`}
-        </h1>
-        <p className="text-muted-foreground">
-          Here's what's happening on your farm today
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-0.5">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground flex items-center gap-1.5">
+            <span>{`Welcome, ${user?.username || "Farmer"}!`}</span>
+            <span className="text-xl sm:text-2xl">🌱</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            Real-time farm insights & agricultural decision support
+          </p>
+        </div>
       </div>
 
-      {/* Quick Insights Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Quick Insights 2x2 Grid on Mobile, 4x1 on Desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Weather Card */}
         <Card
-          className="border-0 shadow-card-shadow hover:shadow-hover-lift transition-all duration-300 cursor-pointer"
+          className="border border-border/70 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden rounded-xl bg-card"
           onClick={() => setActiveModule("market-supply-tracker")}
         >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-primary-glow">
-                <CloudRain className="h-6 w-6 text-primary-foreground" />
+          <CardContent className="p-3 sm:p-4 md:p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <CloudRain className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <Badge variant="outline" className="text-xs">Live</Badge>
+              <Badge variant="outline" className="text-[10px] sm:text-xs px-1.5 py-0 h-4 sm:h-5 font-normal">Live</Badge>
             </div>
             {weatherLoading ? (
-              <div className="flex items-center justify-center h-24">
-                <Loader2 className="h-6 w-6 animate-spin" />
+              <div className="flex items-center justify-center h-14 sm:h-16">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
               </div>
             ) : weatherError || !weatherData ? (
-              <p className="text-sm text-destructive">{weatherError || "Could not load weather."}</p>
+              <p className="text-xs text-destructive">{weatherError || "Unavailable"}</p>
             ) : (
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Weather & Alerts</p>
-                <p className="text-2xl font-bold">{Math.round(weatherData.main.temp)}°C</p>
-                <p className="text-sm text-muted-foreground">{weatherData.weather[0].description.replace(/\b\w/g, (l: string) => l.toUpperCase())}</p>
-                <p className="text-xs text-success flex items-center">
-                  <Droplets className="h-3 w-3 mr-1" />
-                  Humidity: {weatherData.main.humidity}%
+              <div className="space-y-0.5">
+                <p className="text-[11px] sm:text-xs font-medium text-muted-foreground truncate">Weather & Alerts</p>
+                <p className="text-base sm:text-2xl font-bold tracking-tight text-foreground">{Math.round(weatherData.main.temp)}°C</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground truncate">{weatherData.weather[0].description.replace(/\b\w/g, (l: string) => l.toUpperCase())}</p>
+                <p className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center font-medium pt-0.5">
+                  <Droplets className="h-3 w-3 mr-1 shrink-0" />
+                  {weatherData.main.humidity}% Humidity
                 </p>
               </div>
             )}
@@ -203,23 +206,23 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
 
         {/* Profit Prediction Card */}
         <Card
-          className="border-0 shadow-card-shadow hover:shadow-hover-lift transition-all duration-300 cursor-pointer"
+          className="border border-border/70 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden rounded-xl bg-card"
           onClick={() => setActiveModule("crop-profit-predictor")}
         >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-success to-accent">
-                <TrendingUp className="h-6 w-6 text-success-foreground" />
+          <CardContent className="p-3 sm:p-4 md:p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <Badge variant="outline" className="text-xs">AI</Badge>
+              <Badge variant="outline" className="text-[10px] sm:text-xs px-1.5 py-0 h-4 sm:h-5 font-normal">AI</Badge>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Crop Profit Prediction</p>
-              <p className="text-2xl font-bold text-success">+₹45,000</p>
-              <p className="text-sm text-muted-foreground">This Season</p>
-              <p className="text-xs text-success flex items-center">
-                <ArrowUp className="h-3 w-3 mr-1" />
-                +12% vs last season
+            <div className="space-y-0.5">
+              <p className="text-[11px] sm:text-xs font-medium text-muted-foreground truncate">Profit Predict</p>
+              <p className="text-base sm:text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">+₹45,000</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground truncate">Wheat / Season</p>
+              <p className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center font-medium pt-0.5">
+                <ArrowUp className="h-3 w-3 mr-0.5 shrink-0" />
+                +12% Yield
               </p>
             </div>
           </CardContent>
@@ -227,23 +230,23 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
 
         {/* Market Price Card */}
         <Card
-          className="border-0 shadow-card-shadow hover:shadow-hover-lift transition-all duration-300 cursor-pointer"
+          className="border border-border/70 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden rounded-xl bg-card"
           onClick={() => setActiveModule("marketplace")}
         >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-warning to-accent">
-                <IndianRupee className="h-6 w-6 text-warning-foreground" />
+          <CardContent className="p-3 sm:p-4 md:p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <IndianRupee className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <Badge variant="outline" className="text-xs">Market</Badge>
+              <Badge variant="outline" className="text-[10px] sm:text-xs px-1.5 py-0 h-4 sm:h-5 font-normal">Mandi</Badge>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Market Price Trends</p>
-              <p className="text-2xl font-bold">₹2,500/Q</p>
-              <p className="text-sm text-muted-foreground">Wheat (Avg)</p>
-              <p className="text-xs text-success flex items-center">
-                <ArrowUp className="h-3 w-3 mr-1" />
-                +8% this week
+            <div className="space-y-0.5">
+              <p className="text-[11px] sm:text-xs font-medium text-muted-foreground truncate">Price Trends</p>
+              <p className="text-base sm:text-2xl font-bold tracking-tight text-foreground">₹2,500/Q</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground truncate">Wheat APMC</p>
+              <p className="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center font-medium pt-0.5">
+                <ArrowUp className="h-3 w-3 mr-0.5 shrink-0" />
+                +8% This Wk
               </p>
             </div>
           </CardContent>
@@ -251,51 +254,54 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
 
         {/* Active Subsidies Card */}
         <Card
-          className="border-0 shadow-card-shadow hover:shadow-hover-lift transition-all duration-300 cursor-pointer"
+          className="border border-border/70 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden rounded-xl bg-card"
           onClick={() => setActiveModule("government-schemes")}
         >
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-accent">
-                <FileText className="h-6 w-6 text-primary-foreground" />
+          <CardContent className="p-3 sm:p-4 md:p-5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <Badge className="text-xs bg-success">Active</Badge>
+              <Badge className="text-[10px] sm:text-xs px-1.5 py-0 h-4 sm:h-5 bg-purple-600 text-white font-normal">Active</Badge>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Active Subsidies</p>
-              <p className="text-2xl font-bold">3</p>
-              <p className="text-sm text-muted-foreground">Available Now</p>
-              <p className="text-xs text-primary">PM-KISAN + 2 more</p>
+            <div className="space-y-0.5">
+              <p className="text-[11px] sm:text-xs font-medium text-muted-foreground truncate">Govt Subsidies</p>
+              <p className="text-base sm:text-2xl font-bold tracking-tight text-foreground">14 Schemes</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground truncate">PM-KISAN, PMFBY</p>
+              <p className="text-[10px] sm:text-xs text-purple-600 dark:text-purple-400 flex items-center font-medium pt-0.5">
+                Apply Online
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts Section */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Market Price Trends */}
         <Card
-          className="border-0 shadow-card-shadow cursor-pointer hover:shadow-hover-lift transition-all duration-300"
+          className="border border-border/70 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer rounded-xl bg-card"
           onClick={() => setActiveModule("marketplace")}
         >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
+          <CardHeader className="p-3.5 sm:p-5 pb-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Market Price Trends
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-48 lg:h-64">
+          <CardContent className="p-3.5 sm:p-5 pt-0">
+            <div className="h-44 sm:h-56 md:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={priceData} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="month" className="text-muted-foreground" />
-                  <YAxis className="text-muted-foreground" />
+                <LineChart data={priceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/60" />
+                  <XAxis dataKey="month" className="text-muted-foreground text-xs" />
+                  <YAxis className="text-muted-foreground text-xs" />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      fontSize: '12px'
                     }}
                   />
                   <Line
@@ -327,27 +333,28 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
 
         {/* Profit vs Loss Predictions */}
         <Card
-          className="border-0 shadow-card-shadow cursor-pointer hover:shadow-hover-lift transition-all duration-300"
+          className="border border-border/70 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer rounded-xl bg-card"
           onClick={() => setActiveModule("crop-profit-predictor")}
         >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChartIcon className="h-5 w-5 text-primary" />
+          <CardHeader className="p-3.5 sm:p-5 pb-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <BarChartIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Profit vs Loss Predictions
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-48 lg:h-64">
+          <CardContent className="p-3.5 sm:p-5 pt-0">
+            <div className="h-44 sm:h-56 md:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={profitData} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="crop" className="text-muted-foreground" />
-                  <YAxis className="text-muted-foreground" />
+                <BarChart data={profitData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/60" />
+                  <XAxis dataKey="crop" className="text-muted-foreground text-xs" />
+                  <YAxis className="text-muted-foreground text-xs" />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      fontSize: '12px'
                     }}
                   />
                   <Bar
@@ -370,44 +377,44 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
       </div>
 
       {/* AI Recommendations and Notifications */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* AI Recommendations */}
-        <Card className="border-0 shadow-card-shadow bg-gradient-to-br from-primary/5 to-success/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary">
-              <Sprout className="h-5 w-5" />
+        <Card className="border border-border/70 shadow-sm bg-gradient-to-br from-primary/5 to-success/5 rounded-xl">
+          <CardHeader className="p-3.5 sm:p-5 pb-2">
+            <CardTitle className="flex items-center gap-2 text-primary text-base sm:text-lg">
+              <Sprout className="h-4 w-4 sm:h-5 sm:w-5" />
               Best Crops to Plant This Season
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+          <CardContent className="p-3.5 sm:p-5 pt-2 space-y-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <div
-                className="text-center p-3 bg-card/50 rounded-lg border border-primary/20 cursor-pointer hover:bg-primary/10 transition-all duration-200"
+                className="text-center p-2 sm:p-3 bg-card/70 rounded-lg border border-primary/20 cursor-pointer hover:bg-primary/10 transition-all duration-200"
                 onClick={() => setActiveModule("crop-profit-predictor")}
               >
-                <Wheat className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="font-medium text-sm">Wheat</p>
-                <p className="text-xs text-success">92% profit</p>
+                <Wheat className="h-6 w-6 sm:h-7 sm:w-7 text-primary mx-auto mb-1" />
+                <p className="font-medium text-xs sm:text-sm truncate">Wheat</p>
+                <p className="text-[10px] sm:text-xs text-success font-semibold">92% profit</p>
               </div>
               <div
-                className="text-center p-3 bg-card/50 rounded-lg border border-success/20 cursor-pointer hover:bg-success/10 transition-all duration-200"
+                className="text-center p-2 sm:p-3 bg-card/70 rounded-lg border border-success/20 cursor-pointer hover:bg-success/10 transition-all duration-200"
                 onClick={() => setActiveModule("crop-profit-predictor")}
               >
-                <Sprout className="h-8 w-8 text-success mx-auto mb-2" />
-                <p className="font-medium text-sm">Maize</p>
-                <p className="text-xs text-success">87% profit</p>
+                <Sprout className="h-6 w-6 sm:h-7 sm:w-7 text-success mx-auto mb-1" />
+                <p className="font-medium text-xs sm:text-sm truncate">Maize</p>
+                <p className="text-[10px] sm:text-xs text-success font-semibold">87% profit</p>
               </div>
               <div
-                className="text-center p-3 bg-card/50 rounded-lg border border-accent/20 cursor-pointer hover:bg-accent/10 transition-all duration-200"
+                className="text-center p-2 sm:p-3 bg-card/70 rounded-lg border border-accent/20 cursor-pointer hover:bg-accent/10 transition-all duration-200"
                 onClick={() => setActiveModule("crop-profit-predictor")}
               >
-                <Leaf className="h-8 w-8 text-accent mx-auto mb-2" />
-                <p className="font-medium text-sm">Mustard</p>
-                <p className="text-xs text-success">81% profit</p>
+                <Leaf className="h-6 w-6 sm:h-7 sm:w-7 text-accent mx-auto mb-1" />
+                <p className="font-medium text-xs sm:text-sm truncate">Mustard</p>
+                <p className="text-[10px] sm:text-xs text-success font-semibold">81% profit</p>
               </div>
             </div>
             <Button
-              className="w-full"
+              className="w-full text-xs sm:text-sm h-8 sm:h-9"
               variant="outline"
               onClick={() => setActiveModule("crop-profit-predictor")}
             >
@@ -417,47 +424,47 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
         </Card>
 
         {/* Notifications Panel */}
-        <Card className="border-0 shadow-card-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5 text-primary" />
+        <Card className="border border-border/70 shadow-sm rounded-xl">
+          <CardHeader className="p-3.5 sm:p-5 pb-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Notifications & Alerts
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="p-3.5 sm:p-5 pt-2 space-y-2.5">
             <Alert
-              className="border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800 cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-all duration-200"
+              className="p-2.5 sm:p-3 border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-800 cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-all duration-200"
               onClick={() => setActiveModule("market-supply-tracker")}
             >
-              <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-              <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-                <strong>Weather Alert:</strong> Heavy rain expected in next 48 hours. Secure your crops.
+              <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400 shrink-0" />
+              <AlertDescription className="text-yellow-800 dark:text-yellow-200 text-xs sm:text-sm">
+                <strong>Weather Alert:</strong> Heavy rain expected in next 48 hours. Secure crops.
               </AlertDescription>
             </Alert>
 
             <Alert
-              className="border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200"
+              className="p-2.5 sm:p-3 border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200"
               onClick={() => setActiveModule("government-schemes")}
             >
-              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-              <AlertDescription className="text-red-800 dark:text-red-200">
+              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
+              <AlertDescription className="text-red-800 dark:text-red-200 text-xs sm:text-sm">
                 <strong>Subsidy Expiring:</strong> PM Fasal Bima Yojana registration ends in 5 days.
               </AlertDescription>
             </Alert>
 
             <Alert
-              className="border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-800 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 transition-all duration-200"
+              className="p-2.5 sm:p-3 border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-800 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/30 transition-all duration-200"
               onClick={() => setActiveModule("marketplace")}
             >
-              <Bell className="h-4 w-4 text-green-600 dark:text-green-400" />
-              <AlertDescription className="text-green-800 dark:text-green-200">
+              <Bell className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
+              <AlertDescription className="text-green-800 dark:text-green-200 text-xs sm:text-sm">
                 <strong>Market Update:</strong> Wheat prices increased by 8% in local mandis.
               </AlertDescription>
             </Alert>
 
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full text-xs sm:text-sm h-8 sm:h-9"
               onClick={() => setActiveModule("market-supply-tracker")}
             >
               View All Notifications

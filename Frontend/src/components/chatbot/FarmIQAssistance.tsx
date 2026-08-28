@@ -175,7 +175,7 @@ export const FarmIQAssistance = () => {
             const errFallback = activeLang === 'te' 
                 ? "సర్వర్‌తో కనెక్ట్ అవ్వడంలో సమస్య ఉంది. దయచేసి కాసేపటి తర్వాత మళ్ళీ ప్రయత్నించండి."
                 : (activeLang === 'hi'
-                    ? "सर्वर से कनेक्ट करने में समस्या आ रही है। कृपया थोड़ी देर बाद पुनः प्रयास करें।"
+                    ? "सर्वर से कनेक्ट करने में समस्या आ रही है। कृपया थोड़ी देर बाद पुनः प्रयास करें。"
                     : "I'm having trouble connecting to the server. If the problem persists, please check your internet connection.");
             setMessages(prev => [...prev, { role: 'assistant', content: errFallback }]);
             setIsLoading(false);
@@ -189,57 +189,57 @@ export const FarmIQAssistance = () => {
         }
     };
 
+    const getFeatureDetails = (path: string) => {
+        switch(path) {
+            case 'disease-detection': return { label: 'Go to Disease Detection', icon: <Search className="w-4 h-4" />, bg: 'bg-red-100 text-red-700 hover:bg-red-200' };
+            case 'crop-recommendation': return { label: 'Go to Crop Recommendation', icon: <Leaf className="w-4 h-4" />, bg: 'bg-green-100 text-green-700 hover:bg-green-200' };
+            case 'marketplace': return { label: 'Go to Marketplace', icon: <ShoppingCart className="w-4 h-4" />, bg: 'bg-blue-100 text-blue-700 hover:bg-blue-200' };
+            case 'weather-alerts': return { label: 'Go to Weather Alerts', icon: <Cloud className="w-4 h-4" />, bg: 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200' };
+            case 'equipment-rental': return { label: 'Go to Equipment Rental', icon: <Tractor className="w-4 h-4" />, bg: 'bg-amber-100 text-amber-700 hover:bg-amber-200' };
+            case 'expert-consultation': return { label: 'Go to Expert Consultation', icon: <GraduationCap className="w-4 h-4" />, bg: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' };
+            case 'government-schemes': return { label: 'Go to Government Schemes', icon: <Building2 className="w-4 h-4" />, bg: 'bg-purple-100 text-purple-700 hover:bg-purple-200' };
+            default: return { label: 'Explore Feature', icon: <ArrowRight className="w-4 h-4" />, bg: 'bg-green-100 text-green-700 hover:bg-green-200' };
+        }
+    };
+
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end">
             {isOpen && (
-                <Card className="w-[350px] md:w-[400px] shadow-2xl mb-4 border-green-200 animate-in slide-in-from-bottom-5 duration-300">
-                    <CardHeader className="bg-gradient-to-r from-green-600 to-green-500 text-white rounded-t-xl p-4 flex flex-row items-center justify-between">
+                <Card className="w-[calc(100vw-2rem)] sm:w-[380px] md:w-[400px] max-w-[420px] shadow-2xl mb-3 sm:mb-4 border-green-200 animate-in slide-in-from-bottom-5 duration-300">
+                    <CardHeader className="bg-gradient-to-r from-green-600 to-green-500 text-white rounded-t-xl p-3 sm:p-4 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-white/20 rounded-full">
-                                <Sprout className="w-5 h-5 text-white" />
+                            <div className="p-1.5 sm:p-2 bg-white/20 rounded-full">
+                                <Sprout className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
                             <div>
-                                <CardTitle className="text-lg font-bold">Farm IQ Assistance</CardTitle>
-                                <p className="text-xs text-green-100 opacity-90">AI Agri-Expert Support</p>
+                                <CardTitle className="text-base sm:text-lg font-bold">Farm IQ Assistance</CardTitle>
+                                <p className="text-[10px] sm:text-xs text-green-100 opacity-90">AI Agri-Expert Support</p>
                             </div>
                         </div>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-white hover:bg-white/20 h-8 w-8 rounded-full"
+                            className="text-white hover:bg-white/20 h-7 w-7 sm:h-8 sm:w-8 rounded-full"
                             onClick={() => setIsOpen(false)}
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-4 h-4 sm:w-5 sm:h-5" />
                         </Button>
                     </CardHeader>
 
                     <CardContent className="p-0 bg-slate-50">
-                        <ScrollArea className="h-[400px] p-4">
-                            <div className="flex flex-col gap-4">
+                        <ScrollArea className="h-[340px] sm:h-[400px] p-3 sm:p-4">
+                            <div className="flex flex-col gap-3 sm:gap-4">
                                 {messages.map((msg, index) => {
                                     // Parse redirect tags
                                     const redirectMatch = msg.content.match(/\[REDIRECT:\s*([a-zA-Z0-9-]+)\]/);
                                     const redirectPath = redirectMatch ? redirectMatch[1] : null;
                                     const cleanContent = msg.content.replace(/\[REDIRECT:\s*[a-zA-Z0-9-]+\]/, '').trim();
                                     
-                                    const getFeatureDetails = (path: string) => {
-                                        switch(path) {
-                                            case 'disease-detection': return { label: 'Go to Disease Detection', icon: <Search className="w-4 h-4" />, bg: 'bg-red-100 text-red-700 hover:bg-red-200' };
-                                            case 'crop-recommendation': return { label: 'Go to Crop Recommendation', icon: <Leaf className="w-4 h-4" />, bg: 'bg-green-100 text-green-700 hover:bg-green-200' };
-                                            case 'marketplace': return { label: 'Go to Marketplace', icon: <ShoppingCart className="w-4 h-4" />, bg: 'bg-blue-100 text-blue-700 hover:bg-blue-200' };
-                                            case 'weather-alerts': return { label: 'Go to Weather Alerts', icon: <Cloud className="w-4 h-4" />, bg: 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200' };
-                                            case 'equipment-rental': return { label: 'Go to Equipment Rental', icon: <Tractor className="w-4 h-4" />, bg: 'bg-amber-100 text-amber-700 hover:bg-amber-200' };
-                                            case 'expert-consultation': return { label: 'Go to Expert Consultation', icon: <GraduationCap className="w-4 h-4" />, bg: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' };
-                                            case 'government-schemes': return { label: 'Go to Government Schemes', icon: <Building2 className="w-4 h-4" />, bg: 'bg-purple-100 text-purple-700 hover:bg-purple-200' };
-                                            default: return { label: 'Explore Feature', icon: <ArrowRight className="w-4 h-4" />, bg: 'bg-green-100 text-green-700 hover:bg-green-200' };
-                                        }
-                                    };
-
                                     return (
                                         <div key={index} className="flex flex-col gap-2">
                                             <div
                                                 className={cn(
-                                                    "flex flex-col max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm whitespace-pre-wrap break-words overflow-hidden",
+                                                    "flex flex-col max-w-[88%] rounded-2xl px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm shadow-sm whitespace-pre-wrap break-words overflow-hidden",
                                                     msg.role === 'user'
                                                         ? "ml-auto bg-green-600 text-white rounded-br-none"
                                                         : "mr-auto bg-white text-slate-800 border border-slate-200 rounded-bl-none"
@@ -249,22 +249,13 @@ export const FarmIQAssistance = () => {
                                                     <ReactMarkdown
                                                         remarkPlugins={[remarkGfm]}
                                                         components={{
-                                                            h3: ({ node, ...props }) => <h3 className="text-slate-950 font-bold text-lg mt-4 mb-2 block break-words border-l-4 border-green-500 pl-2" {...props} />,
-                                                            ul: ({ node, ...props }) => <ul className="list-disc pl-6 space-y-2 my-3 block" {...props} />,
-                                                            ol: ({ node, ...props }) => <ol className="list-decimal pl-6 space-y-2 my-3 block" {...props} />,
-                                                            li: ({ node, ...props }) => <li className="text-green-700 font-semibold break-words leading-relaxed" {...props} />,
-                                                            p: ({ node, ...props }) => <p className="mb-3 text-slate-800 block break-words leading-relaxed last:mb-0" {...props} />,
-                                                            strong: ({ node, ...props }) => <strong className="font-bold text-slate-950 underline decoration-green-500/30 underline-offset-2" {...props} />,
-                                                            table: ({ node, ...props }) => (
-                                                                <div className="my-4 w-full overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                                                                    <table className="min-w-full divide-y divide-slate-200" {...props} />
-                                                                </div>
-                                                            ),
-                                                            thead: ({ node, ...props }) => <thead className="bg-slate-50 text-slate-900" {...props} />,
-                                                            tbody: ({ node, ...props }) => <tbody className="bg-white divide-y divide-slate-100" {...props} />,
-                                                            tr: ({ node, ...props }) => <tr className="hover:bg-slate-50/50 transition-colors" {...props} />,
-                                                            th: ({ node, ...props }) => <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-green-800 bg-green-50/50" {...props} />,
-                                                            td: ({ node, ...props }) => <td className="px-4 py-3 text-sm text-slate-700 align-top border-r last:border-0 border-slate-50" {...props} />,
+                                                            p: ({ node, ...props }) => <p className="mb-1.5 last:mb-0" {...props} />,
+                                                            ul: ({ node, ...props }) => <ul className="list-disc pl-4 mb-1.5 space-y-0.5" {...props} />,
+                                                            ol: ({ node, ...props }) => <ol className="list-decimal pl-4 mb-1.5 space-y-0.5" {...props} />,
+                                                            li: ({ node, ...props }) => <li className="mb-0.5" {...props} />,
+                                                            strong: ({ node, ...props }) => <strong className="font-semibold text-green-800 dark:text-green-300" {...props} />,
+                                                            h3: ({ node, ...props }) => <h3 className="font-bold text-sm sm:text-base mt-2 mb-1" {...props} />,
+                                                            h4: ({ node, ...props }) => <h4 className="font-semibold text-xs sm:text-sm mt-1 mb-0.5" {...props} />,
                                                         }}
                                                     >
                                                         {cleanContent}
@@ -273,10 +264,10 @@ export const FarmIQAssistance = () => {
                                                     msg.content
                                                 )}
                                             </div>
-                                            
-                                            {/* Feature Redirect Button */}
+
+                                            {/* Smart Action Button if redirect is present */}
                                             {redirectPath && msg.role === 'assistant' && !isLoading && (
-                                                <div className="mr-auto ml-2 animate-in fade-in slide-in-from-left-2 duration-500">
+                                                <div className="mr-auto pl-1 animate-in fade-in slide-in-from-top-1 duration-200">
                                                     <Button 
                                                         variant="outline" 
                                                         size="sm"
@@ -285,7 +276,7 @@ export const FarmIQAssistance = () => {
                                                             window.location.href = `/dashboard/${redirectPath}`;
                                                         }}
                                                         className={cn(
-                                                            "rounded-full gap-2 font-semibold shadow-sm transition-all",
+                                                            "rounded-full gap-1.5 text-xs font-semibold shadow-sm transition-all h-7 px-3",
                                                             getFeatureDetails(redirectPath).bg
                                                         )}
                                                     >
@@ -298,8 +289,8 @@ export const FarmIQAssistance = () => {
                                     );
                                 })}
                                 {isLoading && (
-                                    <div className="mr-auto bg-white border border-slate-200 px-4 py-3 rounded-2xl rounded-bl-none flex items-center gap-2 text-sm text-slate-500 shadow-sm">
-                                        <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+                                    <div className="mr-auto bg-white border border-slate-200 px-3.5 py-2 rounded-2xl rounded-bl-none flex items-center gap-2 text-xs sm:text-sm text-slate-500 shadow-sm">
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin text-green-600" />
                                         Thinking...
                                     </div>
                                 )}
@@ -308,14 +299,14 @@ export const FarmIQAssistance = () => {
                         </ScrollArea>
                     </CardContent>
 
-                    <CardFooter className="p-3 bg-white border-t border-slate-100 rounded-b-xl">
-                        <div className="flex w-full items-center gap-2">
+                    <CardFooter className="p-2.5 sm:p-3 bg-white border-t border-slate-100 rounded-b-xl">
+                        <div className="flex w-full items-center gap-1.5 sm:gap-2">
                             <Input
                                 placeholder="Ask about crops, soil, pests..."
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                className="bg-slate-50 border-slate-200 focus-visible:ring-green-500"
+                                className="bg-slate-50 border-slate-200 focus-visible:ring-green-500 text-xs sm:text-sm h-9"
                                 disabled={isLoading}
                             />
                             <Button
@@ -323,7 +314,7 @@ export const FarmIQAssistance = () => {
                                 variant={isListening ? "destructive" : "outline"}
                                 onClick={toggleListening}
                                 className={cn(
-                                    "shrink-0 transition-colors",
+                                    "shrink-0 transition-colors h-9 w-9",
                                     isListening && "animate-pulse"
                                 )}
                                 disabled={isLoading}
@@ -335,7 +326,7 @@ export const FarmIQAssistance = () => {
                                 size="icon"
                                 onClick={handleSendMessage}
                                 disabled={isLoading || !inputValue.trim()}
-                                className="bg-green-600 hover:bg-green-700 text-white shrink-0 shadow-sm"
+                                className="bg-green-600 hover:bg-green-700 text-white shrink-0 shadow-sm h-9 w-9"
                             >
                                 <Send className="w-4 h-4" />
                             </Button>
@@ -347,14 +338,15 @@ export const FarmIQAssistance = () => {
             <Button
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
-                    "h-16 w-16 rounded-full shadow-xl transition-all duration-300 hover:scale-105 border-4 border-white",
+                    "h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg transition-all duration-300 hover:scale-105 border-2 border-white p-0 flex items-center justify-center",
                     isOpen ? "bg-red-500 hover:bg-red-600 rotate-90" : "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400"
                 )}
+                aria-label="Farm IQ Assistance Chatbot"
             >
                 {isOpen ? (
-                    <X className="w-8 h-8 text-white" />
+                    <X className="w-6 h-6 text-white" />
                 ) : (
-                    <MessageCircle className="w-8 h-8 text-white" />
+                    <MessageCircle className="w-6 h-6 text-white" />
                 )}
             </Button>
         </div>

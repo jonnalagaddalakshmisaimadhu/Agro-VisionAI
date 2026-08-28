@@ -348,12 +348,12 @@ const DiseaseDetection = () => {
 
       {/* Main Tabs - Centered Position */}
       <Tabs defaultValue="analyze" className="w-full">
-        <div className="flex justify-center w-full mb-6">
-          <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs inline-flex">
-            <TabsTrigger value="analyze" className="rounded-lg font-medium px-5">Analyze</TabsTrigger>
-            <TabsTrigger value="history" className="rounded-lg font-medium px-5">Recent Scans ({scanHistory.length})</TabsTrigger>
-            <TabsTrigger value="agronomists" className="rounded-lg font-medium px-5">Agronomists</TabsTrigger>
-            <TabsTrigger value="low-accuracy" className="rounded-lg font-medium px-5">Low Accuracy Cases</TabsTrigger>
+        <div className="flex justify-start sm:justify-center w-full mb-4 sm:mb-6 overflow-x-auto pb-1 no-scrollbar">
+          <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs inline-flex shrink-0">
+            <TabsTrigger value="analyze" className="rounded-lg font-medium px-3 sm:px-5 text-xs sm:text-sm">Analyze</TabsTrigger>
+            <TabsTrigger value="history" className="rounded-lg font-medium px-3 sm:px-5 text-xs sm:text-sm">Recent Scans ({scanHistory.length})</TabsTrigger>
+            <TabsTrigger value="agronomists" className="rounded-lg font-medium px-3 sm:px-5 text-xs sm:text-sm">Agronomists</TabsTrigger>
+            <TabsTrigger value="low-accuracy" className="rounded-lg font-medium px-3 sm:px-5 text-xs sm:text-sm">Low Accuracy</TabsTrigger>
           </TabsList>
         </div>
 

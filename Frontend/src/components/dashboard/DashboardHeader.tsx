@@ -115,28 +115,29 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
   const currentLanguageLabel = INDIAN_LANGUAGES.find(l => l.code === currentLang)?.name || 'English';
 
   return (
-    <header className="bg-card border-b border-border px-4 py-3 h-16 flex items-center justify-between sticky top-0 z-40">
+    <header className="bg-card border-b border-border px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-40 shadow-sm">
       <GoogleTranslate />
 
       {/* Left section */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={onToggleSidebar}
-          className="lg:hidden"
+          className="lg:hidden h-8 w-8 sm:h-9 sm:w-9"
+          aria-label="Toggle Navigation Menu"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
         {/* Logo and brand */}
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <Tractor className="h-8 w-8 text-primary" />
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-foreground">FarmIQ</h1>
-              <p className="text-xs text-muted-foreground">Smart Farming Dashboard</p>
-            </div>
+        <div className="flex items-center space-x-2">
+          <div className="p-1 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Tractor className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-tight">FarmIQ</span>
+            <span className="text-[10px] text-muted-foreground hidden sm:block leading-none">Smart Farming</span>
           </div>
         </div>
       </div>
@@ -144,20 +145,20 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
       {/* Center section - Date */}
       <div className="hidden md:flex items-center">
         <div className="text-center">
-          <p className="text-sm font-medium text-foreground">Today</p>
-          <p className="text-xs text-muted-foreground">{formattedDate}</p>
+          <p className="text-xs font-medium text-foreground">Today</p>
+          <p className="text-[11px] text-muted-foreground">{formattedDate}</p>
         </div>
       </div>
 
       {/* Right section */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-1 sm:space-x-2">
 
-        {/* Language Selector */}
+        {/* Language Selector (Desktop) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-2">
-              <Languages className="h-5 w-5" />
-              <span className="text-sm hidden lg:inline">{currentLanguageLabel}</span>
+            <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-1.5 h-8 px-2.5">
+              <Languages className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs font-medium">{currentLanguageLabel}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 max-h-[300px] overflow-y-auto">
@@ -167,10 +168,10 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
               <DropdownMenuItem
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
-                className="flex items-center justify-between cursor-pointer"
+                className="flex items-center justify-between cursor-pointer text-xs"
               >
                 <span>{lang.label} ({lang.name})</span>
-                {currentLang === lang.code && <Check className="h-4 w-4 text-green-600" />}
+                {currentLang === lang.code && <Check className="h-3.5 w-3.5 text-primary" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -179,8 +180,8 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
         {/* Mobile Language Button (Icon only) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="sm:hidden">
-              <Languages className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="sm:hidden h-8 w-8">
+              <Languages className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 max-h-[300px] overflow-y-auto">
@@ -190,20 +191,20 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
               <DropdownMenuItem
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
-                className="flex items-center justify-between cursor-pointer"
+                className="flex items-center justify-between cursor-pointer text-xs"
               >
                 <span>{lang.name}</span>
-                {currentLang === lang.code && <Check className="h-4 w-4" />}
+                {currentLang === lang.code && <Check className="h-3.5 w-3.5 text-primary" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
 
         {/* Notifications */}
-        <Button variant="ghost" size="sm" className="relative">
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-9 sm:w-9">
+          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
           {notifications > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center">
+            <span className="absolute 0.5 top-0.5 right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
               {notifications}
             </span>
           )}
@@ -212,34 +213,31 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
         {/* Profile dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center space-x-2 hover:bg-accent">
-              <Avatar className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-accent p-0">
+              <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                 <AvatarImage src="/farmer-avatar.jpg" alt="Farmer" />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  <User className="h-4 w-4" />
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+                  {user?.username ? user.username.slice(0, 2).toUpperCase() : <User className="h-3.5 w-3.5" />}
                 </AvatarFallback>
               </Avatar>
-              <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium">{user?.username || "Guest"}</p>
-                <p className="text-xs text-muted-foreground">Farmer</p>
-              </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-card" align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{user?.username || "Farmer User"}</p>
+                <p className="text-xs leading-none text-muted-foreground">{user?.email || "farmer@farmiq.ai"}</p>
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/profile")}>
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/settings")}>
+            <DropdownMenuItem onClick={() => navigate('/settings')}>
               <Settings className="mr-2 h-4 w-4" />
-              Settings
+              <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout}>
+            <DropdownMenuItem onClick={logout} className="text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
-              Log out
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
