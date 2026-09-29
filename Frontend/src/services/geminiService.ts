@@ -124,7 +124,8 @@ Formatting: Use bullet points, bold keywords, and concise structured steps.`;
 
     // 3. Try Backend API
     try {
-        const response = await fetch('/api/chat', {
+        const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+        const response = await fetch(`${API_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -165,7 +166,8 @@ export const getCropRecommendations = async (details: {
     desiredCrops?: string[];
 }): Promise<CropRecommendation[]> => {
     try {
-        const response = await fetch('/api/crops/recommend', {
+        const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+        const response = await fetch(`${API_URL}/api/crops/recommend`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -191,7 +193,7 @@ export const getCropRecommendations = async (details: {
         }
 
         // Secondary fallback to recommendations engine endpoint
-        const recResponse = await fetch('/api/recommendations', {
+        const recResponse = await fetch(`${API_URL}/api/recommendations`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -294,20 +296,19 @@ export const detectPlantDisease = async (
     mimeType: string = "image/jpeg",
     language: string = "english"
 ): Promise<DiseaseDetectionResult> => {
-    // 1. Try Backend ML service if running on localhost
-    const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    if (isLocalhost) {
-        try {
-            const response = await fetch('/api/disease/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-                },
-                body: JSON.stringify({
-                    image_base64: imageDataBase64
-                })
-            });
+    // 1. Try Backend ML service first (using the live backend URL)
+    const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+    try {
+        const response = await fetch(`${API_URL}/api/disease/predict`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+            },
+            body: JSON.stringify({
+                image_base64: imageDataBase64
+            })
+        });
 
             const contentType = response.headers.get('content-type') || '';
             if (response.ok && contentType.includes('application/json')) {
@@ -315,23 +316,23 @@ export const detectPlantDisease = async (
                 const confidenceScore = data.confidence_score || 0.85;
                 const confidencePercentage = Math.min(Math.round(confidenceScore * 100), 100);
 
+                const isPlant = data.is_plant_detected !== false && data.crop_type !== 'None' && data.disease_name !== 'No Plant Detected';
                 return {
-                    isPlantDetected: true,
-                    cropType: data.crop_name || 'Plant',
+                    isPlantDetected: isPlant,
+                    cropType: data.crop_name || data.crop_type || 'Plant',
                     diseaseName: data.disease_name || 'Healthy Crop',
                     description: data.description || 'No severe pathology detected.',
                     confidence: confidencePercentage,
                     severityLevel: data.severity || 'low',
-                    actionRequired: data.severity === 'high' ? 'Immediate treatment required' : 'Standard preventative care',
+                    actionRequired: isPlant ? (data.severity === 'high' ? 'Immediate treatment required' : 'Standard preventative care') : 'Please upload a photo of a crop leaf or plant.',
                     symptoms: data.symptoms || ['Normal leaf foliage and stem integrity'],
                     treatment: data.treatment || ['Maintain balanced organic nutrients and pest monitoring'],
                     organicTreatment: data.organic_treatment || ['Neem oil spray (5ml/L)'],
                     prevention: data.prevention || ['Crop rotation and clean irrigation practices']
                 };
             }
-        } catch (backendErr) {
-            console.warn("Backend ML service unreachable, using Gemini 2.5 Flash Vision AI:", backendErr);
-        }
+    } catch (backendErr) {
+        console.warn("Backend ML service unreachable, using Gemini 2.5 Flash Vision AI:", backendErr);
     }
 
     // 2. Client-Side Gemini 2.5 Flash Vision AI Engine (Works 100% on Live Web)

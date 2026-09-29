@@ -50,10 +50,29 @@ class LocalAuthService {
     farm_size: string = ''
   ): Promise<AuthResponse> {
     try {
+      const trimmedUser = (username || '').trim();
+      const trimmedEmail = (email || '').trim().toLowerCase();
+
+      if (trimmedUser.length < 3) {
+        return { success: false, message: 'Username must be at least 3 characters long' };
+      }
+      if (/^\d+$/.test(trimmedUser)) {
+        return { success: false, message: "Username cannot consist solely of numbers (e.g., '123')" };
+      }
+      if (!/[a-zA-Z]/.test(trimmedUser)) {
+        return { success: false, message: 'Username must contain at least one letter' };
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+        return { success: false, message: 'Please provide a valid email address' };
+      }
+      if (!password || password.length < 6) {
+        return { success: false, message: 'Password must be at least 6 characters long' };
+      }
+
       const users = this.getUsers();
       
       // Check if username already exists
-      if (users.find(user => user.username === username)) {
+      if (users.find(user => user.username.toLowerCase() === trimmedUser.toLowerCase())) {
         return {
           success: false,
           message: 'Username already exists'

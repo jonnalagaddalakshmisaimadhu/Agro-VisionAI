@@ -5,6 +5,9 @@ import hashlib
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.core.config import settings
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models.user import User
 from app.schemas.user import TokenData
 
 # JWT token handling
@@ -69,3 +72,23 @@ def verify_token_optional(credentials: Optional[HTTPAuthorizationCredentials] = 
         pass
     
     return None
+
+def get_current_active_user(
+    token_data: TokenData = Depends(verify_token),
+    db: Session = Depends(get_db)
+) -> User:
+    """Fetch current active user model from database."""
+    user = db.query(User).filter(User.username == token_data.username).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user"
+        )
+    return user
+
+

@@ -4,9 +4,9 @@ from typing import List, Optional
 from app.database import get_db
 from app.models.market_prices import MarketPrice, PriceAlert
 from app.services.market_prices import MarketPricesService
-from app.core.security import verify_token
+from app.core.security import verify_token, get_current_active_user
 from app.models.user import User
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 router = APIRouter()
@@ -36,8 +36,7 @@ class MarketPriceResponse(BaseModel):
     market_insights: Optional[str]
     is_verified: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class PriceTrendResponse(BaseModel):
     crop_name: str
@@ -62,8 +61,7 @@ class PriceAlertResponse(BaseModel):
     created_at: datetime
     triggered_at: Optional[datetime]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 @router.get("/prices", response_model=List[MarketPriceResponse])
 async def get_market_prices(
@@ -186,7 +184,7 @@ async def get_crop_prices(
 @router.post("/alerts", response_model=PriceAlertResponse)
 async def create_price_alert(
     alert: PriceAlertCreate,
-    current_user: User = Depends(verify_token),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Create a new price alert for a user"""
@@ -219,7 +217,7 @@ async def create_price_alert(
 
 @router.get("/alerts", response_model=List[PriceAlertResponse])
 async def get_user_price_alerts(
-    current_user: User = Depends(verify_token),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get all price alerts for the current user"""
@@ -232,7 +230,7 @@ async def get_user_price_alerts(
 @router.delete("/alerts/{alert_id}")
 async def delete_price_alert(
     alert_id: int,
-    current_user: User = Depends(verify_token),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Delete a price alert"""

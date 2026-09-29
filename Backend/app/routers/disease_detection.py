@@ -74,9 +74,10 @@ async def predict_disease(
             db_image_path = "placeholder.jpg"
 
         # 3. Save to database
+        detected_crop = prediction_result.get("crop_name", prediction_result.get("crop_type", "Plant"))
         new_detection = DiseaseDetection(
             user_id=user_id,
-            crop_type="Plant",  # Can be extracted from prediction if needed
+            crop_type=detected_crop,
             image_path=db_image_path,
             disease_name=prediction_result["disease_name"],
             confidence_score=prediction_result["confidence_score"],

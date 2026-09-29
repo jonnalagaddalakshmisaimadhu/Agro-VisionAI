@@ -9,8 +9,9 @@ python-multipart
 httpx
 pillow
 numpy>=1.26.4
-torch>=2.5.0
-torchvision>=0.20.0
+# PyTorch is commented out for live deployment (to avoid memory/size limits on free servers)
+# torch>=2.5.0
+# torchvision>=0.20.0
 pandas>=2.2.0
 python-dotenv==1.0.0
 alembic==1.13.1

@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models.marketplace import Product
 from app.models.user import User
 from app.schemas.marketplace import ProductCreate, ProductResponse, ProductUpdate
-from app.core.security import verify_token
+from app.core.security import verify_token, get_current_active_user
 
 router = APIRouter()
 
@@ -146,7 +146,7 @@ async def get_price_ranges(db: Session = Depends(get_db)):
 
 @router.get("/seller-stats")
 async def get_seller_statistics(
-    current_user: User = Depends(verify_token),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get seller statistics for current user."""

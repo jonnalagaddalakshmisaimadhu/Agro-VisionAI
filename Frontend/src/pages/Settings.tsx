@@ -95,7 +95,9 @@ const SettingsPage: React.FC = () => {
     try {
       const saved = localStorage.getItem("farmiq_app_settings");
       if (saved) return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-    } catch (e) {}
+    } catch (e) {
+      console.debug("Settings parse error:", e);
+    }
     return DEFAULT_SETTINGS;
   });
 
@@ -111,7 +113,9 @@ const SettingsPage: React.FC = () => {
       const next = { ...prev, [key]: value };
       try {
         localStorage.setItem("farmiq_app_settings", JSON.stringify(next));
-      } catch (e) {}
+      } catch (e) {
+        console.debug("Settings save error:", e);
+      }
       return next;
     });
 
@@ -122,7 +126,8 @@ const SettingsPage: React.FC = () => {
   // Test Ringtone Synthesizer
   const testRingtone = () => {
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
@@ -136,14 +141,18 @@ const SettingsPage: React.FC = () => {
         try {
           osc.stop();
           ctx.close();
-        } catch (e) {}
+        } catch (e) {
+          console.debug("Audio oscillator stop error:", e);
+        }
       }, 900);
 
       toast({
         title: "Ringtone Tested",
         description: "In-App VoIP audio ringtone preview played."
       });
-    } catch (e) {}
+    } catch (e) {
+      console.debug("Audio ringtone test error:", e);
+    }
   };
 
   // Test Microphone Input Level
@@ -163,7 +172,8 @@ const SettingsPage: React.FC = () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         micStreamRef.current = stream;
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        const ctx = new AudioCtx();
         audioContextRef.current = ctx;
         const analyser = ctx.createAnalyser();
         const source = ctx.createMediaStreamSource(stream);

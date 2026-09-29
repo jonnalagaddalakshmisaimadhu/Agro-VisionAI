@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -37,8 +37,7 @@ class ProductResponse(ProductBase):
     total_reviews: int = 12
     created_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class EquipmentBase(BaseModel):
     name: str
@@ -82,8 +81,7 @@ class EquipmentResponse(EquipmentBase):
     total_rentals: int = 5
     created_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RentalCreate(BaseModel):
     equipment_id: int
@@ -121,6 +119,5 @@ class RentalResponse(BaseModel):
     equipment: Optional[EquipmentResponse] = None
     created_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 

@@ -42,7 +42,7 @@ class WeatherService:
         if not redis_client:
             return
         try:
-            redis_client.setex(key, ttl, json.dumps(data))
+            redis_client.set(key, json.dumps(data), ex=ttl)
         except Exception as e:
             logger.debug(f"Redis cache write error: {e}")
 
