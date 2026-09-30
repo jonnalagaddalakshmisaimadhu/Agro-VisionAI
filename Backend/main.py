@@ -24,7 +24,8 @@ from app.routers import (
     chatbot,
     community_chat,
     marketplace_chat,
-    app_update
+    app_update,
+    notifications
 )
 from app.database import engine, Base
 from app.core.config import settings
@@ -106,6 +107,7 @@ app.include_router(chatbot.router, prefix="/api", tags=["Chatbot"])
 app.include_router(community_chat.router, prefix="/api/community", tags=["Community Chat"])
 app.include_router(marketplace_chat.router, prefix="/api/marketplace", tags=["Marketplace Chat & Voice"])
 app.include_router(app_update.router, prefix="/api/app", tags=["App Updates"])
+app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
 
 
 

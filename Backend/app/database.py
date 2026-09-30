@@ -17,6 +17,7 @@ Base = declarative_base()
 # Import all models to ensure they are registered (after Base is defined)
 from app.models import user, disease_detection, government_schemes, market_prices, marketplace
 from app.models import nlp_models  # Import new NLP models
+from app.models import notification  # Import notification models
 
 # Dependency to get database session
 def get_db():

@@ -62,3 +62,7 @@ Frontend/.env
 
 .firebase/
 **/.firebase/
+
+# Firebase Credentials
+*firebase-adminsdk*.json
+Backend/*firebase-adminsdk*.json

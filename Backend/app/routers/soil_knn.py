@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from pathlib import Path
 import numpy as np
 import pickle
-import pandas as pd
+import csv
 import math
 
 router = APIRouter()
@@ -36,27 +36,35 @@ def load_district_csv():
     if not CSV_PATH.exists():
         _district_rows = []
         return _district_rows
-    df = pd.read_csv(CSV_PATH, dtype=str)
-    # New dataset uses latitude/longitude columns
-    df['lat'] = pd.to_numeric(df['latitude'], errors='coerce')
-    df['lon'] = pd.to_numeric(df['longitude'], errors='coerce')
     rows = []
-    for _, r in df.iterrows():
-        if pd.isna(r['lat']) or pd.isna(r['lon']):
-            continue
-        rows.append({
-            'state_code': r.get('state_code',''),
-            'state_name': r.get('state','') or r.get('state_name',''),
-            'district': r.get('district',''),
-            'lat': float(r['lat']),
-            'lon': float(r['lon']),
-            'dominant_soil': (r.get('soil_type','') or r.get('dominant_soil','')).lower(),
-            'secondary_soil': r.get('secondary_soil','').lower() if 'secondary_soil' in r else '',
-            'confidence': r.get('confidence',''),
-            'source': r.get('source',''),
-            'date_of_survey': r.get('date_of_survey',''),
-            'notes': r.get('notes',''),
-        })
+    try:
+        with open(CSV_PATH, mode="r", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            for r in reader:
+                lat_raw = r.get("latitude") or r.get("lat")
+                lon_raw = r.get("longitude") or r.get("lon")
+                if not lat_raw or not lon_raw:
+                    continue
+                try:
+                    lat_val = float(lat_raw)
+                    lon_val = float(lon_raw)
+                except ValueError:
+                    continue
+                rows.append({
+                    'state_code': r.get('state_code',''),
+                    'state_name': r.get('state','') or r.get('state_name',''),
+                    'district': r.get('district',''),
+                    'lat': lat_val,
+                    'lon': lon_val,
+                    'dominant_soil': (r.get('soil_type','') or r.get('dominant_soil','')).lower(),
+                    'secondary_soil': r.get('secondary_soil','').lower() if 'secondary_soil' in r else '',
+                    'confidence': r.get('confidence',''),
+                    'source': r.get('source',''),
+                    'date_of_survey': r.get('date_of_survey',''),
+                    'notes': r.get('notes',''),
+                })
+    except Exception as e:
+        rows = []
     _district_rows = rows
     return _district_rows
 

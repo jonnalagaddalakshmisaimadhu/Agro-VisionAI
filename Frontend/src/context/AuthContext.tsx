@@ -151,6 +151,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('farmiq_current_user', JSON.stringify(userData));
         localStorage.setItem('farmiq_logged_in', 'true');
 
+        // Real-Time Notification Onboarding Dispatch for Google Authenticated Users
+        if (userData.email) {
+          const apiRoot = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+          fetch(`${apiRoot}/api/notifications/onboarding/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_name: userData.full_name || userData.username,
+              email: userData.email
+            })
+          }).catch(err => console.debug('Onboarding notification dispatch notice:', err));
+        }
+
         return true;
       }
       return false;

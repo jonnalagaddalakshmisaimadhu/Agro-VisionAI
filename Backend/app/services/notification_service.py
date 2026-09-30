@@ -3,20 +3,62 @@ import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Dict, Any, List, Optional
-from app.core.config import settings
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Ensure environment variables are loaded
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+# Firebase Admin SDK initialization
+_firebase_initialized = False
+try:
+    import firebase_admin
+    from firebase_admin import credentials, messaging
+
+    # Search for service account json key
+    base_dir = Path(__file__).resolve().parent.parent.parent
+    cred_env_path = os.getenv("FIREBASE_CREDENTIALS_PATH")
+    
+    candidate_paths = [
+        Path(cred_env_path) if cred_env_path else None,
+        base_dir / "farmiq-agrovisionai-firebase-adminsdk-fbsvc-e27d76ac68.json",
+        base_dir / "app" / "core" / "farmiq-agrovisionai-firebase-adminsdk-fbsvc-e27d76ac68.json"
+    ]
+
+    selected_cred_path = None
+    for p in candidate_paths:
+        if p and p.exists():
+            selected_cred_path = p
+            break
+
+    if selected_cred_path:
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(str(selected_cred_path))
+            firebase_admin.initialize_app(cred)
+            logger.info(f"Firebase Admin SDK initialized successfully from: {selected_cred_path.name}")
+        _firebase_initialized = True
+    else:
+        logger.warning("Firebase Admin SDK credentials file not found. Push notifications will run in mock mode.")
+except Exception as e:
+    logger.warning(f"Firebase Admin SDK could not be initialized: {e}")
+    _firebase_initialized = False
+
+
 class NotificationService:
     def __init__(self):
-        # SMTP Settings (can be Gmail, Resend, or Sendgrid free tiers)
+        # SMTP Settings (Gmail SMTP for farmiq.in@gmail.com)
         self.smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
         self.smtp_port = int(os.getenv("SMTP_PORT", 587))
-        self.smtp_user = os.getenv("SMTP_USER", "")
+        self.smtp_user = os.getenv("SMTP_USER", "farmiq.in@gmail.com")
         self.smtp_password = os.getenv("SMTP_PASSWORD", "")
-        self.sender_email = os.getenv("SENDER_EMAIL", "alerts@farmiq-agrovision.org")
+        self.sender_email = os.getenv("SENDER_EMAIL", "farmiq.in@gmail.com")
 
+    # =========================================================================
+    # EMAIL DISPATCH SERVICES
+    # =========================================================================
     def send_email_alert(self, to_email: str, subject: str, alert_data: Dict[str, Any]) -> Dict[str, Any]:
         """Send formatted HTML weather advisory / warning email to farmer."""
         location_name = alert_data.get("location", "Your Farm")
@@ -93,20 +135,100 @@ class NotificationService:
                     server.login(self.smtp_user, self.smtp_password)
                     server.sendmail(self.sender_email, to_email, msg.as_string())
                 
-                logger.info(f"Email successfully sent to {to_email}")
-                return {"success": True, "status": "sent", "recipient": to_email}
+                logger.info(f"Email successfully sent from {self.sender_email} to {to_email}")
+                return {"success": True, "status": "sent", "recipient": to_email, "sender": self.sender_email}
             else:
-                # Simulated dispatch mode if SMTP credentials are pending
                 logger.info(f"[Simulated Dispatch] Email generated for {to_email}: {subject}")
                 return {
                     "success": True, 
                     "status": "simulated_success", 
-                    "message": "Email template generated and validated successfully (Configure SMTP_USER in .env for live inbox delivery)",
-                    "recipient": to_email,
-                    "preview_html": html_content
+                    "message": "Email template validated (Configure SMTP credentials in .env for live inbox delivery)",
+                    "recipient": to_email
                 }
         except Exception as e:
             logger.error(f"Error sending email alert: {e}")
+            return {"success": False, "error": str(e)}
+
+    def send_custom_email(self, to_email: str, subject: str, message: str, html_body: Optional[str] = None) -> Dict[str, Any]:
+        """Sends a general custom email (e.g. notifications, OTP, system alerts)."""
+        try:
+            if not self.smtp_user or not self.smtp_password:
+                return {"success": False, "error": "SMTP credentials not configured in .env"}
+
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = self.sender_email
+            msg["To"] = to_email
+
+            # Attach plain text
+            msg.attach(MIMEText(message, "plain"))
+            if html_body:
+                msg.attach(MIMEText(html_body, "html"))
+
+            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.smtp_user, self.smtp_password)
+                server.sendmail(self.sender_email, to_email, msg.as_string())
+
+            logger.info(f"Custom email sent to {to_email}")
+            return {"success": True, "recipient": to_email, "status": "sent"}
+        except Exception as e:
+            logger.error(f"Failed to send custom email to {to_email}: {e}")
+            return {"success": False, "error": str(e)}
+
+    # =========================================================================
+    # FIREBASE CLOUD MESSAGING (FCM PUSH NOTIFICATIONS)
+    # =========================================================================
+    def send_push_notification(self, token: str, title: str, body: str, data: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        """Dispatches an instant push notification directly to a user's mobile device or browser via FCM."""
+        if not _firebase_initialized:
+            logger.warning("[FCM Mock] Firebase not initialized. Mocking push notification.")
+            return {
+                "success": True,
+                "status": "mocked",
+                "message": "Firebase Admin SDK credentials not loaded. Mock push notification accepted.",
+                "payload": {"title": title, "body": body, "token": token[:10] + "..." if token else ""}
+            }
+        
+        try:
+            from firebase_admin import messaging
+
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=title,
+                    body=body
+                ),
+                data=data or {},
+                token=token
+            )
+            response = messaging.send(message)
+            logger.info(f"FCM Push Notification sent successfully: {response}")
+            return {"success": True, "status": "delivered", "message_id": response}
+        except Exception as e:
+            logger.error(f"Error sending FCM push notification: {e}")
+            return {"success": False, "error": str(e)}
+
+    def send_topic_notification(self, topic: str, title: str, body: str, data: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        """Dispatches a broadcast push notification to all devices subscribed to a topic (e.g. 'weather_alerts', 'traffic_updates')."""
+        if not _firebase_initialized:
+            return {"success": True, "status": "mocked", "topic": topic}
+
+        try:
+            from firebase_admin import messaging
+
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=title,
+                    body=body
+                ),
+                data=data or {},
+                topic=topic
+            )
+            response = messaging.send(message)
+            logger.info(f"FCM Topic Notification broadcast to '{topic}': {response}")
+            return {"success": True, "status": "broadcast_sent", "topic": topic, "message_id": response}
+        except Exception as e:
+            logger.error(f"Error sending FCM topic notification: {e}")
             return {"success": False, "error": str(e)}
 
     def format_voice_script(self, location: str, advisories: Dict[str, Any], lang: str = "en") -> str:
