@@ -33,7 +33,7 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
  * Uses native Google Play Services Credential Manager / Firebase Auth on Android APK.
  * Uses Firebase signInWithPopup on Desktop Web browsers.
  */
-export const signInWithGoogle = async (providedEmail?: string, providedName?: string) => {
+export const signInWithGoogle = async () => {
     const isNative = Capacitor.isNativePlatform();
 
     // 1. On Mobile Android APK, use Real Native Google Firebase Authentication
@@ -50,44 +50,21 @@ export const signInWithGoogle = async (providedEmail?: string, providedName?: st
                 };
                 return { 
                     user: user as any, 
-                    token: (result as any)?.credential?.idToken || "native_google_token", 
-                    needsPrompt: false 
+                    token: (result as any)?.credential?.idToken || "native_google_token"
                 };
             }
+            return { user: null, token: null, error: new Error("Google Sign-In returned no user") };
         } catch (nativeErr: any) {
-            console.warn("Native Google Sign-In notice:", nativeErr?.message || nativeErr);
-            // If explicit email provided as fallback
-            if (providedEmail && providedEmail.includes("@")) {
-                const cleanEmail = providedEmail.trim().toLowerCase();
-                const username = cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_");
-                const displayName = providedName?.trim() || username.replace(/[._]/g, " ");
-                const mobileUser = {
-                    uid: `google_m_${Date.now()}`,
-                    displayName: displayName,
-                    email: cleanEmail,
-                    photoURL: null
-                };
-                return { user: mobileUser as any, token: "mobile_google_token", needsPrompt: false };
+            console.error("Native Google Sign-In error:", nativeErr);
+            let friendlyMessage = nativeErr?.message || "Google Sign-In failed.";
+            if (friendlyMessage.includes("10:") || friendlyMessage.includes("DEVELOPER_ERROR")) {
+                friendlyMessage = "Google Play Services error (SHA-1 fingerprint must be added to Firebase Console).";
             }
-            return { user: null, token: null, needsPrompt: true, error: nativeErr };
+            return { user: null, token: null, error: new Error(friendlyMessage) };
         }
     }
 
-    // 2. If explicit email provided
-    if (providedEmail && providedEmail.includes("@")) {
-        const cleanEmail = providedEmail.trim().toLowerCase();
-        const username = cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_");
-        const displayName = providedName?.trim() || username.replace(/[._]/g, " ");
-        const mobileUser = {
-            uid: `google_m_${Date.now()}`,
-            displayName: displayName,
-            email: cleanEmail,
-            photoURL: null
-        };
-        return { user: mobileUser as any, token: "mobile_google_token", needsPrompt: false };
-    }
-
-    // 3. On Web desktop browsers, use real Firebase signInWithPopup
+    // 2. On Web desktop browsers, use real Firebase signInWithPopup
     try {
         const result = await signInWithPopup(auth, googleProvider);
         const credential = GoogleAuthProvider.credentialFromResult(result);
@@ -95,10 +72,10 @@ export const signInWithGoogle = async (providedEmail?: string, providedName?: st
         const user = result.user;
 
         console.log("Firebase Google Login Success:", user);
-        return { user, token, needsPrompt: false };
+        return { user, token };
     } catch (popupError: any) {
         console.warn("Google popup error code:", popupError?.code, popupError?.message);
-        return { user: null, token: null, needsPrompt: true, error: popupError };
+        return { user: null, token: null, error: popupError };
     }
 };
 

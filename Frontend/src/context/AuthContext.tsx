@@ -17,7 +17,7 @@ type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   login: (username: string, password: string) => Promise<boolean>;
-  loginWithGoogle: (providedEmail?: string, providedName?: string) => Promise<{ success: boolean; needsPrompt?: boolean }>;
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   register: (
     username: string, 
     email: string, 
@@ -150,14 +150,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginWithGoogle = async (providedEmail?: string, providedName?: string): Promise<{ success: boolean; needsPrompt?: boolean }> => {
+  const loginWithGoogle = async (): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
-      const res = await signInWithGoogle(providedEmail, providedName);
-
-      if (res.needsPrompt) {
-        return { success: false, needsPrompt: true };
-      }
+      const res = await signInWithGoogle();
 
       if (res.user) {
         const firebaseUser = res.user;
@@ -203,10 +199,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         return { success: true };
       }
-      return { success: false };
-    } catch (error) {
+      
+      const errMsg = (res as any)?.error?.message || (res as any)?.error?.code || "Google authentication was cancelled or failed.";
+      return { success: false, error: errMsg };
+    } catch (error: any) {
       console.error("Google Login failed:", error);
-      return { success: false };
+      return { success: false, error: error?.message || "Google authentication error." };
     } finally {
       setIsLoading(false);
     }
