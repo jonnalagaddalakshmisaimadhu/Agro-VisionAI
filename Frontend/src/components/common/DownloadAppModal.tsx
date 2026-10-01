@@ -26,7 +26,6 @@ interface DownloadAppModalProps {
 }
 
 const LOCAL_APK_URL = "/FarmIQ.apk";
-const GITHUB_APK_BACKUP_URL = "https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/raw/refs/heads/main/Frontend/android/release/FarmIQ.apk";
 
 export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
   isOpen,
@@ -40,19 +39,23 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
     setProgress(30);
 
     // Direct browser file download of real compiled APK binary
+    const downloadUrl = LOCAL_APK_URL;
     const link = document.createElement("a");
-    link.href = LOCAL_APK_URL;
-    link.setAttribute("download", "FarmIQ.apk");
+    link.href = downloadUrl;
+    link.download = "FarmIQ.apk";
+    link.target = "_blank";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    // Also trigger direct navigation fallback for mobile Chrome
-    try {
-      window.location.assign(LOCAL_APK_URL);
-    } catch (e) {
-      window.location.assign(GITHUB_APK_BACKUP_URL);
-    }
+    // Fallback: direct window location assignment
+    setTimeout(() => {
+      try {
+        window.location.assign(downloadUrl);
+      } catch (err) {
+        console.debug("Direct location assign notice:", err);
+      }
+    }, 400);
 
     // Visual progress indicator
     const t1 = setTimeout(() => setProgress(65), 300);
@@ -111,7 +114,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
             Download FarmIQ Android APK
           </DialogTitle>
           <DialogDescription className="text-xs text-gray-500 font-medium">
-            Version 2.0 • 64.5 MB • Android 8.0+
+            Version 2.0 • 128 MB • Android 8.0+
           </DialogDescription>
         </DialogHeader>
 
@@ -148,7 +151,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
             className="w-full h-12 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all border-0"
           >
             <Download className="w-4 h-4" />
-            Download FarmIQ.apk (66.4 MB)
+            Download FarmIQ.apk (Universal 128 MB)
           </button>
 
           {/* Quick 3-Step Install Guide */}

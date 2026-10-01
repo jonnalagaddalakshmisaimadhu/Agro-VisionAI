@@ -39,9 +39,9 @@ LATEST_RELEASE = VersionInfo(
         "🌦️ వేగవంతమైన లైవ్ వెదర్ రాడార్ & విశ్లేషణ",
         "⚡ వేగవంతమైన పనితీరు మరియు ఆటో-అప్‌డేట్ సదుపాయం"
     ],
-    apk_url="https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/releases/latest/download/app-debug.apk",
-    apk_size_mb=65.5,
-    published_date="2026-08-28"
+    apk_url="/FarmIQ.apk",
+    apk_size_mb=128.4,
+    published_date="2026-10-01"
 )
 
 def is_newer_version(latest: str, current: str) -> bool:

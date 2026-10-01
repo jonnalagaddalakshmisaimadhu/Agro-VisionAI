@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // Current Installed App Version
-export const APP_CURRENT_VERSION = "1.0.0";
+export const APP_CURRENT_VERSION = "1.0.1";
 
 export interface UpdateInfo {
   update_available: boolean;
@@ -96,8 +96,17 @@ export const AppUpdateChecker: React.FC = () => {
         if (prev >= 95) {
           clearInterval(interval);
           setDownloadComplete(true);
-          // Trigger actual APK file download / browser intent
-          window.location.href = updateInfo.apk_url;
+          // Trigger actual APK file download directly
+          const targetUrl = updateInfo.apk_url.startsWith("http") 
+            ? updateInfo.apk_url 
+            : `${window.location.origin}${updateInfo.apk_url.startsWith("/") ? "" : "/"}${updateInfo.apk_url}`;
+          const link = document.createElement("a");
+          link.href = targetUrl;
+          link.download = "FarmIQ.apk";
+          link.target = "_blank";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
           return 100;
         }
         return prev + 15;
