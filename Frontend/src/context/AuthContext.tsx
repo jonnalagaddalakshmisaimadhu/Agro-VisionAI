@@ -17,7 +17,7 @@ type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null;
   login: (username: string, password: string) => Promise<boolean>;
-  loginWithGoogle: () => Promise<boolean>;
+  loginWithGoogle: (providedEmail?: string, providedName?: string) => Promise<{ success: boolean; needsPrompt?: boolean }>;
   register: (
     username: string, 
     email: string, 
@@ -150,12 +150,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginWithGoogle = async (): Promise<boolean> => {
+  const loginWithGoogle = async (providedEmail?: string, providedName?: string): Promise<{ success: boolean; needsPrompt?: boolean }> => {
     try {
       setIsLoading(true);
-      const { user: firebaseUser } = await signInWithGoogle();
+      const res = await signInWithGoogle(providedEmail, providedName);
 
-      if (firebaseUser) {
+      if (res.needsPrompt) {
+        return { success: false, needsPrompt: true };
+      }
+
+      if (res.user) {
+        const firebaseUser = res.user;
         const userData: AuthUser = {
           id: firebaseUser.uid,
           username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || "user",
@@ -167,6 +172,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(userData);
         localStorage.setItem('farmiq_current_user', JSON.stringify(userData));
         localStorage.setItem('farmiq_logged_in', 'true');
+
+        // Also register in localAuthService so offline users list and lookups have this account
+        try {
+          const allUsers = localAuthService.getAllUsers();
+          if (!allUsers.some(u => u.email.toLowerCase() === userData.email.toLowerCase())) {
+            await localAuthService.register(
+              userData.username,
+              userData.email,
+              'google_oauth_pass',
+              userData.full_name
+            );
+          }
+        } catch (e) {
+          console.debug("Local user auto-register notice:", e);
+        }
 
         // Real-Time Notification Onboarding Dispatch for Google Authenticated Users
         if (userData.email) {
@@ -181,12 +201,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }).catch(err => console.debug('Onboarding notification dispatch notice:', err));
         }
 
-        return true;
+        return { success: true };
       }
-      return false;
+      return { success: false };
     } catch (error) {
       console.error("Google Login failed:", error);
-      return false;
+      return { success: false };
     } finally {
       setIsLoading(false);
     }

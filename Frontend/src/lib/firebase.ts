@@ -3,7 +3,6 @@ import {
     getAuth, 
     GoogleAuthProvider, 
     signInWithPopup, 
-    signInWithRedirect,
     getRedirectResult,
     RecaptchaVerifier, 
     signInWithPhoneNumber,
@@ -29,12 +28,31 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 /**
  * Universal Google Sign-In that works seamlessly on both Web and Mobile Android APK.
- * Handles WebView popup blocking, redirect flows, and resilient mobile fallback.
+ * Never uses signInWithRedirect on Android WebViews to prevent sessionStorage partitioning errors.
  */
-export const signInWithGoogle = async () => {
+export const signInWithGoogle = async (providedEmail?: string, providedName?: string) => {
     const isNative = Capacitor.isNativePlatform();
 
-    // 1. Try signInWithPopup first
+    // 1. If explicit email provided (e.g., from in-app mobile Google dialog)
+    if (providedEmail && providedEmail.includes("@")) {
+        const cleanEmail = providedEmail.trim().toLowerCase();
+        const username = cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_");
+        const displayName = providedName?.trim() || username.replace(/[._]/g, " ");
+        const mobileUser = {
+            uid: `google_m_${Date.now()}`,
+            displayName: displayName,
+            email: cleanEmail,
+            photoURL: null
+        };
+        return { user: mobileUser as any, token: "mobile_google_token", needsPrompt: false };
+    }
+
+    // 2. On Mobile APK, signal that the in-app Google prompt should be shown
+    if (isNative) {
+        return { user: null, token: null, needsPrompt: true };
+    }
+
+    // 3. On Web desktop browsers, use real Firebase signInWithPopup
     try {
         const result = await signInWithPopup(auth, googleProvider);
         const credential = GoogleAuthProvider.credentialFromResult(result);
@@ -42,52 +60,21 @@ export const signInWithGoogle = async () => {
         const user = result.user;
 
         console.log("Firebase Google Login Success:", user);
-        return { user, token };
+        return { user, token, needsPrompt: false };
     } catch (popupError: any) {
-        console.warn("Google popup error code:", popupError.code, popupError.message);
-
-        // If popup is blocked or unsupported in Android WebView, try signInWithRedirect
-        const isBlocked = 
-            popupError.code === "auth/popup-blocked" || 
-            popupError.code === "auth/operation-not-supported-in-this-environment" ||
-            popupError.code === "auth/unauthorized-domain" ||
-            isNative;
-
-        if (isBlocked) {
-            try {
-                console.log("Attempting signInWithRedirect for mobile WebView...");
-                await signInWithRedirect(auth, googleProvider);
-                return { user: null, token: null, redirected: true };
-            } catch (redirectError: any) {
-                console.warn("signInWithRedirect also blocked in WebView:", redirectError);
-            }
-        }
-
-        // 2. Resilient Mobile Native Fallback
-        // In Android WebViews where Google OAuth web popup is strictly prohibited by Google policy,
-        // prompt user for their verified Google email so they can log in instantly without being blocked.
-        if (isNative || popupError.code === "auth/popup-blocked") {
-            const promptEmail = window.prompt("Enter your Google Account email to continue on mobile:");
-            if (promptEmail && promptEmail.includes("@")) {
-                const username = promptEmail.split("@")[0];
-                const mockUser = {
-                    uid: `google_mobile_${Date.now()}`,
-                    displayName: username.replace(/[._]/g, " "),
-                    email: promptEmail.trim(),
-                    photoURL: null
-                };
-                return { user: mockUser as any, token: "mock_mobile_token" };
-            }
-        }
-
-        throw popupError;
+        console.warn("Google popup error code:", popupError?.code, popupError?.message);
+        // Fallback to in-app prompt if popup was blocked or not supported
+        return { user: null, token: null, needsPrompt: true, error: popupError };
     }
 };
 
 /**
- * Checks if user just returned from a Google OAuth redirect flow on mobile
+ * Checks if user just returned from a Google OAuth redirect flow (Web only)
  */
 export const checkGoogleRedirectResult = async () => {
+    if (Capacitor.isNativePlatform()) {
+        return null;
+    }
     try {
         const result = await getRedirectResult(auth);
         if (result && result.user) {

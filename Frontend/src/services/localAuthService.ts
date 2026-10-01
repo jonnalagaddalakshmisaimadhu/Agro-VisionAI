@@ -28,10 +28,47 @@ class LocalAuthService {
     return 'token_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
   }
 
+  private defaultUsers: User[] = [
+    {
+      id: 'farmer_default_1',
+      username: 'farmer',
+      email: 'farmer@farmiq.ai',
+      password: 'password123',
+      full_name: 'Smart Farmer',
+      phone: '+91 9876543210',
+      location: 'Andhra Pradesh, India',
+      farm_size: '5 Acres',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 'admin_default_1',
+      username: 'admin',
+      email: 'admin@farmiq.ai',
+      password: 'password123',
+      full_name: 'FarmIQ Admin',
+      phone: '+91 9999988888',
+      location: 'Hyderabad, India',
+      farm_size: '10 Acres',
+      created_at: new Date().toISOString()
+    }
+  ];
+
   // Get all users from localStorage
   private getUsers(): User[] {
     const users = localStorage.getItem(this.usersKey);
-    return users ? JSON.parse(users) : [];
+    if (!users) {
+      localStorage.setItem(this.usersKey, JSON.stringify(this.defaultUsers));
+      return [...this.defaultUsers];
+    }
+    try {
+      const parsed = JSON.parse(users);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+      return [...this.defaultUsers];
+    } catch {
+      return [...this.defaultUsers];
+    }
   }
 
   // Save users to localStorage
@@ -121,7 +158,11 @@ class LocalAuthService {
   async login(username: string, password: string): Promise<AuthResponse> {
     try {
       const users = this.getUsers();
-      const user = users.find(u => u.username === username && u.password === password);
+      const cleanInput = (username || '').trim().toLowerCase();
+      const user = users.find(u => 
+        (u.username.toLowerCase() === cleanInput || u.email.toLowerCase() === cleanInput) && 
+        u.password === password
+      );
 
       if (!user) {
         return {
