@@ -143,7 +143,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
             className="w-full h-12 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all border-0"
           >
             <Download className="w-4 h-4" />
-            Download FarmIQ.apk (Universal 128 MB)
+            Download FarmIQ.apk (Ultra-Lite 12 MB)
           </button>
 
           {/* Quick 3-Step Install Guide */}

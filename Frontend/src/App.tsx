@@ -16,15 +16,8 @@ import ProfilePage from "./pages/Profile";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import ExpertConsultation from "./components/modules/ExpertConsultation";
-import AccuracyTest from "./components/modules/AccuracyTest";
 import ProtectedRoute from "./components/common/ProtectedRoute";
-import LoginDemo from "./components/LoginDemo";
 import DiseaseDetection from "./components/modules/DiseaseDetection";
-import NavigationRouting from "./components/modules/NavigationRouting";
-import RealtimeTelemetryMap from "./components/modules/RealtimeTelemetryMap";
-import TrafficPredictionStream from "./components/modules/TrafficPredictionStream";
-import DevOpsHardeningCenter from "./components/modules/DevOpsHardeningCenter";
-import { SecurityComplianceCenter } from "./components/modules/SecurityComplianceCenter";
 import { FarmIQAssistance } from "./components/chatbot/FarmIQAssistance";
 import { AppUpdateChecker } from "./components/common/AppUpdateChecker";
 
@@ -53,19 +46,12 @@ const App = () => {
                 <Route path="/login" element={<AuthPage />} />
                 <Route path="/register" element={<SimpleRegisterPage />} />
                 <Route path="/auth" element={<AuthPage />} />
-                <Route path="/login-demo" element={<LoginDemo />} />
                 <Route path="/terms" element={<TermsAndConditions />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                 <Route path="/expert-consultation" element={<ProtectedRoute><ExpertConsultation /></ProtectedRoute>} />
-                <Route path="/accuracy-test" element={<ProtectedRoute><AccuracyTest /></ProtectedRoute>} />
                 <Route path="/disease-detection" element={<ProtectedRoute><DiseaseDetection /></ProtectedRoute>} />
-                <Route path="/navigation" element={<ProtectedRoute><NavigationRouting /></ProtectedRoute>} />
-                <Route path="/telemetry" element={<ProtectedRoute><RealtimeTelemetryMap /></ProtectedRoute>} />
-                <Route path="/traffic-prediction" element={<ProtectedRoute><TrafficPredictionStream /></ProtectedRoute>} />
-                <Route path="/devops-hardening" element={<ProtectedRoute><DevOpsHardeningCenter /></ProtectedRoute>} />
-                <Route path="/security-compliance" element={<ProtectedRoute><SecurityComplianceCenter /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
