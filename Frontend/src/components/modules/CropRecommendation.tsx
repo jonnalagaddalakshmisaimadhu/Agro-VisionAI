@@ -22,8 +22,24 @@ import {
   BarChart3,
   AlertTriangle,
   Brain,
+  History,
+  Clock,
+  Trash2,
 } from "lucide-react";
 import LocationMaps from "./LocationMaps";
+
+export interface CropRecHistoryItem {
+  id: string;
+  timestamp: string;
+  location: string;
+  season: string;
+  soilType: string;
+  farmSize: string;
+  cropNames: string[];
+  recommendations: CropRecommendationType[];
+}
+
+const CROP_REC_HISTORY_KEY = "farmiq_crop_recommendations_history";
 
 const CropRecommendation = () => {
   const { weatherData, loading: weatherLoading, error: weatherError, fetchWeatherByCity, useCurrentLocation, locationName, location } = useWeather();
@@ -44,6 +60,71 @@ const CropRecommendation = () => {
   const [iotData, setIotData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Persistent Recommendation History
+  const [recHistory, setRecHistory] = useState<CropRecHistoryItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(CROP_REC_HISTORY_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const saveToHistory = (recs: CropRecommendationType[], currentForm: typeof formData) => {
+    if (!recs || recs.length === 0) return;
+    const item: CropRecHistoryItem = {
+      id: `rec-${Date.now()}`,
+      timestamp: new Date().toLocaleDateString("en-IN", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }),
+      location: currentForm.location,
+      season: currentForm.season,
+      soilType: currentForm.soilType,
+      farmSize: currentForm.farmSize,
+      cropNames: recs.map(r => r.cropName),
+      recommendations: recs
+    };
+    const updated = [item, ...recHistory.filter(h => h.id !== item.id).slice(0, 19)];
+    setRecHistory(updated);
+    try {
+      localStorage.setItem(CROP_REC_HISTORY_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.warn("Could not save crop history to localStorage", e);
+    }
+  };
+
+  const handleRestoreHistoryItem = (item: CropRecHistoryItem) => {
+    setRecommendations(item.recommendations);
+    setFormData(prev => ({
+      ...prev,
+      location: item.location,
+      season: item.season,
+      soilType: item.soilType,
+      farmSize: item.farmSize
+    }));
+  };
+
+  const handleDeleteHistoryItem = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = recHistory.filter(h => h.id !== id);
+    setRecHistory(updated);
+    try {
+      localStorage.setItem(CROP_REC_HISTORY_KEY, JSON.stringify(updated));
+    } catch (e) {}
+  };
+
+  const handleClearHistory = () => {
+    if (window.confirm("Are you sure you want to clear your crop recommendation history?")) {
+      setRecHistory([]);
+      try {
+        localStorage.removeItem(CROP_REC_HISTORY_KEY);
+      } catch (e) {}
+    }
+  };
 
   useEffect(() => {
     setFormData(prev => {
@@ -121,6 +202,7 @@ const CropRecommendation = () => {
 
       console.log('📊 Received AI recommendations:', aiRecommendations);
       setRecommendations(aiRecommendations);
+      saveToHistory(aiRecommendations, formData);
 
     } catch (err: any) {
       console.error("Error getting recommendations:", err);
@@ -150,6 +232,71 @@ const CropRecommendation = () => {
           </div>
         </div>
       </div>
+
+      {/* Saved Recommendations History Banner */}
+      {recHistory.length > 0 && (
+        <Card className="border border-emerald-200/80 bg-emerald-50/40 rounded-xl p-3.5 sm:p-4 shadow-xs">
+          <div className="flex items-center justify-between pb-2.5 border-b border-emerald-100">
+            <div className="flex items-center gap-2">
+              <History className="h-4 w-4 text-emerald-700" />
+              <span className="text-xs sm:text-sm font-semibold text-emerald-950">
+                Recent Recommendations History ({recHistory.length})
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearHistory}
+              className="text-[11px] h-7 text-red-600 hover:text-red-700 hover:bg-red-50 px-2"
+            >
+              Clear History
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pt-3">
+            {recHistory.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => handleRestoreHistoryItem(item)}
+                className="group p-3 bg-white border border-emerald-200/90 rounded-lg hover:border-emerald-500 hover:shadow-xs cursor-pointer transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+                    <span className="font-semibold text-slate-900 flex items-center gap-1 truncate max-w-[140px]">
+                      <MapPin className="h-3 w-3 text-emerald-600 shrink-0" /> {item.location}
+                    </span>
+                    <span className="flex items-center gap-1 text-[10px] shrink-0">
+                      <Clock className="h-3 w-3" /> {item.timestamp}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-600 capitalize mb-2">
+                    {item.season} season · {item.soilType} soil
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {item.cropNames?.slice(0, 3).map((cn, i) => (
+                      <Badge key={i} variant="outline" className="text-[10px] py-0 px-1.5 border-emerald-300 text-emerald-800 bg-emerald-50 font-medium">
+                        {cn}
+                      </Badge>
+                    ))}
+                    {(item.cropNames?.length || 0) > 3 && (
+                      <span className="text-[10px] text-slate-500">+{item.cropNames.length - 3}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-100 text-[11px]">
+                  <span className="text-emerald-700 font-semibold group-hover:underline">Restore Advice →</span>
+                  <button
+                    onClick={(e) => handleDeleteHistoryItem(item.id, e)}
+                    className="text-slate-400 hover:text-red-600 p-0.5"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Input Form */}

@@ -735,56 +735,76 @@ const EquipmentRental = () => {
   });
 
   // Active bookings list
-  const [bookings, setBookings] = useState<RentalBooking[]>([
-    {
-      id: 101,
-      equipment_id: 1,
-      equipment_name: "Mahindra 575 DI Sarpanch Tractor",
-      equipment_type: "tractor",
-      owner_name: "Ram Charan",
-      phone_number: "6305936623",
-      start_date: "2026-08-28",
-      end_date: "2026-08-29",
-      billing_mode: "acre",
-      units_booked: 4,
-      with_operator: true,
-      total_amount: 3800,
-      status: "confirmed",
-      created_at: "2026-08-27"
-    },
-    {
-      id: 102,
-      equipment_id: 4,
-      equipment_name: "DJI Agras T40 Smart Spraying Drone",
-      equipment_type: "drone",
-      owner_name: "Sai Madhu",
-      phone_number: "8639668662",
-      start_date: "2026-08-30",
-      end_date: "2026-08-30",
-      billing_mode: "acre",
-      units_booked: 10,
-      with_operator: true,
-      total_amount: 3500,
-      status: "pending",
-      created_at: "2026-08-27"
-    },
-    {
-      id: 103,
-      equipment_id: 2,
-      equipment_name: "John Deere 5050D PowerPro Tractor",
-      equipment_type: "tractor",
-      owner_name: "Charith",
-      phone_number: "8341505040",
-      start_date: "2026-08-31",
-      end_date: "2026-09-01",
-      billing_mode: "acre",
-      units_booked: 6,
-      with_operator: true,
-      total_amount: 5700,
-      status: "confirmed",
-      created_at: "2026-08-27"
+  const [bookings, setBookings] = useState<RentalBooking[]>(() => {
+    try {
+      const saved = localStorage.getItem("farmiq_equipment_bookings");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.debug("Error loading bookings from localStorage:", e);
     }
-  ]);
+    return [
+      {
+        id: 101,
+        equipment_id: 1,
+        equipment_name: "Mahindra 575 DI Sarpanch Tractor",
+        equipment_type: "tractor",
+        owner_name: "Ram Charan",
+        phone_number: "6305936623",
+        start_date: "2026-08-28",
+        end_date: "2026-08-29",
+        billing_mode: "acre",
+        units_booked: 4,
+        with_operator: true,
+        total_amount: 3800,
+        status: "confirmed",
+        created_at: "2026-08-27"
+      },
+      {
+        id: 102,
+        equipment_id: 4,
+        equipment_name: "DJI Agras T40 Smart Spraying Drone",
+        equipment_type: "drone",
+        owner_name: "Sai Madhu",
+        phone_number: "8639668662",
+        start_date: "2026-08-30",
+        end_date: "2026-08-30",
+        billing_mode: "acre",
+        units_booked: 10,
+        with_operator: true,
+        total_amount: 3500,
+        status: "pending",
+        created_at: "2026-08-27"
+      },
+      {
+        id: 103,
+        equipment_id: 2,
+        equipment_name: "John Deere 5050D PowerPro Tractor",
+        equipment_type: "tractor",
+        owner_name: "Charith",
+        phone_number: "8341505040",
+        start_date: "2026-08-31",
+        end_date: "2026-09-01",
+        billing_mode: "acre",
+        units_booked: 6,
+        with_operator: true,
+        total_amount: 5700,
+        status: "confirmed",
+        created_at: "2026-08-27"
+      }
+    ];
+  });
+
+  const updateBookings = (newBookings: RentalBooking[]) => {
+    setBookings(newBookings);
+    try {
+      localStorage.setItem("farmiq_equipment_bookings", JSON.stringify(newBookings));
+    } catch (e) {
+      console.warn("Could not save bookings to localStorage:", e);
+    }
+  };
 
   // Calculator State
   const [calcMachineType, setCalcMachineType] = useState("tractor");
@@ -972,7 +992,7 @@ const EquipmentRental = () => {
       created_at: new Date().toISOString().slice(0, 10)
     };
 
-    setBookings([newBooking, ...bookings]);
+    updateBookings([newBooking, ...bookings]);
     setIsBookingModalOpen(false);
     
     toast({
@@ -1054,7 +1074,7 @@ const EquipmentRental = () => {
   };
 
   const updateBookingStatus = (bookingId: number, nextStatus: RentalBooking["status"]) => {
-    setBookings(bookings.map((b) => (b.id === bookingId ? { ...b, status: nextStatus } : b)));
+    updateBookings(bookings.map((b) => (b.id === bookingId ? { ...b, status: nextStatus } : b)));
     toast({
       title: "Status Updated",
       description: `Rental #${bookingId} marked as ${nextStatus.toUpperCase()}.`
@@ -1608,6 +1628,20 @@ const EquipmentRental = () => {
                 <Clock className="h-5 w-5 text-emerald-600" />
                 <span>Active Bookings & Rental History</span>
               </CardTitle>
+              {bookings.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to clear your rental booking history?")) {
+                      updateBookings([]);
+                    }
+                  }}
+                  className="rounded-xl text-xs text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  Clear History
+                </Button>
+              )}
             </CardHeader>
 
             <CardContent className="p-0 pt-4 space-y-4">
@@ -1687,6 +1721,19 @@ const EquipmentRental = () => {
                           Mark Completed
                         </Button>
                       )}
+
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          if (window.confirm("Remove this rental booking from history?")) {
+                            updateBookings(bookings.filter((b) => b.id !== booking.id));
+                          }
+                        }}
+                        className="rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50 text-xs font-medium"
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 ))

@@ -28,8 +28,11 @@ import {
   VideoOff,
   ExternalLink,
   Activity,
-  Layers
+  Layers,
+  Trash2
 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Camera as CapCamera, CameraResultType, CameraSource } from "@capacitor/camera";
 import EmbeddedAIChat from "./EmbeddedAIChat";
 import { detectPlantDisease } from "@/services/geminiService";
 import { DiseaseDetectionResult } from "@/types/cropPrediction";
@@ -48,8 +51,23 @@ const LANGUAGE_VOICE_MAP: Record<string, string> = {
   kannada: "kn-IN"
 };
 
+export interface ScanHistoryItem {
+  id: number;
+  crop: string;
+  issue: string;
+  date: string;
+  treatment: string;
+  confidence: number;
+  severityLevel?: "low" | "medium" | "high";
+  image?: string;
+  fullResult?: AnalysisResult;
+}
+
+const SCAN_HISTORY_KEY = "farmiq_disease_scan_history";
+
 const DiseaseDetection = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<string>("analyze");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -67,11 +85,32 @@ const DiseaseDetection = () => {
   // Audio Speech synthesis state
   const [isSpeaking, setIsSpeaking] = useState(false);
   
-  const [scanHistory, setScanHistory] = useState([
-    { id: 1, crop: "Blueberry", issue: "Blueberry : healthy", date: "2026-08-27", treatment: "Maintain health", confidence: 99 },
-    { id: 2, crop: "Tomato", issue: "Tomato: Early blight", date: "2026-08-26", treatment: "Neem Oil & Copper Oxychloride", confidence: 95 },
-    { id: 3, crop: "Apple", issue: "Apple: Cedar apple rust", date: "2026-08-25", treatment: "Mancozeb 75% WP", confidence: 92 },
-  ]);
+  // Persistent Scan History from localStorage
+  const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(SCAN_HISTORY_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.debug("Error loading scan history:", e);
+    }
+    return [
+      { id: 1, crop: "Tomato", issue: "Tomato: Early Blight", date: "2026-09-28", treatment: "Neem Oil & Copper Oxychloride", confidence: 96, severityLevel: "medium" },
+      { id: 2, crop: "Chilli", issue: "Chilli: Leaf Curl Virus", date: "2026-09-25", treatment: "Dimethoate 30 EC (1.5 ml/L)", confidence: 94, severityLevel: "high" },
+      { id: 3, crop: "Paddy / Rice", issue: "Rice: Blast Disease", date: "2026-09-20", treatment: "Tricyclazole 75 WP (0.6g/L)", confidence: 92, severityLevel: "high" }
+    ];
+  });
+
+  const updateScanHistory = (newHistory: ScanHistoryItem[]) => {
+    setScanHistory(newHistory);
+    try {
+      localStorage.setItem(SCAN_HISTORY_KEY, JSON.stringify(newHistory));
+    } catch (e) {
+      console.warn("Could not save scan history to localStorage:", e);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -95,6 +134,68 @@ const DiseaseDetection = () => {
       videoRef.current.play().catch((err) => console.error("Video play error:", err));
     }
   }, [isLiveCameraActive, cameraStream]);
+
+  const openCamera = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const photo = await CapCamera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera
+        });
+        if (photo.dataUrl) {
+          setSelectedImage(photo.dataUrl);
+          setAnalysisResult(null);
+          setAnalysisError(null);
+          stopLiveCamera();
+          performAnalysis(photo.dataUrl);
+        }
+      } catch (err: any) {
+        console.warn("Native camera cancelled/failed, trying live camera fallback:", err);
+        if (err?.message !== "User cancelled photos app") {
+          startLiveCamera();
+        }
+      }
+    } else {
+      startLiveCamera();
+    }
+  };
+
+  const handleViewHistoricalReport = (scan: ScanHistoryItem) => {
+    if (scan.fullResult) {
+      setAnalysisResult(scan.fullResult);
+      if (scan.image) setSelectedImage(scan.image);
+    } else {
+      setAnalysisResult({
+        isPlantDetected: true,
+        cropType: scan.crop,
+        diseaseName: scan.issue,
+        confidence: scan.confidence,
+        severityLevel: scan.severityLevel || "medium",
+        actionRequired: "Review previous treatment plan",
+        description: `Field scan diagnosis for ${scan.crop} (${scan.issue}) recorded on ${scan.date}.`,
+        symptoms: ["Historical symptoms preserved for this diagnosis."],
+        treatment: [scan.treatment],
+        organicTreatment: ["Neem oil foliar spray (5ml/L)", "Organic compost soil replenishment"],
+        prevention: ["Crop rotation and clean furrow irrigation practices"]
+      });
+      if (scan.image) setSelectedImage(scan.image);
+    }
+    setActiveTab("analyze");
+  };
+
+  const handleDeleteHistoryItem = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = scanHistory.filter((item) => item.id !== id);
+    updateScanHistory(updated);
+  };
+
+  const handleClearAllHistory = () => {
+    if (window.confirm("Are you sure you want to clear your entire crop scan history?")) {
+      updateScanHistory([]);
+    }
+  };
 
   const startLiveCamera = async () => {
     try {
@@ -247,17 +348,25 @@ const DiseaseDetection = () => {
       setAnalysisResult(result);
 
       if (!isLiveScan) {
-        setScanHistory((prev) => [
-          {
-            id: Date.now(),
-            crop: result.cropType || "Plant",
-            issue: result.diseaseName,
-            date: new Date().toISOString().slice(0, 10),
-            treatment: result.organicTreatment?.[0] || result.treatment?.[0] || "Maintain health",
-            confidence: result.confidence
-          },
-          ...prev
-        ]);
+        const historyItem: ScanHistoryItem = {
+          id: Date.now(),
+          crop: result.cropType || "Plant",
+          issue: result.diseaseName,
+          date: new Date().toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          }),
+          treatment: result.organicTreatment?.[0] || result.treatment?.[0] || "Maintain crop health",
+          confidence: result.confidence,
+          severityLevel: result.severityLevel || "low",
+          image: imageDataUrl.length < 500000 ? imageDataUrl : undefined,
+          fullResult: result
+        };
+        const updated = [historyItem, ...scanHistory.filter(s => s.id !== historyItem.id).slice(0, 49)];
+        updateScanHistory(updated);
       }
     } catch (error: any) {
       console.error("Disease analysis failed:", error);
@@ -347,7 +456,7 @@ const DiseaseDetection = () => {
       </div>
 
       {/* Main Tabs - 4 equal columns on mobile, clean pills */}
-      <Tabs defaultValue="analyze" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex justify-center w-full mb-3 sm:mb-5">
           <TabsList className="bg-slate-200/80 p-1 rounded-xl shadow-xs grid grid-cols-4 w-full sm:w-auto sm:inline-flex max-w-2xl h-auto gap-0.5 sm:gap-1">
             <TabsTrigger value="analyze" className="rounded-lg font-medium py-1.5 px-1 sm:px-4 text-[11px] sm:text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-700 truncate">Analyze</TabsTrigger>
@@ -472,12 +581,12 @@ const DiseaseDetection = () => {
                             Upload Photo
                           </Button>
                           <Button
-                            onClick={startLiveCamera}
+                            onClick={openCamera}
                             variant="secondary"
                             className="border-slate-300 hover:bg-slate-200 text-slate-800 flex-1 h-9 sm:h-10 text-xs sm:text-sm rounded-lg font-medium shadow-xs"
                           >
                             <Camera className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
-                            Live Camera
+                            Take Photo
                           </Button>
                         </div>
                       </>
@@ -889,34 +998,118 @@ const DiseaseDetection = () => {
 
         {/* HISTORY TAB */}
         <TabsContent value="history">
-          <Card className="bg-white border border-slate-200 rounded-2xl shadow-xs">
-            <CardHeader>
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
+          <Card className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            <CardHeader className="border-b border-slate-100 p-4 sm:p-5 flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-emerald-600" />
-                <span>Field Scan History</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {scanHistory.map((scan) => (
-                <div
-                  key={scan.id}
-                  className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 flex items-center justify-between transition-colors"
+                <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
+                  Field Scan History
+                </CardTitle>
+                <Badge variant="secondary" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                  {scanHistory.length} Scans Saved
+                </Badge>
+              </div>
+              {scanHistory.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleClearAllHistory}
+                  className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl gap-1"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-slate-900">{scan.crop}</p>
-                      <Badge variant="outline" className="text-xs bg-white">
-                        {scan.confidence}% Conf.
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-slate-600">{scan.issue}</p>
-                    <p className="text-xs text-emerald-700 font-medium">Tx: {scan.treatment}</p>
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear All
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6 space-y-3">
+              {scanHistory.length === 0 ? (
+                <div className="text-center py-10 space-y-3">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                    <Clock className="h-7 w-7" />
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-mono text-slate-400">{scan.date}</p>
-                  </div>
+                  <p className="font-semibold text-slate-800 text-sm sm:text-base">No field scans recorded yet</p>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    Capture or upload a crop leaf photo to identify diseases and save treatment records automatically.
+                  </p>
+                  <Button
+                    onClick={() => setActiveTab("analyze")}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl shadow-xs px-4"
+                  >
+                    Start New Scan
+                  </Button>
                 </div>
-              ))}
+              ) : (
+                scanHistory.map((scan) => (
+                  <div
+                    key={scan.id}
+                    onClick={() => handleViewHistoricalReport(scan)}
+                    className="p-3.5 sm:p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-emerald-50/30 hover:border-emerald-200 flex items-center justify-between gap-3 transition-all cursor-pointer group shadow-xs"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Leaf / Photo Thumbnail */}
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden bg-emerald-100/70 border border-emerald-200 flex items-center justify-center shrink-0">
+                        {scan.image ? (
+                          <img src={scan.image} alt={scan.crop} className="w-full h-full object-cover" />
+                        ) : (
+                          <Leaf className="h-6 w-6 text-emerald-600" />
+                        )}
+                      </div>
+
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <p className="font-bold text-slate-900 text-sm sm:text-base truncate group-hover:text-emerald-700 transition-colors">
+                            {scan.crop}
+                          </p>
+                          <Badge
+                            className={`text-[10px] px-1.5 py-0 rounded-md font-semibold ${
+                              scan.severityLevel === "high"
+                                ? "bg-red-100 text-red-800 border-red-200"
+                                : scan.severityLevel === "medium"
+                                ? "bg-amber-100 text-amber-800 border-amber-200"
+                                : "bg-emerald-100 text-emerald-800 border-emerald-200"
+                            }`}
+                          >
+                            {scan.severityLevel ? scan.severityLevel.toUpperCase() : "SAFE"}
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px] bg-white">
+                            {scan.confidence}% Conf.
+                          </Badge>
+                        </div>
+                        <p className="text-xs font-medium text-slate-700 truncate">{scan.issue}</p>
+                        <p className="text-[11px] text-emerald-700 line-clamp-1">
+                          <strong>Tx:</strong> {scan.treatment}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <span className="text-[10px] sm:text-xs font-mono text-slate-400">{scan.date}</span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewHistoricalReport(scan);
+                          }}
+                          className="h-7 text-xs px-2 text-emerald-700 hover:bg-emerald-100 rounded-lg gap-1"
+                        >
+                          <Eye className="h-3 w-3" />
+                          <span className="hidden sm:inline">View</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => handleDeleteHistoryItem(scan.id, e)}
+                          className="h-7 w-7 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </TabsContent>

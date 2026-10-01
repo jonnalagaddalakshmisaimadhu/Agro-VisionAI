@@ -91,17 +91,28 @@ export const MarketplaceChatModal = ({
   const fetchChatHistory = async () => {
     if (!product) return;
     setIsLoading(true);
+    const localKey = `farmiq_market_chat_${product.id}`;
     try {
-      const res = await fetch(`/api/marketplace/chat/${product.id}`);
+      const res = await fetch(`/api/marketplace/chat/${product.id}`, { signal: AbortSignal.timeout(3000) });
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
+        localStorage.setItem(localKey, JSON.stringify(data));
+        setIsLoading(false);
+        return;
       }
     } catch (e) {
-      console.error("Failed to load chat:", e);
+      console.debug("Backend chat unreachable, checking local history:", e);
     } finally {
       setIsLoading(false);
     }
+
+    try {
+      const saved = localStorage.getItem(localKey);
+      if (saved) {
+        setMessages(JSON.parse(saved));
+      }
+    } catch (err) {}
   };
 
   const handleSendMessage = async (textToSend?: string, isOffer: boolean = false, price?: number, qty?: number) => {
@@ -119,25 +130,53 @@ export const MarketplaceChatModal = ({
         offered_quantity: qty || (customOfferQty ? parseFloat(customOfferQty) : undefined)
       };
 
-      const res = await fetch(`/api/marketplace/chat/${product.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+      let createdMsg: ChatMessage | null = null;
+      try {
+        const res = await fetch(`/api/marketplace/chat/${product.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(3000)
+        });
+
+        if (res.ok) {
+          createdMsg = await res.json();
+        }
+      } catch (err) {
+        console.debug("Offline or API error, continuing locally:", err);
+      }
+
+      if (!createdMsg) {
+        createdMsg = {
+          id: Date.now(),
+          product_id: product.id,
+          sender_name: "You (Buyer)",
+          receiver_name: product.seller_name,
+          message_text: msg,
+          is_offer: isOffer,
+          offered_price: price || (customOfferPrice ? parseFloat(customOfferPrice) : undefined),
+          offered_quantity: qty || (customOfferQty ? parseFloat(customOfferQty) : undefined),
+          created_at: new Date().toISOString()
+        };
+      }
+
+      setMessages((prev) => {
+        const next = [...prev, createdMsg!];
+        try {
+          localStorage.setItem(`farmiq_market_chat_${product.id}`, JSON.stringify(next));
+        } catch (e) {}
+        return next;
       });
 
-      if (res.ok) {
-        const createdMsg = await res.json();
-        setMessages(prev => [...prev, createdMsg]);
-        setInputText("");
-        setShowOfferDrawer(false);
-        setCustomOfferPrice("");
-        setCustomOfferQty("");
+      setInputText("");
+      setShowOfferDrawer(false);
+      setCustomOfferPrice("");
+      setCustomOfferQty("");
 
-        // Simulate instant simulated farmer reply for responsive pair trading
-        setTimeout(() => {
-          simulateFarmerReply(msg, isOffer, price || parseFloat(customOfferPrice));
-        }, 1200);
-      }
+      // Simulate instant simulated farmer reply for responsive pair trading
+      setTimeout(() => {
+        simulateFarmerReply(msg, isOffer, price || parseFloat(customOfferPrice));
+      }, 1200);
     } catch (e) {
       console.error("Error sending message:", e);
     }
@@ -169,7 +208,13 @@ export const MarketplaceChatModal = ({
       created_at: new Date().toISOString()
     };
 
-    setMessages(prev => [...prev, farmerMsg]);
+    setMessages((prev) => {
+      const next = [...prev, farmerMsg];
+      try {
+        localStorage.setItem(`farmiq_market_chat_${product.id}`, JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
   };
 
   // WebRTC In-App Free Audio Call Simulation
