@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "995463400294",
+    "project_id": "farmiq-agrovisionai",
+    "storage_bucket": "farmiq-agrovisionai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995463400294:android:34bfbc2562ca7b6a4616a7",
+        "android_client_info": {
+          "package_name": "com.farmiq.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "995463400294-g6hc9976pvl4s12jt8hdjgvvh2d1rh86.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsTJVRT2pYrcljIvXTyfmyNlT0pGprWo8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "995463400294-g6hc9976pvl4s12jt8hdjgvvh2d1rh86.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

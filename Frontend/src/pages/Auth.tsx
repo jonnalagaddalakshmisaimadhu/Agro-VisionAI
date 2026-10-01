@@ -79,15 +79,6 @@ const AuthPage = () => {
 
   const handleGoogleLogin = async () => {
     setAuthError(null);
-    const isNative = Capacitor.isNativePlatform();
-
-    if (isNative) {
-      // In mobile Android APK, open in-app Google Sign-In dialog
-      // This prevents the WebView from redirecting to firebaseapp.com and crashing
-      setIsGoogleModalOpen(true);
-      return;
-    }
-
     setIsLoading(true);
     try {
       const res = await loginWithGoogle();
