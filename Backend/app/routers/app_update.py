@@ -39,7 +39,7 @@ LATEST_RELEASE = VersionInfo(
         "🌦️ వేగవంతమైన లైవ్ వెదర్ రాడార్ & విశ్లేషణ",
         "⚡ వేగవంతమైన పనితీరు మరియు ఆటో-అప్‌డేట్ సదుపాయం"
     ],
-    apk_url="/FarmIQ.apk",
+    apk_url="https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/releases/latest/download/FarmIQ.apk",
     apk_size_mb=128.4,
     published_date="2026-10-01"
 )

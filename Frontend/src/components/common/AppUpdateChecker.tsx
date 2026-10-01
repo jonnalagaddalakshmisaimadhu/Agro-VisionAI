@@ -99,11 +99,12 @@ export const AppUpdateChecker: React.FC = () => {
           // Trigger actual APK file download directly
           const targetUrl = updateInfo.apk_url.startsWith("http") 
             ? updateInfo.apk_url 
-            : `${window.location.origin}${updateInfo.apk_url.startsWith("/") ? "" : "/"}${updateInfo.apk_url}`;
+            : "https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/releases/latest/download/FarmIQ.apk";
           const link = document.createElement("a");
           link.href = targetUrl;
           link.download = "FarmIQ.apk";
           link.target = "_blank";
+          link.rel = "noopener noreferrer";
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
