@@ -39,8 +39,16 @@ export const signInWithGoogle = async () => {
     // 1. On Mobile Android APK, use Real Native Google Firebase Authentication
     if (isNative) {
         try {
-            const result = await FirebaseAuthentication.signInWithGoogle();
-            const nativeUser = result.user;
+            let result: any;
+            try {
+                // Disable Credential Manager to bypass [16] Account reauth failed bug
+                result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: false });
+            } catch (cmErr: any) {
+                console.warn("signInWithGoogle without CredentialManager failed, trying with default:", cmErr);
+                result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: true });
+            }
+
+            const nativeUser = result?.user;
             if (nativeUser) {
                 const user = {
                     uid: nativeUser.uid,
@@ -57,8 +65,10 @@ export const signInWithGoogle = async () => {
         } catch (nativeErr: any) {
             console.error("Native Google Sign-In error:", nativeErr);
             let friendlyMessage = nativeErr?.message || "Google Sign-In failed.";
-            if (friendlyMessage.includes("10:") || friendlyMessage.includes("DEVELOPER_ERROR")) {
-                friendlyMessage = "Google Play Services error (SHA-1 fingerprint must be added to Firebase Console).";
+            if (friendlyMessage.includes("16") || friendlyMessage.includes("reauth")) {
+                friendlyMessage = "Google Sign-In requires SHA-1 fingerprint to be added in Firebase Console.";
+            } else if (friendlyMessage.includes("10:") || friendlyMessage.includes("DEVELOPER_ERROR")) {
+                friendlyMessage = "Google Play Services error (SHA-1 fingerprint missing in Firebase Console).";
             }
             return { user: null, token: null, error: new Error(friendlyMessage) };
         }

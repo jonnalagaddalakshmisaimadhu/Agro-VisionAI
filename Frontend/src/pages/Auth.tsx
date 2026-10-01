@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Capacitor } from "@capacitor/core";
-import { User, Lock, Eye, EyeOff, Sprout, Loader2, Sparkles } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Sprout, Loader2 } from "lucide-react";
 import tractorBg from "@/assets/farmiq-tractor-login-bg.png";
 
 const AuthPage = () => {
@@ -85,13 +85,6 @@ const AuthPage = () => {
     }
   };
 
-  const handleDemoFill = () => {
-    setFormData({
-      username: "farmer",
-      password: "password123"
-    });
-    if (authError) setAuthError(null);
-  };
 
   return (
     <div className="min-h-screen relative flex items-center justify-center lg:justify-end p-4 sm:p-6 lg:pr-24 xl:pr-36">
@@ -291,17 +284,7 @@ const AuthPage = () => {
                 <span>Sign in with Google</span>
               </Button>
 
-              {/* Quick Demo Fill helper for instant access on mobile or test devices */}
-              <div className="pt-2 text-center">
-                <button
-                  type="button"
-                  onClick={handleDemoFill}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 px-3 py-1.5 rounded-full transition-all active:scale-95"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Demo Farmer Access (Click to auto-fill)</span>
-                </button>
-              </div>
+
 
               {/* Sign Up Link */}
               <div className="text-center pt-2">
