@@ -20,12 +20,7 @@ import {
   X,
   Youtube,
   ChevronLeft,
-  ChevronRight,
-  Compass,
-  Radio,
-  Brain,
-  Server,
-  ShieldCheck
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -88,46 +83,16 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       badge: null
     },
     {
-      id: "navigation",
-      icon: Compass,
-      label: "Route & Navigation",
-      badge: "P0"
-    },
-    {
-      id: "telemetry",
-      icon: Radio,
-      label: "Real-Time Radar",
-      badge: "Live"
-    },
-    {
-      id: "traffic-prediction",
-      icon: Brain,
-      label: "AI Traffic Forecast",
-      badge: "P2"
-    },
-    {
-      id: "devops-hardening",
-      icon: Server,
-      label: "DevOps & Scale Radar",
-      badge: "P1/P2"
-    },
-    {
-      id: "security-compliance",
-      icon: ShieldCheck,
-      label: "Security & Compliance",
-      badge: "P1"
-    },
-    {
-      id: "help",
-      icon: MessageCircle,
-      label: "Help",
-      badge: null
-    },
-    {
       id: "video-session",
       icon: Youtube,
       label: "Video Session",
       badge: "New"
+    },
+    {
+      id: "help",
+      icon: MessageCircle,
+      label: "Help & Support",
+      badge: null
     }
   ];
 

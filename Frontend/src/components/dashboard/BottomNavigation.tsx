@@ -14,12 +14,7 @@ import {
   Package,
   Settings,
   Stethoscope,
-  Sparkles,
-  Compass,
-  Radio,
-  Brain,
-  Server,
-  ShieldCheck
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -57,51 +52,6 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
 
   // 🌟 ONLY REMAINING FEATURES (Excluded items already in bottom bar: Home, Predict, Disease, Market)
   const remainingFeatures: RemainingFeature[] = [
-    {
-      id: "security-compliance",
-      label: "Security",
-      icon: ShieldCheck,
-      badge: "P1",
-      badgeColor: "bg-emerald-600",
-      color: "text-emerald-600 dark:text-emerald-400",
-      bgColor: "bg-emerald-100/90 dark:bg-emerald-950/80"
-    },
-    {
-      id: "devops-hardening",
-      label: "DevOps",
-      icon: Server,
-      badge: "P1/P2",
-      badgeColor: "bg-indigo-600",
-      color: "text-indigo-600 dark:text-indigo-400",
-      bgColor: "bg-indigo-100/90 dark:bg-indigo-950/80"
-    },
-    {
-      id: "traffic-prediction",
-      label: "Traffic AI",
-      icon: Brain,
-      badge: "P2",
-      badgeColor: "bg-purple-600",
-      color: "text-purple-600 dark:text-purple-400",
-      bgColor: "bg-purple-100/90 dark:bg-purple-950/80"
-    },
-    {
-      id: "telemetry",
-      label: "Radar",
-      icon: Radio,
-      badge: "Live",
-      badgeColor: "bg-emerald-500",
-      color: "text-emerald-600 dark:text-emerald-400",
-      bgColor: "bg-emerald-100/90 dark:bg-emerald-950/80"
-    },
-    {
-      id: "navigation",
-      label: "Routes",
-      icon: Compass,
-      badge: "P0",
-      badgeColor: "bg-blue-500",
-      color: "text-blue-600 dark:text-blue-400",
-      bgColor: "bg-blue-100/90 dark:bg-blue-950/80"
-    },
     {
       id: "market-supply-tracker",
       label: "Weather",
