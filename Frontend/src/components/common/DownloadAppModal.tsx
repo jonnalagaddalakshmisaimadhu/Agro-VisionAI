@@ -25,7 +25,8 @@ interface DownloadAppModalProps {
   onClose: () => void;
 }
 
-const APK_DOWNLOAD_URL = "https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/raw/refs/heads/main/Frontend/android/release/FarmIQ.apk";
+const LOCAL_APK_URL = "/FarmIQ.apk";
+const GITHUB_APK_BACKUP_URL = "https://github.com/jonnalagaddalakshmisaimadhu/Agro-VisionAI/raw/refs/heads/main/Frontend/android/release/FarmIQ.apk";
 
 export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
   isOpen,
@@ -40,7 +41,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
 
     // Direct browser file download of real compiled APK binary
     const link = document.createElement("a");
-    link.href = APK_DOWNLOAD_URL;
+    link.href = LOCAL_APK_URL;
     link.setAttribute("download", "FarmIQ.apk");
     document.body.appendChild(link);
     link.click();
@@ -48,8 +49,10 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
 
     // Also trigger direct navigation fallback for mobile Chrome
     try {
-      window.location.assign(APK_DOWNLOAD_URL);
-    } catch (e) {}
+      window.location.assign(LOCAL_APK_URL);
+    } catch (e) {
+      window.location.assign(GITHUB_APK_BACKUP_URL);
+    }
 
     // Visual progress indicator
     const t1 = setTimeout(() => setProgress(65), 300);
@@ -145,7 +148,7 @@ export const DownloadAppModal: React.FC<DownloadAppModalProps> = ({
             className="w-full h-12 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm font-bold rounded-xl shadow-lg shadow-green-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all border-0"
           >
             <Download className="w-4 h-4" />
-            Download FarmIQ.apk (64.5 MB)
+            Download FarmIQ.apk (66.4 MB)
           </button>
 
           {/* Quick 3-Step Install Guide */}
