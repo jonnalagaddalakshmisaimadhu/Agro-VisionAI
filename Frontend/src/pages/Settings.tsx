@@ -236,7 +236,7 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6 animate-in fade-in duration-200">
+    <div className="p-3 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6 pb-28 animate-in fade-in duration-200">
       
       {/* 1. TOP HEADER WITH BACK BUTTON & REAL-TIME SYNC BADGE */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -272,10 +272,10 @@ const SettingsPage: React.FC = () => {
 
       {/* 2. MAIN SETTINGS TABS */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-slate-100 p-1 rounded-xl grid grid-cols-2 sm:grid-cols-5 gap-1 w-full border border-slate-200/80">
+        <TabsList className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl flex flex-wrap sm:grid sm:grid-cols-5 gap-1.5 w-full h-auto border border-slate-200/80 shadow-xs">
           <TabsTrigger
             value="farm_profile"
-            className="rounded-lg font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 min-w-[130px] sm:min-w-0 rounded-xl font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
           >
             <Wheat className="h-3.5 w-3.5" />
             <span>Farm Profile</span>
@@ -283,7 +283,7 @@ const SettingsPage: React.FC = () => {
 
           <TabsTrigger
             value="weather_alerts"
-            className="rounded-lg font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 min-w-[130px] sm:min-w-0 rounded-xl font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
           >
             <CloudRain className="h-3.5 w-3.5" />
             <span>Weather Alerts</span>
@@ -291,7 +291,7 @@ const SettingsPage: React.FC = () => {
 
           <TabsTrigger
             value="voip_privacy"
-            className="rounded-lg font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 min-w-[130px] sm:min-w-0 rounded-xl font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
           >
             <PhoneCall className="h-3.5 w-3.5" />
             <span>VoIP & Calling</span>
@@ -299,7 +299,7 @@ const SettingsPage: React.FC = () => {
 
           <TabsTrigger
             value="language_mandi"
-            className="rounded-lg font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 min-w-[130px] sm:min-w-0 rounded-xl font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
           >
             <Globe className="h-3.5 w-3.5" />
             <span>Language & Mandi</span>
@@ -307,7 +307,7 @@ const SettingsPage: React.FC = () => {
 
           <TabsTrigger
             value="data_storage"
-            className="rounded-lg font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 min-w-[130px] sm:min-w-0 rounded-xl font-semibold text-xs py-2.5 data-[state=active]:bg-white data-[state=active]:text-emerald-900 data-[state=active]:shadow-xs transition-all flex items-center justify-center gap-1.5"
           >
             <HardDrive className="h-3.5 w-3.5" />
             <span>Offline & Data</span>

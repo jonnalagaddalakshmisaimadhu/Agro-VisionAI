@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { localAuthService, User } from "@/services/localAuthService";
 import { authService } from "@/services/authService";
-import { signInWithGoogle } from "@/lib/firebase";
+import { signInWithGoogle, checkGoogleRedirectResult } from "@/lib/firebase";
 
 type AuthUser = {
   id: string;
@@ -53,6 +53,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initializeAuth = async () => {
+      // 0. Check if returning from a mobile Google OAuth redirect
+      const redirectAuth = await checkGoogleRedirectResult();
+      if (redirectAuth && redirectAuth.user) {
+        const u = redirectAuth.user;
+        const mappedUser: AuthUser = {
+          id: u.uid,
+          username: u.displayName || u.email?.split("@")[0] || "user",
+          email: u.email || "",
+          full_name: u.displayName || "",
+          created_at: new Date().toISOString()
+        };
+        setUser(mappedUser);
+        localStorage.setItem("farmiq_current_user", JSON.stringify(mappedUser));
+        localStorage.setItem("farmiq_logged_in", "true");
+        return;
+      }
+
       const token = authService.getToken();
       if (token) {
         try {

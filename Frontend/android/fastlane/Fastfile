@@ -1,0 +1,44 @@
+# Fastlane Configuration for FarmIQ Android Automation
+default_platform(:android)
+
+platform :android do
+  desc "Runs all unit and lint tests on the Android Capacitor build"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Builds the release APK and generates production bundle"
+  lane :build_apk do
+    gradle(
+      task: "assemble",
+      build_type: "Release"
+    )
+  end
+
+  desc "Builds Android App Bundle (AAB) for Google Play Store upload"
+  lane :build_bundle do
+    gradle(
+      task: "bundle",
+      build_type: "Release"
+    )
+  end
+
+  desc "Deploys a new version to the Google Play Internal Track"
+  lane :deploy_internal do
+    build_bundle
+    upload_to_play_store(
+      track: "internal",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Deploys a new version to Google Play Production track"
+  lane :deploy_production do
+    build_bundle
+    upload_to_play_store(
+      track: "production"
+    )
+  end
+end

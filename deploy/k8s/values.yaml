@@ -1,0 +1,102 @@
+# =============================================================================
+# FARMIQ KUBERNETES / K3S / EKS PRODUCTION HELM VALUES
+# =============================================================================
+
+global:
+  environment: production
+  domain: farmiq.ai
+
+# 1. FastAPI Application Backend
+backend:
+  replicaCount: 3
+  image:
+    repository: farmiq-backend
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "1024Mi"
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# 2. Frontend Nginx SPA Web & Mobile Assets
+frontend:
+  replicaCount: 2
+  image:
+    repository: farmiq-frontend
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    limits:
+      cpu: "300m"
+      memory: "256Mi"
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+
+# 3. PostGIS Spatial Database
+postgis:
+  image: postgis/postgis:16-3.4
+  storage:
+    size: 50Gi
+    storageClass: local-path
+  resources:
+    limits:
+      cpu: "2000m"
+      memory: "4096Mi"
+    requests:
+      cpu: "500m"
+      memory: "1024Mi"
+
+# 4. Redis 7.2 Telemetry & GeoSets
+redis:
+  image: redis:7.2-alpine
+  storage:
+    size: 10Gi
+    storageClass: local-path
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "2048Mi"
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+
+# 5. Redpanda / Kafka Distributed Stream Broker
+redpanda:
+  image: redpandadata/redpanda:latest
+  storage:
+    size: 20Gi
+    storageClass: local-path
+  resources:
+    limits:
+      cpu: "1500m"
+      memory: "2048Mi"
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+
+# 6. Traefik Ingress Gateway
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  tls:
+    enabled: true
+    secretName: farmiq-tls-cert

@@ -1,0 +1,114 @@
+# =============================================================================
+# Zero-Trust Kubernetes Network Policy (NIST SP 800-207 & OWASP Benchmark)
+# Default-Deny Ingress/Egress Isolation for FarmIQ Production Microservices
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: farmiq-backend-zero-trust-policy
+  namespace: {{ .Values.namespace | default "farmiq-production" }}
+  labels:
+    app.kubernetes.io/name: farmiq-backend
+    app.kubernetes.io/part-of: farmiq-platform
+    security.farmiq.io/compliance: zero-trust-p1
+spec:
+  podSelector:
+    matchLabels:
+      app: farmiq-backend
+  policyTypes:
+    - Ingress
+    - Egress
+
+  # ---------------------------------------------------------------------------
+  # INGRESS RESTRICTIONS: Only Traefik Ingress & Prometheus Scraping Permitted
+  # ---------------------------------------------------------------------------
+  ingress:
+    # 1. Allow HTTP/WebSocket Ingress exclusively from Traefik Edge Proxy
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - protocol: TCP
+          port: 8000
+
+    # 2. Allow Metric Scraping exclusively from Prometheus Monitoring namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 8000
+
+  # ---------------------------------------------------------------------------
+  # EGRESS RESTRICTIONS: Strict Least-Privilege Pod Outbound Egress
+  # ---------------------------------------------------------------------------
+  egress:
+    # 1. DNS Resolution (CoreDNS in kube-system)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # 2. PostGIS Sharded Database Cluster (Port 5432)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: farmiq-postgis
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # 3. Redis 7.2 In-Memory Telemetry Stream (Port 6379)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: farmiq-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # 4. HashiCorp Vault Secrets Manager (Port 8200)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vault
+      ports:
+        - protocol: TCP
+          port: 8200
+
+    # 5. Redpanda / Kafka Telemetry Brokers (Port 9092)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: farmiq-redpanda
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # 6. Egress to Sentry Enterprise Cloud & OpenStreetMap Routing APIs (HTTPS 443)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

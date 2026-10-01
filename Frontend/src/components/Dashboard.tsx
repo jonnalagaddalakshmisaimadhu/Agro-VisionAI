@@ -14,6 +14,11 @@ import WeatherAlerts from "./modules/WeatherAlerts";
 import GovernmentSchemes from "./modules/GovernmentSchemes";
 import HelpPage from "./modules/HelpPage";
 import VideoSession from "./modules/VideoSession";
+import NavigationRouting from "./modules/NavigationRouting";
+import RealtimeTelemetryMap from "./modules/RealtimeTelemetryMap";
+import TrafficPredictionStream from "./modules/TrafficPredictionStream";
+import DevOpsHardeningCenter from "./modules/DevOpsHardeningCenter";
+import { SecurityComplianceCenter } from "./modules/SecurityComplianceCenter";
 import SettingsPage from "@/pages/Settings";
 import { WeatherProvider } from "@/components/dashboard/WeatherContext";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
@@ -73,6 +78,26 @@ const Dashboard = () => {
         return <SettingsPage />;
       case "video-session":
         return <VideoSession />;
+      case "navigation":
+      case "routing":
+        return <NavigationRouting />;
+      case "telemetry":
+      case "radar":
+        return <RealtimeTelemetryMap />;
+      case "traffic-prediction":
+      case "traffic-ai":
+      case "stream-processing":
+        return <TrafficPredictionStream />;
+      case "devops-hardening":
+      case "devops":
+      case "scale-radar":
+      case "stress-testing":
+        return <DevOpsHardeningCenter />;
+      case "security-compliance":
+      case "security":
+      case "compliance":
+      case "waf":
+        return <SecurityComplianceCenter />;
       case "home":
       default:
         return <DashboardMainContent activeModule={activeModule} setActiveModule={setActiveModule} />;

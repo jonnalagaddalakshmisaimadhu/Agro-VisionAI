@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. SPATIAL DATABASE ENGINE: PostgreSQL 16 with PostGIS 3.4
+  # ---------------------------------------------------------------------------
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: farmiq_postgis_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_farmiq_secure}
+      POSTGRES_DB: ${POSTGRES_DB:-farmiq_spatial}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d farmiq_spatial"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - farmiq_network
+
+  # ---------------------------------------------------------------------------
+  # 2. CORE ROUTING ENGINE: Open Source Routing Machine (OSRM) Container
+  # ---------------------------------------------------------------------------
+  osrm:
+    image: osrm/osrm-backend:latest
+    container_name: farmiq_osrm_engine
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - osrm_data:/data
+    command: >
+      sh -c "if [ -f /data/corridor.osrm ]; then
+               osrm-routed --algorithm mld /data/corridor.osrm;
+             else
+               echo 'OSRM map graph not pre-built in volume. Container standing by on proxy mode.' &&
+               tail -f /dev/null;
+             fi"
+    networks:
+      - farmiq_network
+
+  # ---------------------------------------------------------------------------
+  # 3. REAL-TIME PUB/SUB & GEOSET ENGINE: Redis 7.2 Container
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7.2-alpine
+    container_name: farmiq_redis_telemetry
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - farmiq_network
+
+  # ---------------------------------------------------------------------------
+  # 4. STREAM MESSAGE BROKER: Redpanda (Kafka 3.x API Distributed Broker)
+  # ---------------------------------------------------------------------------
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: farmiq_redpanda_broker
+    restart: always
+    command:
+      - redpanda start
+      - --smp 1
+      - --memory 512M
+      - --overprovisioned
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "19092:19092"
+      - "9092:9092"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    networks:
+      - farmiq_network
+
+  # ---------------------------------------------------------------------------
+  # 5. APPLICATION BACKEND: FastAPI with PostGIS, OSRM, Redis & Redpanda/Kafka
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: farmiq_backend_api
+    restart: always
+    depends_on:
+      postgis:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres_farmiq_secure}@postgis:5432/${POSTGRES_DB:-farmiq_spatial}
+      - OSRM_ROUTER_URL=http://osrm:5000
+      - REDIS_URL=redis://redis:6379/0
+      - KAFKA_BOOTSTRAP_SERVERS=redpanda:9092
+      - ENVIRONMENT=production
+    volumes:
+      - ./Backend/uploads:/app/uploads
+    networks:
+      - farmiq_network
+
+volumes:
+  postgis_data:
+    driver: local
+  osrm_data:
+    driver: local
+  redis_data:
+    driver: local
+  redpanda_data:
+    driver: local
+
+networks:
+  farmiq_network:
+    driver: bridge

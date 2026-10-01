@@ -20,7 +20,12 @@ import {
   Sprout,
   Tractor,
   Droplets,
-  BarChart as BarChartIcon
+  BarChart as BarChartIcon,
+  Brain,
+  Compass,
+  Radio,
+  Server,
+  ShieldCheck
 } from "lucide-react";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useAuth } from "@/context/AuthContext";
@@ -375,6 +380,67 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
           </CardContent>
         </Card>
       </div>
+
+      {/* Phase 4 AI Traffic & Live Stream Prediction Banner */}
+      <Card className="border border-primary/30 bg-gradient-to-r from-primary/10 via-background to-success/10 shadow-sm rounded-xl overflow-hidden">
+        <div className="p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-primary text-primary-foreground shadow-xs shrink-0">
+              <Brain className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-bold text-primary uppercase tracking-wider">Phase 4 AI Radar</span>
+                <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px] py-0">
+                  Kafka / Redpanda Active
+                </Badge>
+                <Badge variant="outline" className="text-[10px] py-0 font-mono">
+                  XGBoost 3.2 + PyTorch GNN
+                </Badge>
+              </div>
+              <h3 className="text-sm sm:text-base font-bold text-foreground">
+                Ahead-of-Time Agri-Corridor Congestion & Speed Prediction
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Real-time road link map-matching, stream micro-batching, and ML speed forecasting ahead of time.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setActiveModule("telemetry")}
+              className="text-xs h-9 bg-card"
+            >
+              <Radio className="w-3.5 h-3.5 mr-1.5 text-emerald-500" /> Live Radar
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setActiveModule("traffic-prediction")}
+              className="text-xs h-9 bg-primary text-primary-foreground font-semibold shadow-xs"
+            >
+              <Compass className="w-3.5 h-3.5 mr-1.5" /> Open Traffic AI
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setActiveModule("devops-hardening")}
+              className="text-xs h-9 bg-card border-indigo-500/30 text-indigo-600 dark:text-indigo-400"
+            >
+              <Server className="w-3.5 h-3.5 mr-1.5 text-indigo-500" /> DevOps & Scale
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setActiveModule("security-compliance")}
+              className="text-xs h-9 bg-card border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 mr-1.5 text-emerald-500" /> Security
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       {/* AI Recommendations and Notifications */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">

@@ -30,7 +30,9 @@ import {
   Zap,
   TrendingDown,
   Building2,
-  Download
+  Download,
+  Server,
+  ShieldCheck
 } from "lucide-react";
 import { DownloadAppModal } from "@/components/common/DownloadAppModal";
 
@@ -88,6 +90,24 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
       title: "☁️ Climate Alerts & Weather Updates",
       description: "Get real-time weather warnings and optimal planting/harvesting recommendations.",
       gradient: "from-primary to-accent"
+    },
+    {
+      icon: Brain,
+      title: "🧠 AI Traffic Prediction & Stream Radar",
+      description: "Ahead-of-time road congestion forecasting using Kafka streams, map-matching, and XGBoost + PyTorch GNN.",
+      gradient: "from-purple-600 to-indigo-600"
+    },
+    {
+      icon: Server,
+      title: "⚡ 100K High-Scale DevOps & Cloud Infrastructure",
+      description: "Powered by K3s Kubernetes, multi-stage Docker, Citus PostGIS sharding, and Cloudflare edge CDN.",
+      gradient: "from-blue-600 to-emerald-600"
+    },
+    {
+      icon: ShieldCheck,
+      title: "🛡️ Enterprise Security & Compliance Guardrails",
+      description: "Zero-Trust network policies, OWASP ModSecurity WAF, GPS telemetry anonymization, and Sentry crash escalation.",
+      gradient: "from-emerald-600 to-indigo-600"
     }
   ];
 

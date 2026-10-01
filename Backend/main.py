@@ -25,12 +25,19 @@ from app.routers import (
     community_chat,
     marketplace_chat,
     app_update,
-    notifications
+    notifications,
+    navigation,
+    telemetry_ws,
+    traffic_prediction,
+    devops_hardening,
+    security_compliance
 )
+from app.core.waf_middleware import OWASPModSecurityWAFMiddleware
 from app.database import engine, Base
 from app.core.config import settings
 from app.services.scheduler import scheduler_service
 from app.database_mongo import mongo_db
+from app.services.stream_processing import stream_processor
 
 from contextlib import asynccontextmanager
 
@@ -48,7 +55,15 @@ async def lifespan(app: FastAPI):
         await mongo_db.connect()
     except Exception as e:
         print(f"Warning: MongoDB connect error: {e}")
+    try:
+        await stream_processor.start()
+    except Exception as e:
+        print(f"Warning: Stream processor startup error: {e}")
     yield
+    try:
+        await stream_processor.stop()
+    except Exception as e:
+        print(f"Warning: Stream processor stop error: {e}")
     try:
         await scheduler_service.stop_scheduler()
     except Exception as e:
@@ -89,6 +104,9 @@ uploads_path.mkdir(exist_ok=True)
 app.mount("/models", StaticFiles(directory=str(models_path)), name="models")
 app.mount("/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")
 
+# OWASP Core Rule Set WAF & Zero-Trust Inspection Middleware
+app.add_middleware(OWASPModSecurityWAFMiddleware, rate_limit_per_minute=300)
+
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(disease_detection.router, prefix="/api/disease", tags=["Disease Detection"])
@@ -108,6 +126,12 @@ app.include_router(community_chat.router, prefix="/api/community", tags=["Commun
 app.include_router(marketplace_chat.router, prefix="/api/marketplace", tags=["Marketplace Chat & Voice"])
 app.include_router(app_update.router, prefix="/api/app", tags=["App Updates"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(navigation.router, prefix="/api/navigation", tags=["Navigation & Routing"])
+app.include_router(telemetry_ws.router, prefix="/api/telemetry", tags=["Real-Time Telemetry & WebSockets"])
+app.include_router(traffic_prediction.router, prefix="/api/traffic", tags=["AI/ML Traffic Prediction & Stream Processing"])
+app.include_router(devops_hardening.router, prefix="/api/devops", tags=["DevOps, Kubernetes & Scale Hardening"])
+app.include_router(devops_hardening.router, tags=["Prometheus Metrics"])
+app.include_router(security_compliance.router, prefix="/api/security", tags=["Enterprise Security & Compliance"])
 
 
 

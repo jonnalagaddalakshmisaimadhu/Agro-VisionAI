@@ -18,6 +18,7 @@ Base = declarative_base()
 from app.models import user, disease_detection, government_schemes, market_prices, marketplace
 from app.models import nlp_models  # Import new NLP models
 from app.models import notification  # Import notification models
+from app.models import spatial_incident  # Import Phase 1 spatial models
 
 # Dependency to get database session
 def get_db():

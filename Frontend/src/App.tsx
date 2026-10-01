@@ -20,12 +20,26 @@ import AccuracyTest from "./components/modules/AccuracyTest";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import LoginDemo from "./components/LoginDemo";
 import DiseaseDetection from "./components/modules/DiseaseDetection";
+import NavigationRouting from "./components/modules/NavigationRouting";
+import RealtimeTelemetryMap from "./components/modules/RealtimeTelemetryMap";
+import TrafficPredictionStream from "./components/modules/TrafficPredictionStream";
+import DevOpsHardeningCenter from "./components/modules/DevOpsHardeningCenter";
+import { SecurityComplianceCenter } from "./components/modules/SecurityComplianceCenter";
 import { FarmIQAssistance } from "./components/chatbot/FarmIQAssistance";
 import { AppUpdateChecker } from "./components/common/AppUpdateChecker";
 
+import { useEffect } from "react";
+import mobileBackgroundService from "@/services/mobileBackgroundService";
+
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    // Phase 3 Capgo Live OTA Updater initialization
+    mobileBackgroundService.initOTAUpdater();
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -47,6 +61,11 @@ const App = () => (
                 <Route path="/expert-consultation" element={<ProtectedRoute><ExpertConsultation /></ProtectedRoute>} />
                 <Route path="/accuracy-test" element={<ProtectedRoute><AccuracyTest /></ProtectedRoute>} />
                 <Route path="/disease-detection" element={<ProtectedRoute><DiseaseDetection /></ProtectedRoute>} />
+                <Route path="/navigation" element={<ProtectedRoute><NavigationRouting /></ProtectedRoute>} />
+                <Route path="/telemetry" element={<ProtectedRoute><RealtimeTelemetryMap /></ProtectedRoute>} />
+                <Route path="/traffic-prediction" element={<ProtectedRoute><TrafficPredictionStream /></ProtectedRoute>} />
+                <Route path="/devops-hardening" element={<ProtectedRoute><DevOpsHardeningCenter /></ProtectedRoute>} />
+                <Route path="/security-compliance" element={<ProtectedRoute><SecurityComplianceCenter /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -58,6 +77,7 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
