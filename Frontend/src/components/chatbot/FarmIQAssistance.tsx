@@ -175,6 +175,18 @@ export const FarmIQAssistance = () => {
         }
     };
 
+    const [hasEmbeddedChat, setHasEmbeddedChat] = useState(false);
+
+    useEffect(() => {
+        const checkEmbedded = () => {
+            const el = document.getElementById("embedded-ai-disease-chat");
+            setHasEmbeddedChat(!!el);
+        };
+        checkEmbedded();
+        const interval = setInterval(checkEmbedded, 350);
+        return () => clearInterval(interval);
+    }, []);
+
     const getFeatureDetails = (path: string) => {
         switch(path) {
             case 'disease-detection': return { label: 'Go to Disease Detection', icon: <Search className="w-4 h-4" />, bg: 'bg-red-100 text-red-700 hover:bg-red-200' };
@@ -187,6 +199,10 @@ export const FarmIQAssistance = () => {
             default: return { label: 'Explore Feature', icon: <ArrowRight className="w-4 h-4" />, bg: 'bg-green-100 text-green-700 hover:bg-green-200' };
         }
     };
+
+    if (hasEmbeddedChat) {
+        return null;
+    }
 
     return (
         <div className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] right-3.5 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end pointer-events-auto">

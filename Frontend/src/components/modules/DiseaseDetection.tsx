@@ -433,7 +433,7 @@ const DiseaseDetection = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+    <div className="min-h-screen bg-slate-50 p-3 sm:p-5 md:p-6 space-y-4 sm:space-y-6 pb-32 sm:pb-40">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-5 rounded-xl border border-slate-200 shadow-xs">
         <div className="flex items-center space-x-2.5 sm:space-x-3">
@@ -512,23 +512,23 @@ const DiseaseDetection = () => {
                     </div>
 
                     {/* LIVE CAMERA CONTROLS OVERLAY */}
-                    <div className="absolute bottom-4 left-0 right-0 px-4 flex items-center justify-center gap-3">
+                    <div className="absolute bottom-2 sm:bottom-4 left-0 right-0 px-2 sm:px-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                       <Button
                         size="sm"
                         variant="secondary"
                         onClick={toggleCameraFacing}
-                        className="bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md rounded-xl"
+                        className="h-8 sm:h-9 px-2.5 sm:px-3 text-xs bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md rounded-xl"
                       >
-                        <RefreshCw className="h-4 w-4 mr-1.5" />
+                        <RefreshCw className="h-3.5 w-3.5 mr-1" />
                         Flip
                       </Button>
 
                       <Button
                         onClick={handleCaptureAndAnalyze}
                         disabled={isAnalyzing}
-                        className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-5 rounded-2xl shadow-lg shadow-emerald-500/30 flex items-center gap-2"
+                        className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold h-9 sm:h-11 px-3 sm:px-5 rounded-xl sm:rounded-2xl shadow-lg shadow-emerald-500/30 flex items-center gap-1.5 text-xs sm:text-sm"
                       >
-                        <Camera className="h-5 w-5" />
+                        <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
                         Capture & Diagnose
                       </Button>
 
@@ -536,9 +536,9 @@ const DiseaseDetection = () => {
                         size="sm"
                         variant={isAutoScanning ? "destructive" : "secondary"}
                         onClick={toggleAutoScan}
-                        className="bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md rounded-xl"
+                        className="h-8 sm:h-9 px-2.5 sm:px-3 text-xs bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-md rounded-xl"
                       >
-                        <Activity className="h-4 w-4 mr-1.5" />
+                        <Activity className="h-3.5 w-3.5 mr-1" />
                         {isAutoScanning ? "Stop Auto" : "Auto-Scan"}
                       </Button>
 
@@ -546,7 +546,7 @@ const DiseaseDetection = () => {
                         size="sm"
                         variant="ghost"
                         onClick={stopLiveCamera}
-                        className="bg-black/60 hover:bg-black/80 text-white rounded-xl"
+                        className="h-8 w-8 sm:h-9 sm:w-9 p-0 bg-black/60 hover:bg-black/80 text-white rounded-xl"
                       >
                         <VideoOff className="h-4 w-4" />
                       </Button>
@@ -741,20 +741,20 @@ const DiseaseDetection = () => {
           {analysisResult && analysisResult.isPlantDetected !== false && (
             <div className="space-y-6">
               <Card className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className={`p-6 border-b ${
+                <div className={`p-3.5 sm:p-5 md:p-6 border-b ${
                   analysisResult.diseaseName.toLowerCase().includes("healthy")
                     ? "bg-emerald-50/80 border-emerald-100"
                     : analysisResult.severityLevel === "high"
                     ? "bg-red-50/80 border-red-100"
                     : "bg-amber-50/80 border-amber-100"
                 }`}>
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                        <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-600">
                           Target Crop: {analysisResult.cropType || "Plant"}
                         </span>
-                        <Badge className={`${
+                        <Badge className={`text-[10px] sm:text-xs py-0.5 px-2 ${
                           analysisResult.diseaseName.toLowerCase().includes("healthy")
                             ? "bg-emerald-600 text-white"
                             : analysisResult.severityLevel === "high"
@@ -763,35 +763,35 @@ const DiseaseDetection = () => {
                         }`}>
                           {analysisResult.severityLevel ? `${analysisResult.severityLevel.toUpperCase()} SEVERITY` : "ACTIVE"}
                         </Badge>
-                        <Badge variant="outline" className="bg-white/80 text-slate-700 border-slate-300">
+                        <Badge variant="outline" className="text-[10px] sm:text-xs py-0.5 px-2 bg-white/80 text-slate-700 border-slate-300">
                           {analysisResult.confidence}% Confidence
                         </Badge>
                       </div>
 
-                      <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                      <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
                         {analysisResult.diseaseName}
                       </h2>
-                      <p className="text-sm text-slate-700 mt-2 max-w-3xl leading-relaxed">
+                      <p className="text-xs sm:text-sm text-slate-700 mt-1.5 sm:mt-2 max-w-3xl leading-relaxed">
                         {analysisResult.description}
                       </p>
                     </div>
 
                     {/* ACTION BUTTONS (VOICE & PRINT) */}
-                    <div className="flex items-center gap-2 self-start md:self-center shrink-0">
+                    <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto mt-2 md:mt-0 shrink-0">
                       <Button
                         variant="outline"
                         onClick={handleToggleSpeech}
-                        className={`rounded-xl border-slate-300 ${isSpeaking ? "bg-emerald-100 text-emerald-800 border-emerald-400" : "bg-white text-slate-700"}`}
+                        className={`h-9 px-2 sm:px-3 text-xs sm:text-sm rounded-xl border-slate-300 w-full sm:w-auto justify-center ${isSpeaking ? "bg-emerald-100 text-emerald-800 border-emerald-400" : "bg-white text-slate-700 hover:bg-slate-50"}`}
                       >
                         {isSpeaking ? (
                           <>
-                            <VolumeX className="h-4 w-4 mr-1.5 text-emerald-600" />
-                            Stop Voice
+                            <VolumeX className="h-4 w-4 mr-1 text-emerald-600 shrink-0" />
+                            <span className="truncate">Stop Voice</span>
                           </>
                         ) : (
                           <>
-                            <Volume2 className="h-4 w-4 mr-1.5 text-emerald-600" />
-                            Listen Diagnosis
+                            <Volume2 className="h-4 w-4 mr-1 text-emerald-600 shrink-0" />
+                            <span className="truncate">Listen Diagnosis</span>
                           </>
                         )}
                       </Button>
@@ -799,40 +799,40 @@ const DiseaseDetection = () => {
                       <Button
                         variant="outline"
                         onClick={handlePrintPrescription}
-                        className="rounded-xl border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                        className="h-9 px-2 sm:px-3 text-xs sm:text-sm rounded-xl border-slate-300 bg-white text-slate-700 hover:bg-slate-50 w-full sm:w-auto justify-center"
                       >
-                        <Printer className="h-4 w-4 mr-1.5 text-slate-600" />
-                        Print Prescription
+                        <Printer className="h-4 w-4 mr-1 text-slate-600 shrink-0" />
+                        <span className="truncate">Print Prescription</span>
                       </Button>
                     </div>
                   </div>
                 </div>
 
-                <CardContent className="p-6 space-y-6">
+                <CardContent className="p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
                   {/* VISUAL INSPECTION (ORIGINAL VS HEATMAP) */}
                   {analysisResult.heatmapImage && selectedImage && (
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <Layers className="h-5 w-5 text-emerald-600" />
-                          <h3 className="font-bold text-slate-900 text-base">Visual Pathogen Localization</h3>
+                          <Layers className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+                          <h3 className="font-bold text-slate-900 text-sm sm:text-base">Visual Pathogen Localization</h3>
                         </div>
                         <div className="flex items-center bg-slate-100 p-1 rounded-xl gap-1 text-xs font-semibold">
                           <button
                             onClick={() => setViewMode("original")}
-                            className={`px-3 py-1 rounded-lg transition-all ${viewMode === "original" ? "bg-white shadow-xs text-slate-900" : "text-slate-600"}`}
+                            className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all text-xs ${viewMode === "original" ? "bg-white shadow-xs text-slate-900" : "text-slate-600"}`}
                           >
                             Original
                           </button>
                           <button
                             onClick={() => setViewMode("heatmap")}
-                            className={`px-3 py-1 rounded-lg transition-all ${viewMode === "heatmap" ? "bg-white shadow-xs text-purple-700" : "text-slate-600"}`}
+                            className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all text-xs ${viewMode === "heatmap" ? "bg-white shadow-xs text-purple-700" : "text-slate-600"}`}
                           >
                             AI Heatmap
                           </button>
                           <button
                             onClick={() => setViewMode("split")}
-                            className={`px-3 py-1 rounded-lg transition-all ${viewMode === "split" ? "bg-white shadow-xs text-emerald-700" : "text-slate-600"}`}
+                            className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all text-xs ${viewMode === "split" ? "bg-white shadow-xs text-emerald-700" : "text-slate-600"}`}
                           >
                             Side-by-Side
                           </button>
@@ -841,7 +841,7 @@ const DiseaseDetection = () => {
 
                       {/* VISUAL CONTAINERS */}
                       {viewMode === "split" ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                           <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-900">
                             <div className="bg-slate-800 text-white text-xs px-3 py-1 font-mono font-medium">
                               Original Leaf Photo
@@ -849,18 +849,18 @@ const DiseaseDetection = () => {
                             <img
                               src={selectedImage}
                               alt="Original leaf"
-                              className="w-full h-64 object-cover"
+                              className="w-full h-52 sm:h-64 object-cover"
                             />
                           </div>
                           <div className="rounded-2xl overflow-hidden border border-purple-200 bg-slate-900">
                             <div className="bg-purple-900 text-white text-xs px-3 py-1 font-mono font-medium flex justify-between">
                               <span>Grad-CAM Attention Map</span>
-                              <span className="text-purple-300">● Warm colors indicate lesions</span>
+                              <span className="text-purple-300">● Lesions</span>
                             </div>
                             <img
                               src={analysisResult.heatmapImage}
                               alt="AI Heatmap"
-                              className="w-full h-64 object-cover"
+                              className="w-full h-52 sm:h-64 object-cover"
                             />
                           </div>
                         </div>
@@ -869,7 +869,7 @@ const DiseaseDetection = () => {
                           <img
                             src={viewMode === "original" ? selectedImage : analysisResult.heatmapImage}
                             alt="Leaf visual"
-                            className="w-full h-72 object-cover"
+                            className="w-full h-60 sm:h-72 object-cover"
                           />
                         </div>
                       )}
@@ -877,17 +877,17 @@ const DiseaseDetection = () => {
                   )}
 
                   {/* 3-COLUMN STRUCTURED TREATMENT GRID */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                     {/* SYMPTOMS / ORGANIC REMEDIES */}
                     <Card className="bg-emerald-50/40 border-emerald-200/80 rounded-2xl shadow-xs">
-                      <CardHeader className="pb-3 border-b border-emerald-100">
-                        <CardTitle className="text-base font-bold flex items-center gap-2 text-emerald-900">
-                          <Leaf className="h-5 w-5 text-emerald-600" />
+                      <CardHeader className="p-3.5 sm:p-4 pb-2.5 sm:pb-3 border-b border-emerald-100">
+                        <CardTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-emerald-900">
+                          <Leaf className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 shrink-0" />
                           <span>Organic & Bio-Control</span>
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-4">
-                        <ul className="space-y-2.5 text-sm text-emerald-950">
+                      <CardContent className="p-3.5 sm:p-4 pt-3 sm:pt-4">
+                        <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm text-emerald-950">
                           {(analysisResult.organicTreatment && analysisResult.organicTreatment.length > 0
                             ? analysisResult.organicTreatment
                             : analysisResult.treatment
@@ -903,14 +903,14 @@ const DiseaseDetection = () => {
 
                     {/* CHEMICAL & ACTIVE INGREDIENTS */}
                     <Card className="bg-blue-50/40 border-blue-200/80 rounded-2xl shadow-xs">
-                      <CardHeader className="pb-3 border-b border-blue-100">
-                        <CardTitle className="text-base font-bold flex items-center gap-2 text-blue-900">
-                          <Stethoscope className="h-5 w-5 text-blue-600" />
+                      <CardHeader className="p-3.5 sm:p-4 pb-2.5 sm:pb-3 border-b border-blue-100">
+                        <CardTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-blue-900">
+                          <Stethoscope className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 shrink-0" />
                           <span>Chemical & Targeted Spray</span>
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-4">
-                        <ul className="space-y-2.5 text-sm text-blue-950">
+                      <CardContent className="p-3.5 sm:p-4 pt-3 sm:pt-4">
+                        <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm text-blue-950">
                           {(analysisResult.chemicalTreatment && analysisResult.chemicalTreatment.length > 0
                             ? analysisResult.chemicalTreatment
                             : ["Apply targeted fungicide/bactericide as per agronomist dosage"]
@@ -926,14 +926,14 @@ const DiseaseDetection = () => {
 
                     {/* 5-STEP PREVENTION */}
                     <Card className="bg-amber-50/40 border-amber-200/80 rounded-2xl shadow-xs">
-                      <CardHeader className="pb-3 border-b border-amber-100">
-                        <CardTitle className="text-base font-bold flex items-center gap-2 text-amber-900">
-                          <ShieldCheck className="h-5 w-5 text-amber-600" />
+                      <CardHeader className="p-3.5 sm:p-4 pb-2.5 sm:pb-3 border-b border-amber-100">
+                        <CardTitle className="text-sm sm:text-base font-bold flex items-center gap-2 text-amber-900">
+                          <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600 shrink-0" />
                           <span>Preventive Protocol</span>
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-4">
-                        <ul className="space-y-2.5 text-sm text-amber-950">
+                      <CardContent className="p-3.5 sm:p-4 pt-3 sm:pt-4">
+                        <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm text-amber-950">
                           {analysisResult.prevention.map((item, idx) => (
                             <li key={idx} className="flex items-start gap-2">
                               <CheckCircle2 className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
@@ -947,23 +947,23 @@ const DiseaseDetection = () => {
 
                   {/* RECOMMENDED STORE SUPPLEMENT BANNER (IF AVAILABLE) */}
                   {analysisResult.supplementName && (
-                    <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="p-3.5 sm:p-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                       <div className="flex items-center gap-3">
                         {analysisResult.supplementImage ? (
                           <img
                             src={analysisResult.supplementImage}
                             alt="Supplement"
-                            className="w-14 h-14 rounded-xl object-contain bg-white border border-emerald-100 p-1"
+                            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-contain bg-white border border-emerald-100 p-1 shrink-0"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-xl bg-emerald-200/70 flex items-center justify-center text-emerald-800 font-bold">
+                          <div className="w-12 h-12 rounded-xl bg-emerald-200/70 flex items-center justify-center text-emerald-800 font-bold shrink-0">
                             Rx
                           </div>
                         )}
                         <div>
-                          <p className="text-xs uppercase font-bold text-emerald-700 tracking-wider">Recommended Crop Remedy</p>
-                          <p className="text-base font-bold text-emerald-950">{analysisResult.supplementName}</p>
-                          <p className="text-xs text-emerald-800">Verified agricultural input for {analysisResult.diseaseName}</p>
+                          <p className="text-[10px] sm:text-xs uppercase font-bold text-emerald-700 tracking-wider">Recommended Crop Remedy</p>
+                          <p className="text-sm sm:text-base font-bold text-emerald-950">{analysisResult.supplementName}</p>
+                          <p className="text-[11px] sm:text-xs text-emerald-800">Verified agricultural input for {analysisResult.diseaseName}</p>
                         </div>
                       </div>
 
@@ -972,19 +972,18 @@ const DiseaseDetection = () => {
                           href={analysisResult.buyLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-xs"
+                          className="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl shadow-xs w-full sm:w-auto"
                         >
                           <span>Buy Remedy Online</span>
                           <ExternalLink className="h-4 w-4" />
                         </a>
                       ) : (
-                        <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">
+                        <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300 text-xs py-1 px-2.5 w-full sm:w-auto justify-center text-center">
                           Available at Regional Mandis & Fertilizer Dealers
                         </Badge>
                       )}
                     </div>
                   )}
-
                   {/* EMBEDDED CONTEXT CHATBOT */}
                   <EmbeddedAIChat
                     diseaseName={analysisResult.diseaseName}
