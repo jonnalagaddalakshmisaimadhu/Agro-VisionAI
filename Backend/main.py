@@ -113,6 +113,21 @@ app.include_router(marketplace_chat.router, prefix="/api/marketplace", tags=["Ma
 app.include_router(app_update.router, prefix="/api/app", tags=["App Updates"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
 
+# Mount Modular Notification System Endpoints
+try:
+    import sys
+    import logging
+    from pathlib import Path
+    _notif_sys_path = Path(__file__).resolve().parent.parent / "Notification System"
+    if str(_notif_sys_path) not in sys.path:
+        sys.path.insert(0, str(_notif_sys_path))
+    from routes.api_routes import router as modular_notification_router
+    app.include_router(modular_notification_router, prefix="/api/notifications", tags=["Notification System Core"])
+    logging.info("Modular Notification System routes successfully registered.")
+except Exception as e:
+    import logging
+    logging.warning(f"Could not load modular Notification System: {e}")
+
 
 
 @app.get("/")

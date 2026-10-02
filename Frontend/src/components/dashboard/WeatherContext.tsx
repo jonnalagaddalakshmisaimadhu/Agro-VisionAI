@@ -82,13 +82,25 @@ export const WeatherProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Alert State
-    const [alertSettings, setAlertSettings] = useState<AlertSettings>({
-        rain: true,
-        temp: true,
-        frost: true,
-        wind: false
+    // Alert State - ALL DISABLED (OFF) BY DEFAULT AS REQUESTED
+    const [alertSettings, setAlertSettings] = useState<AlertSettings>(() => {
+        try {
+            const saved = localStorage.getItem('farmiq_weather_alert_settings');
+            if (saved) return JSON.parse(saved);
+        } catch (e) {}
+        return {
+            rain: false,
+            temp: false,
+            frost: false,
+            wind: false
+        };
     });
+
+    useEffect(() => {
+        try {
+            localStorage.setItem('farmiq_weather_alert_settings', JSON.stringify(alertSettings));
+        } catch (e) {}
+    }, [alertSettings]);
 
     // Generate Dynamic Alerts
     const alerts = useMemo(() => {

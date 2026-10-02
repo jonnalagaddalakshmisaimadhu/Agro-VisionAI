@@ -296,7 +296,8 @@ async def broadcast_system_announcement(payload: AnnouncementBroadcastRequest, b
     return {
         "success": True,
         "status": "queued_async",
-        "recipient": recipient,
+        "recipients_count": recipients_count,
+        "target_email": payload.target_email,
         "template": "existing_users_appreciation_and_announcement"
     }
 

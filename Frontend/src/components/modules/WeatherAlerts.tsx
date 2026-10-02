@@ -24,6 +24,7 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useWeather } from "@/components/dashboard/WeatherContext";
 import LocationMaps from "./LocationMaps";
+import { handleSwitchToggleNotification } from "@/lib/notificationStore";
 
 const WMO_CODES: { [key: number]: { description: string; icon: React.ElementType, emoji: string } } = {
   0: { description: 'Clear sky', icon: Sun, emoji: '☀️' },
@@ -84,7 +85,11 @@ const WeatherAlerts = () => {
   );
 
   const toggleSetting = (key: keyof typeof alertSettings) => {
-    setAlertSettings(prev => ({ ...prev, [key]: !prev[key] }));
+    const nextVal = !alertSettings[key];
+    setAlertSettings(prev => ({ ...prev, [key]: nextVal }));
+    if (nextVal) {
+      handleSwitchToggleNotification(key, true);
+    }
   };
 
   const sendTestNotification = () => {

@@ -28,6 +28,8 @@ interface DashboardHeaderProps {
 
 import { useAuth } from "@/context/AuthContext";
 import { useWeather } from "@/components/dashboard/WeatherContext";
+import { NotificationBellPopover } from "./NotificationBellPopover";
+import { handleSwitchToggleNotification } from "@/lib/notificationStore";
 import GoogleTranslate from "@/components/common/GoogleTranslate";
 
 const INDIAN_LANGUAGES = [
@@ -83,6 +85,11 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
   const handleLanguageChange = (langCode: string) => {
     setCurrentLang(langCode);
     localStorage.setItem('farmiq_language', langCode);
+
+    const langObj = INDIAN_LANGUAGES.find((l) => l.code === langCode);
+    handleSwitchToggleNotification("language", true, {
+      languageName: langObj?.name || langCode
+    });
 
     const hostname = window.location.hostname;
     if (langCode === 'en') {
@@ -200,15 +207,8 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground">
-          <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-          {notifications > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center leading-none shadow-xs">
-              {notifications}
-            </span>
-          )}
-        </Button>
+        {/* Notifications Popover Center */}
+        <NotificationBellPopover />
 
         {/* Profile dropdown */}
         <DropdownMenu>

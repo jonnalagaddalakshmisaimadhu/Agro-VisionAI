@@ -41,6 +41,7 @@ import {
   HelpCircle,
   Radio
 } from "lucide-react";
+import { handleSwitchToggleNotification } from "@/lib/notificationStore";
 
 interface FarmingSettings {
   language: string;
@@ -70,16 +71,16 @@ const DEFAULT_SETTINGS: FarmingSettings = {
   soilType: "Black Clay Loam",
   primaryCrop: "Paddy (వరి)",
   irrigationType: "Borewell / Solar Pump",
-  rainAlert: true,
+  rainAlert: false, // Default OFF
   rainThreshold: "60",
-  windSprayAlert: true,
-  heatwaveAlert: true,
-  frostAlert: false,
+  windSprayAlert: false, // Default OFF
+  heatwaveAlert: false, // Default OFF
+  frostAlert: false, // Default OFF
   alertSound: true,
   voipEnabled: true,
   numberMasking: true,
   ringtoneType: "kisan_bell",
-  mandiPriceAlerts: true,
+  mandiPriceAlerts: false, // Default OFF
   offlineCacheEnabled: true,
   theme: "light"
 };
@@ -118,6 +119,32 @@ const SettingsPage: React.FC = () => {
       }
       return next;
     });
+
+    // Notify inside the UI Header Bell notification icon whenever user turns ON any alert switch
+    if (value === true) {
+      if (key === "mandiPriceAlerts") {
+        handleSwitchToggleNotification("mandi", true);
+      } else if (key === "rainAlert") {
+        handleSwitchToggleNotification("rain", true);
+      } else if (key === "windSprayAlert") {
+        handleSwitchToggleNotification("wind", true);
+      } else if (key === "heatwaveAlert") {
+        handleSwitchToggleNotification("temp", true);
+      } else if (key === "frostAlert") {
+        handleSwitchToggleNotification("frost", true);
+      }
+    } else if (key === "language") {
+      const langNames: Record<string, string> = {
+        en: "English",
+        te: "తెలుగు (Telugu)",
+        hi: "हिंदी (Hindi)",
+        ta: "தமிழ் (Tamil)",
+        mr: "मराठी (Marathi)"
+      };
+      handleSwitchToggleNotification("language", true, {
+        languageName: langNames[value as string] || (value as string)
+      });
+    }
 
     const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     setLastSavedTime(`Saved at ${now}`);
