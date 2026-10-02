@@ -10,9 +10,11 @@ if str(_backend_path) not in sys.path:
     sys.path.insert(0, str(_backend_path))
 
 try:
-    from app.database import SessionLocal
+    from app.database import SessionLocal, engine, Base
     from app.models.notification import InAppNotification
     from app.models.user import User
+    if engine and Base:
+        Base.metadata.create_all(bind=engine)
 except ImportError:
     SessionLocal = None
     InAppNotification = None

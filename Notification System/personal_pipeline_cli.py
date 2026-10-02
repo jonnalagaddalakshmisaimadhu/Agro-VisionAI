@@ -19,11 +19,24 @@ import sys
 import os
 import argparse
 from pathlib import Path
+from dotenv import load_dotenv
+
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 # Ensure root workspace and Backend are in sys.path
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 sys.path.insert(0, str(BASE_DIR / "Backend"))
+
+# Load environment variables
+load_dotenv(BASE_DIR / "Backend" / ".env")
+load_dotenv(BASE_DIR / ".env")
+load_dotenv()
 
 from services.personal_pipeline import personal_pipeline
 

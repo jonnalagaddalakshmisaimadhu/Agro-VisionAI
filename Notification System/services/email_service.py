@@ -7,7 +7,12 @@ from typing import Optional, Dict, Any
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from Backend/.env and workspace root
+_current_dir = Path(__file__).resolve().parent
+_project_root = _current_dir.parent.parent
+load_dotenv(_project_root / "Backend" / ".env")
+load_dotenv(_project_root / ".env")
+load_dotenv(_current_dir.parent / ".env")
 load_dotenv()
 
 logger = logging.getLogger("NotificationSystem.EmailService")
@@ -19,10 +24,13 @@ TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
 
 class EmailService:
     def __init__(self):
+        self._refresh_credentials()
+
+    def _refresh_credentials(self):
         self.smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
         self.smtp_port = int(os.getenv("SMTP_PORT", 587))
         self.smtp_user = os.getenv("SMTP_USER", "farmiq.in@gmail.com")
-        self.smtp_password = os.getenv("SMTP_PASSWORD", "")
+        self.smtp_password = os.getenv("SMTP_PASSWORD", "").strip()
         self.sender_email = os.getenv("SENDER_EMAIL", self.smtp_user)
 
     def _read_template(self, filename: str) -> str:
@@ -39,6 +47,7 @@ class EmailService:
         text_body: Optional[str] = None
     ) -> Dict[str, Any]:
         """Dispatches an email via Gmail SMTP with TLS."""
+        self._refresh_credentials()
         try:
             if not self.smtp_user or not self.smtp_password:
                 logger.warning(f"[Simulated Dispatch] Email to {to_email}: {subject}")
