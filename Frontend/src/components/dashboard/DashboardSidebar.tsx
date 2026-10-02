@@ -101,7 +101,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       {/* Mobile backdrop */}
       {!isCollapsed && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 lg:hidden transition-opacity"
           onClick={onToggle}
           aria-hidden="true"
         />
@@ -110,8 +110,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-slate-200 shadow-xs z-40 transition-all duration-300 ease-in-out flex flex-col justify-between overflow-hidden",
-          "lg:fixed lg:top-16 lg:h-[calc(100vh-4rem)] lg:translate-x-0",
+          "fixed left-0 top-0 pt-safe h-full bg-white border-r border-slate-200 shadow-2xl z-50 transition-all duration-300 ease-in-out flex flex-col justify-between overflow-hidden",
+          "lg:top-16 lg:pt-0 lg:h-[calc(100vh-4rem)] lg:translate-x-0 lg:z-30 lg:shadow-xs",
           isCollapsed ? "-translate-x-full lg:w-16" : "translate-x-0 w-72"
         )}
       >
@@ -227,7 +227,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         </nav>
 
         {/* Bottom Settings */}
-        <div className="p-3 border-t border-slate-200 shrink-0 bg-white">
+        <div className="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] border-t border-slate-200 shrink-0 bg-white">
           {isCollapsed ? (
             <Tooltip>
               <TooltipTrigger asChild>

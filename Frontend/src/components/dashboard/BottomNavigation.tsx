@@ -133,8 +133,8 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
 
       {/* 🪟 COMPACT POPUP - SMALL LOGOS WITH NAMES */}
       {isOpen && (
-        <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 w-[310px] z-[70] animate-in fade-in zoom-in-95 duration-200 pointer-events-auto">
-          <div className="bg-card border border-border/90 shadow-2xl rounded-2xl p-3">
+        <div className="lg:hidden fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-[340px] z-[70] animate-in fade-in zoom-in-95 duration-200 pointer-events-auto">
+          <div className="bg-card/98 backdrop-blur-lg border border-border shadow-2xl rounded-2xl p-3">
             
             {/* Header */}
             <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-border/60">
@@ -208,29 +208,34 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
       )}
 
       {/* 📱 Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border z-[65] px-2 pb-safe shadow-lg">
-        <div className="flex justify-between items-center h-16 max-w-md mx-auto relative">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-lg border-t border-border/80 z-[65] px-2 pb-safe-nav shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <div className="flex justify-between items-center h-14 sm:h-16 max-w-md mx-auto relative">
           
           {/* Left Nav Items */}
-          <div className="flex flex-1 justify-around items-center">
-            {leftNavItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleSelect(item)}
-                className={cn(
-                  "flex flex-col items-center justify-center flex-1 h-full space-y-0.5 transition-all cursor-pointer",
-                  activeModule === item.id ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <item.icon className={cn("h-5 w-5 transition-transform", activeModule === item.id && "scale-110")} />
-                <span className="text-[10px]">{item.label}</span>
-              </button>
-            ))}
+          <div className="flex flex-1 justify-around items-center h-full">
+            {leftNavItems.map((item) => {
+              const isActive = activeModule === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleSelect(item)}
+                  className={cn(
+                    "flex flex-col items-center justify-center flex-1 h-full py-1 space-y-0.5 transition-all cursor-pointer select-none active:scale-95",
+                    isActive ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <item.icon className={cn("h-5 w-5 transition-transform shrink-0", isActive && "scale-110 text-emerald-700 dark:text-emerald-400")} />
+                  <span className={cn("text-[10px] tracking-tight leading-tight", isActive ? "font-bold text-emerald-700 dark:text-emerald-400" : "font-medium")}>
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* 🪟 CENTER WINDOWS-STYLE FLOATING HUB BUTTON */}
-          <div className="relative -top-4 flex flex-col items-center px-1">
+          <div className="relative -top-4 sm:-top-5 flex flex-col items-center px-1.5 shrink-0">
             <button
               type="button"
               onClick={(e) => {
@@ -238,10 +243,10 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
                 setIsOpen(!isOpen);
               }}
               className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center shadow-xl transition-all duration-200 transform active:scale-95 border-3 border-card ring-2 cursor-pointer",
+                "w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 transform active:scale-95 border-3 border-card ring-2 cursor-pointer",
                 isOpen 
-                  ? "bg-destructive text-white ring-destructive/30 rotate-90 scale-105" 
-                  : "bg-gradient-to-tr from-emerald-600 via-teal-600 to-green-500 text-white ring-primary/30 hover:scale-105 shadow-emerald-600/30"
+                  ? "bg-destructive text-white ring-destructive/40 rotate-90 scale-105 shadow-destructive/30" 
+                  : "bg-gradient-to-tr from-emerald-600 via-teal-600 to-green-500 text-white ring-emerald-500/30 hover:scale-105 shadow-emerald-600/30"
               )}
               aria-label="Toggle Features Menu"
             >
@@ -249,38 +254,43 @@ const BottomNavigation = ({ activeModule, setActiveModule }: BottomNavigationPro
                 <X className="h-5 w-5 text-white" />
               ) : (
                 /* Windows 4-Square Style Grid Logo */
-                <div className="grid grid-cols-2 gap-0.5 p-0.5 pointer-events-none">
-                  <div className="w-2 h-2 bg-white rounded-xs opacity-95" />
-                  <div className="w-2 h-2 bg-white/90 rounded-xs opacity-95" />
-                  <div className="w-2 h-2 bg-white/90 rounded-xs opacity-95" />
-                  <div className="w-2 h-2 bg-white rounded-xs opacity-95" />
+                <div className="grid grid-cols-2 gap-1 p-0.5 pointer-events-none">
+                  <div className="w-2 h-2 bg-white rounded-xs shadow-xs" />
+                  <div className="w-2 h-2 bg-white/95 rounded-xs shadow-xs" />
+                  <div className="w-2 h-2 bg-white/95 rounded-xs shadow-xs" />
+                  <div className="w-2 h-2 bg-white rounded-xs shadow-xs" />
                 </div>
               )}
             </button>
             <span className={cn(
-              "text-[9px] font-bold mt-0.5 transition-colors",
-              isOpen ? "text-destructive" : "text-primary"
+              "text-[9px] font-bold mt-0.5 tracking-tight transition-colors leading-none",
+              isOpen ? "text-destructive" : "text-emerald-700 dark:text-emerald-400"
             )}>
               {isOpen ? "Close" : "Apps"}
             </span>
           </div>
 
           {/* Right Nav Items */}
-          <div className="flex flex-1 justify-around items-center">
-            {rightNavItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleSelect(item)}
-                className={cn(
-                  "flex flex-col items-center justify-center flex-1 h-full space-y-0.5 transition-all cursor-pointer",
-                  activeModule === item.id ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <item.icon className={cn("h-5 w-5 transition-transform", activeModule === item.id && "scale-110")} />
-                <span className="text-[10px]">{item.label}</span>
-              </button>
-            ))}
+          <div className="flex flex-1 justify-around items-center h-full">
+            {rightNavItems.map((item) => {
+              const isActive = activeModule === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleSelect(item)}
+                  className={cn(
+                    "flex flex-col items-center justify-center flex-1 h-full py-1 space-y-0.5 transition-all cursor-pointer select-none active:scale-95",
+                    isActive ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <item.icon className={cn("h-5 w-5 transition-transform shrink-0", isActive && "scale-110 text-emerald-700 dark:text-emerald-400")} />
+                  <span className={cn("text-[10px] tracking-tight leading-tight", isActive ? "font-bold text-emerald-700 dark:text-emerald-400" : "font-medium")}>
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
         </div>

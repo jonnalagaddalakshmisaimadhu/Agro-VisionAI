@@ -189,9 +189,9 @@ export const FarmIQAssistance = () => {
     };
 
     return (
-        <div className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] right-3.5 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end pointer-events-auto">
             {isOpen && (
-                <Card className="w-[calc(100vw-2rem)] sm:w-[380px] md:w-[400px] max-w-[420px] shadow-2xl mb-3 sm:mb-4 border-green-200 animate-in slide-in-from-bottom-5 duration-300">
+                <Card className="w-[calc(100vw-1.75rem)] sm:w-[380px] md:w-[400px] max-w-[420px] shadow-2xl mb-2 sm:mb-4 border-green-200 animate-in slide-in-from-bottom-5 duration-300 overflow-hidden">
                     <CardHeader className="bg-gradient-to-r from-green-600 to-green-500 text-white rounded-t-xl p-3 sm:p-4 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="p-1.5 sm:p-2 bg-white/20 rounded-full">
@@ -213,7 +213,7 @@ export const FarmIQAssistance = () => {
                     </CardHeader>
 
                     <CardContent className="p-0 bg-slate-50">
-                        <ScrollArea className="h-[340px] sm:h-[400px] p-3 sm:p-4">
+                        <ScrollArea className="h-[min(340px,calc(100vh-14rem))] sm:h-[400px] p-3 sm:p-4">
                             <div className="flex flex-col gap-3 sm:gap-4">
                                 {messages.map((msg, index) => {
                                     // Parse redirect tags

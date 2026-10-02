@@ -290,12 +290,12 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0">
-            <div className="h-44 sm:h-56 md:h-64">
+            <div className="h-48 sm:h-56 md:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={priceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <LineChart data={priceData} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border/60" />
-                  <XAxis dataKey="month" className="text-muted-foreground text-xs" />
-                  <YAxis className="text-muted-foreground text-xs" />
+                  <XAxis dataKey="month" className="text-muted-foreground text-xs" tickLine={false} />
+                  <YAxis className="text-muted-foreground text-xs" tickLine={false} width={40} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
@@ -343,12 +343,17 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5 pt-0">
-            <div className="h-44 sm:h-56 md:h-64">
+            <div className="h-48 sm:h-56 md:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={profitData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={profitData} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border/60" />
-                  <XAxis dataKey="crop" className="text-muted-foreground text-xs" />
-                  <YAxis className="text-muted-foreground text-xs" />
+                  <XAxis dataKey="crop" className="text-muted-foreground text-xs" tickLine={false} />
+                  <YAxis
+                    className="text-muted-foreground text-xs"
+                    tickLine={false}
+                    width={42}
+                    tickFormatter={(val) => (val >= 1000 ? `₹${val / 1000}k` : `₹${val}`)}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: 'hsl(var(--card))',
@@ -356,17 +361,18 @@ const DashboardMainContent = ({ activeModule, setActiveModule }: DashboardMainCo
                       borderRadius: '8px',
                       fontSize: '12px'
                     }}
+                    formatter={(val: number) => [`₹${val.toLocaleString('en-IN')}`, '']}
                   />
                   <Bar
                     dataKey="profit"
                     fill="hsl(var(--success))"
-                    name="Profit (₹)"
+                    name="Profit"
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="loss"
                     fill="hsl(var(--destructive))"
-                    name="Loss (₹)"
+                    name="Loss"
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>

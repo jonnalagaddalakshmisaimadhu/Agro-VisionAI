@@ -17,7 +17,7 @@ const DashboardFooter = () => {
   return (
     <footer className="bg-card border-t border-border mt-auto" role="contentinfo">
       {/* Mobile Compact Footer */}
-      <div className="md:hidden px-4 py-3 text-center space-y-1.5">
+      <div className="md:hidden px-4 py-4 text-center space-y-2 pb-6">
         <div className="flex items-center justify-center space-x-1.5 text-xs text-muted-foreground">
           <Tractor className="h-4 w-4 text-primary" />
           <span className="font-semibold text-foreground">FarmIQ</span>

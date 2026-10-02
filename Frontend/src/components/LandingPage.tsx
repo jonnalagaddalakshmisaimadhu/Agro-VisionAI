@@ -175,9 +175,9 @@ const LandingPage = ({ onClickLogin }: { onClickLogin?: () => void }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border pt-safe">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center min-h-[3.75rem] sm:min-h-[4rem] h-auto py-2">
             <div className="flex items-center space-x-2">
               <Leaf className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold text-foreground">FarmIQ</span>

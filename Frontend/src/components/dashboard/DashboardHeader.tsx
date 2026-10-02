@@ -115,25 +115,25 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
   const currentLanguageLabel = INDIAN_LANGUAGES.find(l => l.code === currentLang)?.name || 'English';
 
   return (
-    <header className="bg-card border-b border-border px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+    <header className="bg-card/95 backdrop-blur-md border-b border-border px-3 sm:px-4 pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pt-safe min-h-[3.75rem] sm:min-h-[4rem] h-auto py-2 flex items-center justify-between sticky top-0 z-40 shadow-xs transition-all">
       <GoogleTranslate />
 
       {/* Left section */}
-      <div className="flex items-center space-x-2 sm:space-x-3">
+      <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
         <Button
           variant="ghost"
           size="icon"
           onClick={onToggleSidebar}
-          className="lg:hidden h-8 w-8 sm:h-9 sm:w-9"
+          className="lg:hidden h-8 w-8 sm:h-9 sm:w-9 text-foreground hover:bg-muted shrink-0"
           aria-label="Toggle Navigation Menu"
         >
           <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
         {/* Logo and brand */}
-        <div className="flex items-center space-x-2">
-          <div className="p-1 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Tractor className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+        <div className="flex items-center space-x-2 shrink-0">
+          <div className="p-1 sm:p-1.5 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <Tractor className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-primary" />
           </div>
           <div className="flex flex-col">
             <span className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-tight">FarmIQ</span>
@@ -151,7 +151,7 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
       </div>
 
       {/* Right section */}
-      <div className="flex items-center space-x-1 sm:space-x-2">
+      <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
 
         {/* Language Selector (Desktop) */}
         <DropdownMenu>
@@ -180,7 +180,7 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
         {/* Mobile Language Button (Icon only) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="sm:hidden h-8 w-8">
+            <Button variant="ghost" size="icon" className="sm:hidden h-8 w-8 text-foreground hover:bg-muted">
               <Languages className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -201,10 +201,10 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
         </DropdownMenu>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-9 sm:w-9">
-          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+        <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground">
+          <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
           {notifications > 0 && (
-            <span className="absolute 0.5 top-0.5 right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+            <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center leading-none shadow-xs">
               {notifications}
             </span>
           )}
@@ -213,7 +213,7 @@ const DashboardHeader = ({ onToggleSidebar, sidebarCollapsed }: DashboardHeaderP
         {/* Profile dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-accent p-0">
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-accent p-0 ring-1 ring-border/70 overflow-hidden">
               <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
                 <AvatarImage src="/farmer-avatar.jpg" alt="Farmer" />
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
